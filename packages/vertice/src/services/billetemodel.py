@@ -1,4 +1,4 @@
-from models.entities.billete import Billete
+from services.entities.billete import Billete
 from database.db import get_connection 
 
 

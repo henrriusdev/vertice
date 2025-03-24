@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from models.facturamodel import FacturaModel
+from services.facturamodel import FacturaModel
 import traceback
 factura_bp = Blueprint('factura_bp', __name__)
 

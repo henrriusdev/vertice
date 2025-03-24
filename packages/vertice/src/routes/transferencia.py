@@ -1,6 +1,6 @@
 from flask import Blueprint,jsonify,request
-from models.transferenciamodel import TransferenciaModel
-from models.entities.transferencias import Transferencia
+from services.transferenciamodel import TransferenciaModel
+from services.entities.transferencias import Transferencia
 
 transf = Blueprint("transf_blueprint",__name__)
 

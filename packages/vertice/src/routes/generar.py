@@ -1,15 +1,15 @@
 from flask import Blueprint, jsonify, render_template, send_file
-from models.studentsmodel import StudentModel
-from models.carreramodel import CarreraModel
-from models.materiamodel import MateriaModel
+from services.studentsmodel import StudentModel
+from services.carreramodel import CarreraModel
+from services.materiamodel import MateriaModel
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import date, datetime
 import pdfkit
 import io
 import traceback
 import os
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 generar_pdf = Blueprint('generar_blueprint', __name__)
 

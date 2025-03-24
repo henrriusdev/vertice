@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from models.carreramodel import CarreraModel
-from models.entities.carreras import Carrera
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.carreramodel import CarreraModel
+from services.entities.carreras import Carrera
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
 import traceback

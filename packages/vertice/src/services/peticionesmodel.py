@@ -1,7 +1,7 @@
-from models.entities.peticiones import Peticiones
-from models.entities.students import Student
-from models.entities.docente import Docente
-from models.entities.materias import Materias
+from services.entities.peticiones import Peticiones
+from services.entities.students import Student
+from services.entities.docente import Docente
+from services.entities.materias import Materias
 from database.db import get_connection 
 
 class PeticionesModel():

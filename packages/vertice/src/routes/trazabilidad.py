@@ -1,5 +1,5 @@
-from models.entities.trazabilidad import Trazabilidad
-from models.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
 from flask import Blueprint, jsonify
 
 tr = Blueprint('tr_Blueprint', __name__)

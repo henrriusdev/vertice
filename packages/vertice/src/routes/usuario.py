@@ -2,11 +2,11 @@ from datetime import timedelta, datetime
 import traceback
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
-from models.entities.user import User
-from models.usermodel import UserModel
+from services.entities.user import User
+from services.usermodel import UserModel
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 user = Blueprint('user_blueprint', __name__)
 

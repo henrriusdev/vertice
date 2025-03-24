@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify, request
-from models.configmodel import ConfigModel
-from models.entities.students import Student
-from models.entities.pagos import Pago
-from models.studentsmodel import StudentModel
+from services.configmodel import ConfigModel
+from services.entities.students import Student
+from services.entities.pagos import Pago
+from services.studentsmodel import StudentModel
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from datetime import timedelta, datetime
 import traceback
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 main = Blueprint('students_blueprint', __name__)
 

@@ -1,5 +1,5 @@
 from database.db import get_connection
-from models.entities.metodo import Metodo
+from services.entities.metodo import Metodo
 
 class MetodoModel():
 

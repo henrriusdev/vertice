@@ -1,6 +1,6 @@
 from flask import Blueprint,jsonify,request
-from models.billetemodel import BilleteModel
-from models.entities.billete import Billete
+from services.billetemodel import BilleteModel
+from services.entities.billete import Billete
 
 
 billete = Blueprint("billete_blueprint",__name__)

@@ -1,8 +1,8 @@
 from database.db import get_connection 
 from models.entities.administracion import Administracion
-from models.entities.students import Student
-from models.entities.monto import Monto
-from models.entities.metodo import Metodo
+from services.entities.students import Student
+from services.entities.monto import Monto
+from services.entities.metodo import Metodo
 
 class AdminModel():
 

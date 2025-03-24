@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt, get_jwt_identity
-from models.entities.SuperUsuario import SuperUsuario
-from models.SuperUsuarioModel import SuperUsuarioModel
+from services.entities.SuperUsuario import SuperUsuario
+from services.SuperUsuarioModel import SuperUsuarioModel
 from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 import traceback
 superUs = Blueprint('superUsuario_Blueprint', __name__)
 

@@ -1,12 +1,12 @@
-from models.entities.materias import Materias
-from models.materiamodel import MateriaModel
-from models.configmodel import ConfigModel
+from services.entities.materias import Materias
+from services.materiamodel import MateriaModel
+from services.configmodel import ConfigModel
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 import traceback
 from datetime import datetime
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 materia = Blueprint('materia_blueprint', __name__)
 

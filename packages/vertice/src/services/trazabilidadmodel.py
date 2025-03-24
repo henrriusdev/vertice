@@ -1,4 +1,4 @@
-from models.entities.trazabilidad import Trazabilidad
+from services.entities.trazabilidad import Trazabilidad
 from database.db import get_connection
 from datetime import datetime
 

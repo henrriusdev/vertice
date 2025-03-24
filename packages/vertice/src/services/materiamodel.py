@@ -1,8 +1,8 @@
 from database.db import get_connection
-from models.configmodel import ConfigModel
-from models.entities.carreras import Carrera
-from models.entities.materias import Materias
-from models.entities.docente import Docente
+from services.configmodel import ConfigModel
+from services.entities.carreras import Carrera
+from services.entities.materias import Materias
+from services.entities.docente import Docente
 
 
 class MateriaModel():

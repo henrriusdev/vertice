@@ -1,8 +1,8 @@
-from models.entities.coordinacion import Coordinacion
-from models.coordinacionmodel import CoordinacionModel
-from models.studentsmodel import StudentModel, Student
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.entities.coordinacion import Coordinacion
+from services.coordinacionmodel import CoordinacionModel
+from services.studentsmodel import StudentModel, Student
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required, create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash

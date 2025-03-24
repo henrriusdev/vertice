@@ -1,6 +1,6 @@
 from database.db import get_connection 
-from models.entities.monto import Monto
-from models.entities.pagos import Pago
+from services.entities.monto import Monto
+from services.entities.pagos import Pago
 
 class MountModel():
 

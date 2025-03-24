@@ -2,8 +2,8 @@ from flask import Blueprint, request, send_from_directory, jsonify
 from os import getcwd, path, remove, makedirs
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 files = Blueprint("files", __name__)
 

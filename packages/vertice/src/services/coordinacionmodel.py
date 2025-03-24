@@ -1,5 +1,5 @@
 from database.db import get_connection
-from models.entities.coordinacion import Coordinacion
+from services.entities.coordinacion import Coordinacion
 
 class CoordinacionModel():
 

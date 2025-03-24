@@ -1,6 +1,6 @@
-from models.entities.carreras import Carrera
+from services.entities.carreras import Carrera
 from database.db import get_connection 
-from models.entities.materias import Materias
+from services.entities.materias import Materias
 
 class CarreraModel():
 

@@ -1,4 +1,4 @@
-from models.seguridadmodel import SeguridadModel
+from services.seguridadmodel import SeguridadModel
 from flask import Blueprint, jsonify
 
 seg_bp = Blueprint('seg_bp', __name__)

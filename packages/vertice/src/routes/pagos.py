@@ -1,17 +1,17 @@
 from flask import Blueprint, jsonify, request
-from models.entities.pagos import Pago
-from models.pagosmodel import PagoModel
-from models.entities.monto import Monto
-from models.mountmodel import MountModel
-from models.metodomodel import MetodoModel
-from models.entities.metodo import Metodo
-from models.transferenciamodel import TransferenciaModel
-from models.entities.transferencias import Transferencia
+from services.entities.pagos import Pago
+from services.pagosmodel import PagoModel
+from services.entities.monto import Monto
+from services.mountmodel import MountModel
+from services.metodomodel import MetodoModel
+from services.entities.metodo import Metodo
+from services.transferenciamodel import TransferenciaModel
+from services.entities.transferencias import Transferencia
 from traceback import print_exc
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 pago = Blueprint("pagos_blueprint", __name__)
 

@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from models.entities.config import Configuracion
-from models.configmodel import ConfigModel
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.entities.config import Configuracion
+from services.configmodel import ConfigModel
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
 

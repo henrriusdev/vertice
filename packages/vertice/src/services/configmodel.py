@@ -1,4 +1,4 @@
-from models.entities.config import Configuracion
+from services.entities.config import Configuracion
 from database.db import get_connection
 
 class ConfigModel():

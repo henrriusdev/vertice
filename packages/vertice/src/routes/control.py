@@ -2,10 +2,10 @@ from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity, create_access_token
 from datetime import timedelta, datetime
-from models.entities.control import Control
-from models.controlmodel import ControlModel
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.entities.control import Control
+from services.controlmodel import ControlModel
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 control = Blueprint('control_es_blueprint', __name__)
 

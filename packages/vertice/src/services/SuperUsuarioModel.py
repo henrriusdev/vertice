@@ -1,4 +1,4 @@
-from models.entities.SuperUsuario import SuperUsuario
+from services.entities.SuperUsuario import SuperUsuario
 from database.db import get_connection
 import traceback
 

@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
-from models.entities.docente import Docente
-from models.docentemodel import DocenteModel
-from models.materiamodel import MateriaModel
-from models.entities.materias import Materias
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.entities.docente import Docente
+from services.docentemodel import DocenteModel
+from services.materiamodel import MateriaModel
+from services.entities.materias import Materias
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt, create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime

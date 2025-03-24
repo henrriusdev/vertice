@@ -1,9 +1,9 @@
 from database.db import get_connection
-from models.entities.students import Student
-from models.entities.pagos import Pago
-from models.entities.monto import Monto
-from models.entities.metodo import Metodo
-from models.configmodel import ConfigModel
+from services.entities.students import Student
+from services.entities.pagos import Pago
+from services.entities.monto import Monto
+from services.entities.metodo import Metodo
+from services.configmodel import ConfigModel
 
 
 class StudentModel():

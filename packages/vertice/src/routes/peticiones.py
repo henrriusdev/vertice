@@ -1,11 +1,11 @@
 import traceback
-from models.entities.peticiones import Peticiones
-from models.peticionesmodel import PeticionesModel
+from services.entities.peticiones import Peticiones
+from services.peticionesmodel import PeticionesModel
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
-from models.trazabilidadmodel import TrazabilidadModel
-from models.entities.trazabilidad import Trazabilidad
+from services.trazabilidadmodel import TrazabilidadModel
+from services.entities.trazabilidad import Trazabilidad
 
 peticion = Blueprint('peticion_blueprint', __name__)
 

@@ -1,4 +1,4 @@
-from models.entities.control import Control
+from services.entities.control import Control
 from database.db import get_connection
 
 
