@@ -1,151 +1,49 @@
 from flask import Blueprint, jsonify, request
-from service.carreramodel import CarreraModel
-from service.entities.carreras import Carrera
-from packages.vertice.src.service.trazabilidad import TrazabilidadModel
-from service.entities.trazabilidad import Trazabilidad
+from service.carrera import get_carreras, get_carrera, add_carrera, update_carrera, delete_carrera
+from service.trazabilidad import add_trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
-import traceback
 
-# no se q hago, pero luzco bien haciendolo :*
-
-carrera = Blueprint('carrera_blueprint', __name__)
-
-@carrera.after_request 
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response
+carrera = Blueprint("carrera_blueprint", __name__)
 
 @carrera.route('/')
 @jwt_required()
-def get_carreras():
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        carreras = CarreraModel.get_carreras()
+async def list_carreras():
+    claims = get_jwt()
+    await add_trazabilidad({"accion": "Obtener Carreras", "usuario": claims.get('nombre'), "modulo": "General", "nivel_alerta": 1})
+    data = await get_carreras()
+    return jsonify({"ok": True, "status": 200, "data": data})
 
-        # Registrar trazabilidad
-        trazabilidad = Trazabilidad(
-            accion="Obtener Carreras",
-            usuario=usuario,
-            fecha=datetime.now(),
-            modulo="General",
-            nivel_alerta=1
-        )
-        TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-        return jsonify({"ok": True, "status": 200, "data": carreras})
-    except Exception as ex:
-        traceback.print_exc()
-        return jsonify({"message": str(ex)}), 500
-
-@carrera.route('/<id>')
+@carrera.route('/<int:id>')
 @jwt_required()
-def get_carrera(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        carrera = CarreraModel.get_carrera(id)
-        
-        if carrera is not None:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Obtener Carrera con id: {id}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="General",
-                nivel_alerta=1
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": carrera})
-        else:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "carrera no encontrada"}}), 404
-    except Exception as ex:
-        return jsonify({"message": str(ex)}), 500
+async def get_one_carrera(id):
+    claims = get_jwt()
+    await add_trazabilidad({"accion": f"Obtener Carrera {id}", "usuario": claims.get('nombre'), "modulo": "General", "nivel_alerta": 1})
+    data = await get_carrera(id)
+    return jsonify({"ok": True, "status": 200, "data": data})
 
 @carrera.route('/add', methods=['POST'])
 @jwt_required()
-def add_carrera():
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
+async def add_new():
+    payload = request.json
+    claims = get_jwt()
+    await add_carrera(payload)
+    await add_trazabilidad({"accion": f"Añadir Carrera {payload['id']}", "usuario": claims.get('nombre'), "modulo": "General", "nivel_alerta": 2})
+    return jsonify({"ok": True, "status": 200})
 
-        id = request.json['id']
-        nombre = request.json['nombre']
-
-        carrera = Carrera(str(id), nombre)
-        affected_rows = CarreraModel.add_carrera(carrera)
-
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Añadir Carrera con id: {id}, nombre: {nombre}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="General",
-                nivel_alerta=2
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 500, "data": {"message": affected_rows}}), 500
-    except Exception as ex:
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
-
-@carrera.route('/update/<id>', methods=['PUT'])
+@carrera.route('/update/<int:id>', methods=['PUT'])
 @jwt_required()
-def update_carrera(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
+async def update_one(id: int):
+    payload = request.json
+    claims = get_jwt()
+    await update_carrera(id, payload)
+    await add_trazabilidad({"accion": f"Actualizar Carrera {id}", "usuario": claims.get('nombre'), "modulo": "General", "nivel_alerta": 2})
+    return jsonify({"ok": True, "status": 200})
 
-        nombre = request.json['nombre']
-        carrera = Carrera(str(id), nombre)
-        affected_rows = CarreraModel.update_carrera(carrera)
-
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Actualizar Carrera con id: {id}, nombre: {nombre}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="General",
-                nivel_alerta=2
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 500, "data": {"message": "Error al actualizar, compruebe los datos e intente nuevamente"}}), 500
-    except Exception as ex:
-        return jsonify({"ok": False, "status": 500, "data": {"message": "Error al actualizar, compruebe los datos e intente nuevamente"}}), 500
-
-@carrera.route('/delete/<id>', methods=['DELETE'])
+@carrera.route('/delete/<int:id>', methods=['DELETE'])
 @jwt_required()
-def delete_carrera(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-
-        carrera = Carrera(str(id))
-        affected_rows = CarreraModel.delete_carrera(carrera)
-
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Eliminar Carrera con id: {id}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="General",
-                nivel_alerta=3
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "carrera no encontrada"}}), 404
-    except Exception as ex:
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+async def delete_one(id):
+    claims = get_jwt()
+    await delete_carrera(id)
+    await add_trazabilidad({"accion": f"Eliminar Carrera {id}", "usuario": claims.get('nombre'), "modulo": "General", "nivel_alerta": 3})
+    return jsonify({"ok": True, "status": 200})
