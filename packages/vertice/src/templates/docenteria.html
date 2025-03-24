@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Técnica de Datos Estudiantiles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f8f8f8;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 38px;
+            margin-bottom: 30px;
+            color: #007bff;
+        }
+
+        .academic-info, .academic-info {
+            margin-bottom: 30px;
+        }
+
+        .academic-info h2, .academic-info h2 {
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f1f1f1;
+        }
+
+        .signature {
+            margin-top: 30px;
+            text-align: right;
+        }
+
+        /* Estilos para el enlace */
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            width: 150px;
+            height: 150px;
+        }
+
+        .profile-picture {
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .info{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .info h3{
+            margin-right: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="profile-picture">
+    <!-- Espacio para la imagen -->
+    <img src="/home/app/web//templates/pascal-fondo.png"
+         alt="Imagen del estudiante">
+</div>
+<h1 class="center">Ficha Técnica de Materias</h1>
+<section class="info">
+    <h3>Fecha de emisión:</h3>
+    <p><strong style="color: #007bff">{{fecha_actual}}</strong></p>
+</section>
+<div class="academic-info">
+    <h2>Docentes de materias del ciclo actual</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Prelación</th>
+            <th>U.C.</th>
+            <th>HP</th>
+            <th>HT</th>
+            <th>Sem.</th>
+            <th>Docente</th>
+            <th>Ciclo</th>
+            <th>Carrera</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for materia in materias.contenido.materia %}
+            <tr>
+                <td style="text-transform: capitalize;">{{ materia.id }}</td>
+                <td style="text-transform: capitalize;">{{ materia.nombre }}</td>
+                <td style="text-transform: capitalize;">{{ materia.prelacion }}</td>
+                <td style="text-transform: capitalize;">{{ materia.unidad_credito }}</td>
+                <td style="text-transform: capitalize;">{{ materia.hp }}</td>
+                <td style="text-transform: capitalize;">{{ materia.ht }}</td>
+                <td style="text-transform: capitalize;">{{ materia.semestre }}</td>
+                <td style="text-transform: capitalize;">{{ materia.nombre_docente }}</td>
+                <td style="text-transform: capitalize;">{{ materia.ciclo }}</td>
+                <td style="text-transform: capitalize;">{{ materia.carrera }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
