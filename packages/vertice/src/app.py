@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from settings import settings
 from database.db import init_db
-from routes import pagos, students, usuario, docente, carreras, materias, billete, coordinacion, control, peticiones, config, files, generar, SuperUsuario, transferencia, factura, trazabilidad, seguridad
+from route import pagos, students, usuario, docente, carreras, materias, billete, coordinacion, control, peticiones, config, files, generar, SuperUsuario, transferencia, factura, trazabilidad, seguridad
 
 def create_app():
     app = Flask(__name__)
