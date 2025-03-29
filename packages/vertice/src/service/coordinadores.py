@@ -1,0 +1,116 @@
+from model.coordinador import Coordinador
+from model.usuario import Usuario
+from model.carrera import Carrera
+from tortoise.exceptions import DoesNotExist
+from model.configuracion import Configuracion
+from model.estudiante import Estudiante
+from model.matricula import Matricula
+
+
+async def get_coordinadores():
+    try:
+        coordinadores = await Coordinador.all().prefetch_related("usuario", "carrera")
+        resultado = []
+        for c in coordinadores:
+            resultado.append({
+                "id": c.id,
+                "cedula": c.usuario.cedula,
+                "nombre": c.usuario.fullname,
+                "correo": c.usuario.correo,
+                "telefono": c.telefono,
+                "carrera": c.carrera.nombre
+            })
+        return resultado
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def get_coordinador_by_id(id: int):
+    try:
+        c = await Coordinador.get(id=id).prefetch_related("usuario", "carrera")
+        return {
+            "id": c.id,
+            "cedula": c.usuario.cedula,
+            "nombre": c.usuario.fullname,
+            "correo": c.usuario.correo,
+            "telefono": c.telefono,
+            "carrera": c.carrera.nombre
+        }
+    except DoesNotExist:
+        return None
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def add_coordinador(usuario_id: int, carrera_id: int, telefono: str):
+    try:
+        usuario = await Usuario.get(id=usuario_id)
+        carrera = await Carrera.get(id=carrera_id)
+
+        coordinador = Coordinador(usuario=usuario, carrera=carrera, telefono=telefono)
+        await coordinador.save()
+        return coordinador.id
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def update_coordinador(id: int, carrera_id: int = None, telefono: str = None):
+    try:
+        coordinador = await Coordinador.get(id=id)
+
+        if carrera_id:
+            carrera = await Carrera.get(id=carrera_id)
+            coordinador.carrera = carrera
+
+        if telefono:
+            coordinador.telefono = telefono
+
+        await coordinador.save()
+        return True
+    except DoesNotExist:
+        return False
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def delete_coordinador(id: int):
+    try:
+        coordinador = await Coordinador.get(id=id)
+        await coordinador.delete()
+        return True
+    except DoesNotExist:
+        return False
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def calcular_promedio_ponderado_estudiante(cedula: str):
+    try:
+        estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario")
+        config = await Configuracion.get(id=1)
+        porcentajes = config.porcentajes or []
+
+        matriculas = await Matricula.filter(cedula_estudiante=estudiante).prefetch_related("cod_materia")
+        total_uc = 0
+        total_ponderado = 0
+
+        for m in matriculas:
+            notas = m.notas or []
+            uc = m.uc or m.cod_materia.unidad_credito
+
+            if not notas or len(notas) != len(porcentajes):
+                continue  # Saltar si datos incompletos
+
+            promedio = sum(n * (p / 100) for n, p in zip(notas, porcentajes))
+            total_ponderado += promedio * uc
+            total_uc += uc
+
+        promedio_final = round(total_ponderado / total_uc, 2) if total_uc else 0
+
+        estudiante.promedio = promedio_final
+        await estudiante.save()
+
+        return promedio_final
+
+    except Exception as ex:
+        raise Exception(ex)

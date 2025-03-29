@@ -9,6 +9,7 @@ class Configuracion(Model):
     horario_inicio = fields.DatetimeField()
     horario_fin = fields.DatetimeField()
     cuotas = fields.JSONField(null=True)  # fechas de cuotas dinámicas
+    porcentajes = fields.JSONField(null=True)  # porcentajes de notas del ciclo
 
     class Meta:
         table = "configuraciones"

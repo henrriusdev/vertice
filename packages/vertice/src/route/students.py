@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from service.configmodel import ConfigModel
+from packages.vertice.src.service.configuracion import ConfigModel
 from service.entities.students import Student
 from service.entities.pagos import Pago
-from service.studentsmodel import StudentModel
+from packages.vertice.src.service.estudiantes import StudentModel
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from datetime import timedelta, datetime

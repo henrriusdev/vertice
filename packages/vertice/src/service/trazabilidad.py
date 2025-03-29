@@ -1,5 +1,4 @@
-# services/trazabilidad_service.py
-from models.trazabilidad import Trazabilidad
+from model.trazabilidad import Trazabilidad
 from datetime import datetime
 
 async def add_trazabilidad(data: dict):

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from service.entities.docente import Docente
-from service.docentemodel import DocenteModel
-from service.materiamodel import MateriaModel
+from packages.vertice.src.service.docentes import DocenteModel
+from packages.vertice.src.service.materias import MateriaModel
 from service.entities.materias import Materias
 from packages.vertice.src.service.trazabilidad import TrazabilidadModel
 from service.entities.trazabilidad import Trazabilidad

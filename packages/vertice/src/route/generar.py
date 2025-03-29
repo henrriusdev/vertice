@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, render_template, send_file
-from service.studentsmodel import StudentModel
+from packages.vertice.src.service.estudiantes import StudentModel
 from packages.vertice.src.service.carrera import CarreraModel
-from service.materiamodel import MateriaModel
+from packages.vertice.src.service.materias import MateriaModel
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import date, datetime
 import pdfkit

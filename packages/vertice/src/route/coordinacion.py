@@ -1,6 +1,6 @@
 from service.entities.coordinacion import Coordinacion
-from service.coordinacionmodel import CoordinacionModel
-from service.studentsmodel import StudentModel, Student
+from packages.vertice.src.service.coordinadores import CoordinacionModel
+from packages.vertice.src.service.estudiantes import StudentModel, Student
 from packages.vertice.src.service.trazabilidad import TrazabilidadModel
 from service.entities.trazabilidad import Trazabilidad
 from flask import Blueprint, jsonify, request

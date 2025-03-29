@@ -1,6 +1,6 @@
 import traceback
 from service.entities.peticiones import Peticiones
-from service.peticionesmodel import PeticionesModel
+from packages.vertice.src.service.peticiones import PeticionesModel
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime

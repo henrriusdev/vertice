@@ -10,12 +10,7 @@ class Materia(Model):
     ht = fields.IntField()
     semestre = fields.IntField()
     id_carrera = fields.ForeignKeyField('model.Carrera', related_name='materias')
-    dia = fields.CharField(max_length=20, null=True)
-    hora_inicio = fields.CharField(max_length=10, null=True)
-    hora_fin = fields.CharField(max_length=10, null=True)
-    dia2 = fields.CharField(max_length=20, null=True)
-    hora_inicio2 = fields.CharField(max_length=10, null=True)
-    hora_fin2 = fields.CharField(max_length=10, null=True)
+    horarios = fields.JSONField(null=True)  # Nuevo campo agrupado
     ciclo = fields.CharField(max_length=10)
     modalidad = fields.CharField(max_length=20, null=True)
     maximo = fields.IntField(null=True)

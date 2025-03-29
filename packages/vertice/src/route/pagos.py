@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from service.pago import (
+from packages.vertice.src.service.pagos import (
     get_all_pagos, get_pago_by_id, add_pago, update_pago
 )
 from service.trazabilidad import add_trazabilidad

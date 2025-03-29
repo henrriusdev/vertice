@@ -1,0 +1,111 @@
+from model.peticion import Peticion
+
+async def get_peticiones():
+    try:
+        result = []
+
+        peticiones = await Peticion.all().prefetch_related(
+            "id_docente", "id_docente__rol",
+            "id_estudiante",
+            "id_materia"
+        )
+
+        for p in peticiones:
+            peticion_data = {
+                "id": p.id,
+                "descripcion": p.descripcion,
+                "estado": p.estado,
+                "id_docente": p.id_docente_id,
+                "id_estudiante": p.id_estudiante_id,
+                "id_materia": p.id_materia_id,
+                "campo": p.campo
+            }
+
+            result.append({
+                "estudiante": {
+                    "cedula": p.id_estudiante.cedula,
+                    "nombre": p.id_estudiante.fullname
+                },
+                "docente": {
+                    "cedula": p.id_docente.cedula,
+                    "nombre": p.id_docente.fullname
+                },
+                "materia": {
+                    "id": p.id_materia.id,
+                    "nombre": p.id_materia.nombre
+                },
+                "peticion": peticion_data
+            })
+
+        return result
+
+    except Exception as ex:
+        raise Exception(ex)
+
+async def get_peticion(id: int):
+    try:
+        p = await Peticion.get(id=id)
+        return {
+            "id": p.id,
+            "descripcion": p.descripcion,
+            "estado": p.estado,
+            "id_docente": p.id_docente_id,
+            "id_estudiante": p.id_estudiante_id,
+            "id_materia": p.id_materia_id,
+            "campo": p.campo
+        }
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def get_peticiones_pendientes():
+    try:
+        peticiones = await Peticion.filter(estado="Pendiente")
+        return [p.__dict__ for p in peticiones]
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def add_peticion(peticion):
+    try:
+        nueva = await Peticion.create(
+            id_docente_id=peticion.id_docente,
+            descripcion=peticion.descripcion,
+            estado=peticion.estado,
+            id_estudiante_id=peticion.id_estudiante,
+            id_materia_id=peticion.id_materia,
+            campo=peticion.campo
+        )
+        return 1 if nueva else 0
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def update_peticion(peticion):
+    try:
+        p = await Peticion.get(id=peticion.id)
+        if peticion.id_docente:
+            p.id_docente_id = peticion.id_docente
+        if peticion.descripcion:
+            p.descripcion = peticion.descripcion
+        if peticion.estado:
+            p.estado = peticion.estado
+        if peticion.id_estudiante:
+            p.id_estudiante_id = peticion.id_estudiante
+        if peticion.id_materia:
+            p.id_materia_id = peticion.id_materia
+        if peticion.campo:
+            p.campo = peticion.campo
+
+        await p.save()
+        return 1
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def delete_peticion(peticion):
+    try:
+        eliminado = await Peticion.filter(id=peticion.id).delete()
+        return eliminado[0]
+    except Exception as ex:
+        raise Exception(ex)

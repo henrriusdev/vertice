@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from service.entities.config import Configuracion
-from service.configmodel import ConfigModel
+from packages.vertice.src.service.configuracion import ConfigModel
 from packages.vertice.src.service.trazabilidad import TrazabilidadModel
 from service.entities.trazabilidad import Trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt

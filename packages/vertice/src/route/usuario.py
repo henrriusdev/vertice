@@ -3,7 +3,7 @@ import traceback
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from service.entities.user import User
-from service.usermodel import UserModel
+from packages.vertice.src.service.usuarios import UserModel
 from werkzeug.security import generate_password_hash, check_password_hash
 from packages.vertice.src.service.trazabilidad import TrazabilidadModel
 from service.entities.trazabilidad import Trazabilidad

@@ -1,6 +1,6 @@
 from service.entities.materias import Materias
-from service.materiamodel import MateriaModel
-from service.configmodel import ConfigModel
+from packages.vertice.src.service.materias import MateriaModel
+from packages.vertice.src.service.configuracion import ConfigModel
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 import traceback
