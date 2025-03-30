@@ -1,12 +1,14 @@
 from src.model.usuario import Usuario
 from src.service.estudiantes import validar_pagos_estudiante
 from tortoise.exceptions import DoesNotExist, IntegrityError
+from werkzeug.security import check_password_hash
 
 async def login(correo: str, password: str):
     try:
-        usuario = await Usuario.get(correo=correo).prefetch_related("rol")
+        usuario = await Usuario.filter(correo=correo).prefetch_related("rol").first()
+        print(f"Usuario encontrado: {usuario}")
 
-        if not usuario or usuario.password != password:
+        if not usuario or not check_password_hash(usuario.password, password):
             return None
 
         if usuario.rol.nombre.lower() == "estudiante":

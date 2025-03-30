@@ -2,7 +2,7 @@ from tortoise.models import Model
 from tortoise import fields
 
 class Docente(Model):
-    usuario = fields.OneToOneField('model.Usuario', related_name='docente')
+    usuario = fields.OneToOneField('models.Usuario', related_name='docente')
     titulo = fields.CharField(max_length=50, null=True)
     dedicacion = fields.CharField(max_length=50, null=True)
     especialidad = fields.CharField(max_length=100, null=True)

@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+import traceback
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from src.model.trazabilidad import Trazabilidad
@@ -19,7 +20,7 @@ async def login_usuario():
         password = data.get('password')
 
         usuario = await login(correo, password)
-        await usuario.fetch_related('rol')
+        print(not usuario)
         if not usuario:
             return jsonify({"ok": False, "status": 401, "data": {"message": "Correo y/o clave incorrectos"}}), 401
 
@@ -41,13 +42,13 @@ async def login_usuario():
 
         await registrar_sesion(usuario.correo, jti)
 
-        await add_trazabilidad(Trazabilidad(
-            accion=f"Inicio de sesión del usuario: {usuario.correo}",
-            usuario=usuario.correo,
-            fecha=datetime.now(),
-            modulo="Autenticación",
-            nivel_alerta=1
-        ))
+        await add_trazabilidad({
+            "accion":f"Inicio de sesión del usuario: {usuario.correo}",
+            "usuario":usuario,
+            "fecha":datetime.now(),
+            "modulo":"Autenticación",
+            "nivel_alerta":1
+        })
 
         return jsonify({
             "ok": True,
@@ -59,6 +60,7 @@ async def login_usuario():
         })
 
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
     
 
@@ -112,13 +114,13 @@ async def update_usuario_password():
         hashed = generate_password_hash(new_password, method="pbkdf2:sha256", salt_length=16)
         await update_password(correo, hashed)
 
-        await add_trazabilidad(Trazabilidad(
-            accion=f"Actualizar contraseña del usuario: {nombre}",
-            usuario=correo,
-            fecha=datetime.now(),
-            modulo="Usuarios",
-            nivel_alerta=2
-        ))
+        await add_trazabilidad({
+            'accion':f"Actualizar contraseña del usuario: {nombre}",
+            'usuario':correo,
+            'fecha':datetime.now(),
+            'modulo':"Usuarios",
+            'nivel_alerta':2
+        })
 
         return jsonify({"ok": True, "status": 200, "data": "Contraseña actualizada exitosamente"})
 
@@ -140,13 +142,13 @@ async def registrar():
 
         creado = await registrar_usuario(usuario)
 
-        await add_trazabilidad(Trazabilidad(
-            accion=f"Registrar usuario: {usuario.correo}, nombre: {usuario.nombre}",
-            usuario=usuario.correo,
-            fecha=datetime.now(),
-            modulo="Usuarios",
-            nivel_alerta=2
-        ))
+        await add_trazabilidad({
+            "accion":f"Registrar usuario: {usuario.correo}, nombre: {usuario.nombre}",
+            "usuario":usuario,
+            "fecha":datetime.now(),
+            "modulo":"Usuarios",
+            "nivel_alerta":2
+        })
 
         return jsonify({"ok": True, "status": 200, "data": creado.to_dict()})
 

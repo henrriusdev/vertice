@@ -1,9 +1,10 @@
-import asyncio
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from src.settings import settings
 from src.database.db import init_db
+from src.settings import settings
+from asgiref.wsgi import WsgiToAsgi  # 👈 adaptador WSGI → ASGI
+
 from src.route import pagos, usuario, docente, carreras, materias, billete, coordinacion, peticiones, config, archivos, trazabilidad, sesiones, estudiantes
 
 def create_app():
@@ -12,9 +13,7 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = settings.JWT_SECRET_KEY
     
     CORS(app, resources={r"/api/*": {"origins": "*"}})
-
     JWTManager(app)
-    init_db()
 
     # Blueprints
     blueprints = [
@@ -38,7 +37,21 @@ def create_app():
 
     app.register_error_handler(404, page_not_found)
 
-    return app
+    # ASGI hook para inicializar DB una vez
+    asgi_app = WsgiToAsgi(app)
+
+    class DBInitMiddleware:
+        def __init__(self, app):
+            self.app = app
+            self.db_initialized = False
+
+        async def __call__(self, scope, receive, send):
+            if not self.db_initialized:
+                await init_db()
+                self.db_initialized = True
+            await self.app(scope, receive, send)
+
+    return DBInitMiddleware(asgi_app)
 
 
 def page_not_found(error):

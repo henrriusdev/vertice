@@ -13,7 +13,7 @@ class Usuario(Model):
     fecha_creacion = fields.DatetimeField(auto_now_add=True)  # ✅ Fecha de creación
     ultima_sesion = fields.DatetimeField(null=True)  # ✅ Último acceso/login
 
-    rol = fields.ForeignKeyField("model.Rol", related_name="usuarios")
+    rol = fields.ForeignKeyField("models.Rol", related_name="usuarios")
     
     def to_dict(self):
         return {
