@@ -136,10 +136,10 @@
 
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
-		<h1 class="text-2xl font-bold">Estudiantes</h1>
+		<h1 class="text-2xl font-bold">Docentes</h1>
 		<Button color="blue" on:click={crearEstudiante}>
 			<PlusOutline class="mr-2 h-5 w-5" />
-			Nuevo Estudiante
+			Nuevo Docente
 		</Button>
 	</div>
 

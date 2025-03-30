@@ -6,7 +6,20 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@imask/svelte':
+        specifier: ^7.6.1
+        version: 7.6.1(svelte@5.25.3)
+      flatpickr:
+        specifier: ^4.6.13
+        version: 4.6.13
+      imask:
+        specifier: ^7.6.1
+        version: 7.6.1
+      svelte-flatpickr:
+        specifier: ^3.3.5
+        version: 3.3.5(svelte@5.25.3)
 
   packages/front:
     devDependencies:
@@ -85,6 +98,10 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@babel/runtime-corejs3@7.27.0':
+    resolution: {integrity: sha512-UWjX6t+v+0ckwZ50Y5ShZLnlk95pP5MyW/pon9tiYzl3+18pkTHTFNTKr7rQbfRXPkowt2QAn30o1b6oswszew==}
+    engines: {node: '>=6.9.0'}
 
   '@esbuild/aix-ppc64@0.25.1':
     resolution: {integrity: sha512-kfYGy8IdzTGy+z0vFGvExZtxkFlA4zAxgKEahG9KE1ScBjpQnFsNOX8KTU5ojNru5ed5CVoJYXFtoxaq5nFbjQ==}
@@ -311,6 +328,11 @@ packages:
   '@humanwhocodes/retry@0.4.2':
     resolution: {integrity: sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ==}
     engines: {node: '>=18.18'}
+
+  '@imask/svelte@7.6.1':
+    resolution: {integrity: sha512-NVGhgV+endyrmG8srUmNjbULmZs8Wq9B7YFzV/jKtC3EYWhMzccgvQ27IEkRFQ9dcxaPjmwni9UejfrkK1oeow==}
+    peerDependencies:
+      svelte: ^4.2.12
 
   '@jridgewell/gen-mapping@0.3.8':
     resolution: {integrity: sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA==}
@@ -754,6 +776,9 @@ packages:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
 
+  core-js-pure@3.41.0:
+    resolution: {integrity: sha512-71Gzp96T9YPk63aUvE5Q5qP+DryB4ZloUZPSOebGM88VNw8VNfvdA7z6kGA8iGOTEzAomsRidp4jXSmUIJsL+Q==}
+
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -912,6 +937,9 @@ packages:
     resolution: {integrity: sha512-f7ccFPK3SXFHpx15UIGyRJ/FJQctuKZ0zVuN3frBo4HnK3cay9VEW0R6yPYFHC0AgqhukPzKjq22t5DmAyqGyw==}
     engines: {node: '>=16'}
 
+  flatpickr@4.6.13:
+    resolution: {integrity: sha512-97PMG/aywoYpB4IvbvUJi0RQi8vearvU0oov1WW3k0WZPBMrTQVqekSX5CjSG/M4Q3i6A/0FKXC7RyAoAUUSPw==}
+
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
 
@@ -975,6 +1003,10 @@ packages:
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
+
+  imask@7.6.1:
+    resolution: {integrity: sha512-sJlIFM7eathUEMChTh9Mrfw/IgiWgJqBKq2VNbyXvBZ7ev/IlO6/KQTKlV/Fm+viQMLrFLG/zCuudrLIwgK2dg==}
+    engines: {npm: '>=4.0.0'}
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -1271,6 +1303,9 @@ packages:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
 
+  regenerator-runtime@0.14.1:
+    resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
+
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
@@ -1348,6 +1383,11 @@ packages:
     peerDependenciesMeta:
       svelte:
         optional: true
+
+  svelte-flatpickr@3.3.5:
+    resolution: {integrity: sha512-D2uVdQi5jn/mMS3AK4gI/30Ho80fBYM0ZfZ44pHg8L4bMZq4c0mjajExZU4WF1EoOf7Qt8njQ9DBtkjJwfl3Cg==}
+    peerDependencies:
+      svelte: '>= 3.31.0 < 5.0'
 
   svelte@5.25.3:
     resolution: {integrity: sha512-J9rcZ/xVJonAoESqVGHHZhrNdVbrCfkdB41BP6eiwHMoFShD9it3yZXApVYMHdGfCshBsZCKsajwJeBbS/M1zg==}
@@ -1505,6 +1545,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
+  '@babel/runtime-corejs3@7.27.0':
+    dependencies:
+      core-js-pure: 3.41.0
+      regenerator-runtime: 0.14.1
+
   '@esbuild/aix-ppc64@0.25.1':
     optional: true
 
@@ -1651,6 +1696,11 @@ snapshots:
   '@humanwhocodes/retry@0.3.1': {}
 
   '@humanwhocodes/retry@0.4.2': {}
+
+  '@imask/svelte@7.6.1(svelte@5.25.3)':
+    dependencies:
+      imask: 7.6.1
+      svelte: 5.25.3
 
   '@jridgewell/gen-mapping@0.3.8':
     dependencies:
@@ -2076,6 +2126,8 @@ snapshots:
 
   cookie@0.6.0: {}
 
+  core-js-pure@3.41.0: {}
+
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -2275,6 +2327,8 @@ snapshots:
       flatted: 3.3.3
       keyv: 4.5.4
 
+  flatpickr@4.6.13: {}
+
   flatted@3.3.3: {}
 
   flowbite-datepicker@1.3.2(rollup@4.37.0):
@@ -2343,6 +2397,10 @@ snapshots:
       function-bind: 1.1.2
 
   ignore@5.3.2: {}
+
+  imask@7.6.1:
+    dependencies:
+      '@babel/runtime-corejs3': 7.27.0
 
   import-fresh@3.3.1:
     dependencies:
@@ -2571,6 +2629,8 @@ snapshots:
 
   readdirp@4.1.2: {}
 
+  regenerator-runtime@0.14.1: {}
+
   resolve-from@4.0.0: {}
 
   resolve@1.22.10:
@@ -2662,6 +2722,11 @@ snapshots:
       postcss-scss: 4.0.9(postcss@8.5.3)
       postcss-selector-parser: 7.1.0
     optionalDependencies:
+      svelte: 5.25.3
+
+  svelte-flatpickr@3.3.5(svelte@5.25.3):
+    dependencies:
+      flatpickr: 4.6.13
       svelte: 5.25.3
 
   svelte@5.25.3:
