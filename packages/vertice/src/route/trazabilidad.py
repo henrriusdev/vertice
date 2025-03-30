@@ -1,21 +1,17 @@
-from service.entities.trazabilidad import Trazabilidad
-from packages.vertice.src.service.trazabilidad import TrazabilidadModel
 from flask import Blueprint, jsonify
+from src.service.trazabilidad import get_trazabilidad
 
-tr = Blueprint('tr_Blueprint', __name__)
+trz = Blueprint('trazabilidad_blueprint', __name__)
 
-@tr.after_request
+@trz.after_request
 def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
-  
-@tr.get('/')
-def get_trazabilidad():
+
+@trz.get('/')
+async def list_trazabilidad():
     try:
-        trazabilidad = TrazabilidadModel.get_trazabilidad()
-        return jsonify({"ok": True, "status": 200, "data": trazabilidad})
+        data = await get_trazabilidad()
+        return jsonify({"ok": True, "status": 200, "data": data})
     except Exception as ex:
-        print(ex)
-        return jsonify({"message": str(ex)}), 500
-      
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500

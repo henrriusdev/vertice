@@ -1,4 +1,4 @@
-from model.peticion import Peticion
+from src.model.peticion import Peticion
 
 async def get_peticiones():
     try:

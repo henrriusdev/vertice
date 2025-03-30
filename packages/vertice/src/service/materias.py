@@ -1,10 +1,7 @@
-from database.db import get_connection
-from model.materia import Materia
-from model.carrera import Carrera
-from model.configuracion import Configuracion
-from model.matricula import Matricula
-from model.estudiante import Estudiante
-from tortoise.expressions import Q
+from src.model.materia import Materia
+from src.model.configuracion import Configuracion
+from src.model.matricula import Matricula
+from src.model.estudiante import Estudiante
 
 async def get_materias():
     try:

@@ -1,13 +1,12 @@
-from tortoise.contrib.flask import register_tortoise
-from settings import settings
+from tortoise import Tortoise
+from src.settings import settings
 
-def init_db(app):
+async def init_db():
     DB_URL = f"postgres://{settings.PGSQL_USER}:{settings.PGSQL_PASSWORD}@{settings.PGSQL_HOST}:{settings.PGSQL_PORT}/{settings.PGSQL_DB}"
-
-    register_tortoise(
-        app,
+    
+    await Tortoise.init(
         db_url=DB_URL,
-        modules={'models': ['src.models']},
-        generate_schemas=False,
-        add_exception_handlers=True,
+        modules={"models": ["src.model"]},  # ajusta si tu módulo es diferente
     )
+    # Si no quieres generar schemas automáticamente, no llames a generate_schemas()
+    # await Tortoise.generate_schemas()

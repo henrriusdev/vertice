@@ -1,14 +1,5 @@
-from service.entities.config import Configuracion as ConfigEntity
-from model.configuracion import Configuracion
+from src.model.configuracion import Configuracion
 
-async def get_configuraciones():
-    try:
-        config = await Configuracion.first()
-        if not config:
-            return {}
-        return ConfigEntity(**config.__dict__).to_JSON()
-    except Exception as ex:
-        raise Exception(ex)
 
 async def get_configuracion(id: int):
     try:

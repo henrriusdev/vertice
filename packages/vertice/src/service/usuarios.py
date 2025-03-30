@@ -1,5 +1,5 @@
-from model.usuario import Usuario
-from service.estudiantes import validar_pagos_estudiante
+from src.model.usuario import Usuario
+from src.service.estudiantes import validar_pagos_estudiante
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
 async def login(correo: str, password: str):
@@ -30,14 +30,8 @@ async def get_usuario_por_correo(correo: str, incluir: str = None):
             relations.append("estudiante")
         elif incluir == "docente":
             relations.append("docente")
-        elif incluir == "superusuario":
-            relations.append("superusuario")
-        elif incluir == "control":
-            relations.append("control")
         elif incluir == "coordinador":
             relations.append("coordinador")
-        elif incluir == "caja":
-            relations.append("caja")
 
         return await Usuario.get(correo=correo).prefetch_related(*relations)
 
@@ -82,3 +76,27 @@ async def registrar_usuario(usuario: Usuario):
         raise Exception("Error al registrar usuario. Verifica los campos únicos.")
     except Exception as ex:
         raise ex
+    
+
+async def bloquear_usuario(correo: str):
+    try:
+        usuario = await Usuario.get(correo=correo)
+        usuario.activo = False
+        await usuario.save()
+        return True
+    except DoesNotExist:
+        raise Exception("Usuario no encontrado")
+    except Exception as ex:
+        raise Exception(f"Error al bloquear usuario: {ex}")
+
+
+async def reactivar_usuario(correo: str):
+    try:
+        usuario = await Usuario.get(correo=correo)
+        usuario.activo = True
+        await usuario.save()
+        return True
+    except DoesNotExist:
+        raise Exception("Usuario no encontrado")
+    except Exception as ex:
+        raise Exception(f"Error al reactivar usuario: {ex}")

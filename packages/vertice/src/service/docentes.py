@@ -1,6 +1,6 @@
-from model.docente import Docente
-from model.peticion import Peticion
-from model.usuario import Usuario
+from src.model.docente import Docente
+from src.model.peticion import Peticion
+from src.model.usuario import Usuario
 from tortoise.exceptions import DoesNotExist
 
 async def get_docentes():
@@ -26,7 +26,7 @@ async def get_docentes():
         raise Exception(ex)
 
 
-async def get_docente_by_id(id: int):
+async def get_docente(id: int):
     try:
         d = await Docente.get(id=id).prefetch_related("usuario")
         return {

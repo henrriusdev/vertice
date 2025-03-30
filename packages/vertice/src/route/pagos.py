@@ -1,17 +1,12 @@
 from flask import Blueprint, jsonify, request
-from packages.vertice.src.service.pagos import (
+from src.service.pagos import (
     get_all_pagos, get_pago_by_id, add_pago, update_pago
 )
-from service.trazabilidad import add_trazabilidad
+from src.service.trazabilidad import add_trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
 
 pago = Blueprint("pagos_blueprint", __name__)
-
-@pago.after_request
-def after_request(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    return response
 
 @pago.route("/")
 @jwt_required()

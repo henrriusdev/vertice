@@ -1,5 +1,5 @@
 # services/pagos_service.py
-from model.pago import Pago
+from src.model.pago import Pago
 
 async def get_all_pagos():
     result = {"pagos": [], "metodos": []}

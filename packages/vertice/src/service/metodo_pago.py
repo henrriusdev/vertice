@@ -1,4 +1,4 @@
-from model.metodo_pago import MetodoPago
+from src.model.metodo_pago import MetodoPago
 
 async def get_metodos():
     metodos = await MetodoPago.all()

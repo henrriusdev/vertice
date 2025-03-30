@@ -1,179 +1,108 @@
-import traceback
-from service.entities.peticiones import Peticiones
-from packages.vertice.src.service.peticiones import PeticionesModel
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
-from packages.vertice.src.service.trazabilidad import TrazabilidadModel
-from service.entities.trazabilidad import Trazabilidad
+from src.service.peticiones import (
+    get_peticiones,
+    get_peticion,
+    get_peticiones_pendientes,
+    add_peticion,
+    update_peticion,
+    delete_peticion
+)
+from src.service.trazabilidad import add_trazabilidad
 
-peticion = Blueprint('peticion_blueprint', __name__)
+ptc = Blueprint('peticion_blueprint', __name__)
 
-@peticion.after_request
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response
-
-@peticion.route('/')
+@ptc.route('/')
 @jwt_required()
-def get_peticiones():
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        peticiones = PeticionesModel.get_peticiones()
+async def get_all_peticiones():
+    claims = get_jwt()
+    usuario = claims.get('nombre')
+    data = await get_peticiones()
+    await add_trazabilidad({
+        "accion": "Obtener todas las Peticiones",
+        "usuario": usuario,
+        "modulo": "Peticiones",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": data})
 
-        # Registrar trazabilidad
-        trazabilidad = Trazabilidad(
-            accion="Obtener todas las Peticiones",
-            usuario=usuario,
-            fecha=datetime.now(),
-            modulo="Peticiones",
-            nivel_alerta=1
-        )
-        TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-        return jsonify({"ok": True, "status": 200, "data": peticiones})
-    except Exception as ex:
-        return jsonify({"message": str(ex)}), 500
-
-@peticion.route('/<id>')
+@ptc.route('/<id>')
 @jwt_required()
-def get_peticion(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        peticiones = PeticionesModel.get_peticion(id)
-        
-        if peticiones is not None:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Obtener Petición con id: {id}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Peticiones",
-                nivel_alerta=1
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
+async def get_one_peticion(id):
+    claims = get_jwt()
+    usuario = claims.get('nombre')
+    data = await get_peticion(id)
+    if not data:
+        return jsonify({"ok": False, "status": 404, "data": {"message": "peticion no disponible"}}), 404
+    await add_trazabilidad({
+        "accion": f"Obtener Petición con id: {id}",
+        "usuario": usuario,
+        "modulo": "Peticiones",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": data})
 
-            return jsonify({"ok": True, "status": 200, "data": peticiones})
-        else:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "peticion no disponible"}}), 404
-    except Exception as ex:
-        return jsonify({"message": str(ex)}), 500
-
-@peticion.route('/pendientes')
+@ptc.route('/pendientes')
 @jwt_required()
-def get_peticiones_pendientes():
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        peticiones_pendientes = PeticionesModel.get_peticiones_pendientes()
+async def get_pending_peticiones():
+    claims = get_jwt()
+    usuario = claims.get('nombre')
+    data = await get_peticiones_pendientes()
+    await add_trazabilidad({
+        "accion": "Obtener todas las Peticiones Pendientes",
+        "usuario": usuario,
+        "modulo": "Peticiones",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": data})
 
-        # Registrar trazabilidad
-        trazabilidad = Trazabilidad(
-            accion="Obtener todas las Peticiones Pendientes",
-            usuario=usuario,
-            fecha=datetime.now(),
-            modulo="Peticiones",
-            nivel_alerta=1
-        )
-        TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-        return jsonify({"ok": True, "status": 200, "data": peticiones_pendientes})
-    except Exception as ex:
-        return jsonify({"message": str(ex)}), 500
-
-@peticion.route('/add', methods=["POST"])
+@ptc.route('/add', methods=["POST"])
 @jwt_required()
-def add_peticion():
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
+async def create_peticion():
+    claims = get_jwt()
+    usuario = claims.get('nombre')
+    body = request.json
 
-        id_docente = request.json['id_docente']
-        descripcion = request.json['descripcion']
-        estado = request.json['estado']
-        if estado not in ["Aprobado", "Denegado", "Pendiente"]:
-            return jsonify({'error': 'Valor inválido para el campo estado'}), 400
-        id_estudiante = request.json['id_estudiante']
-        id_materia = request.json['id_materia']
-        campo = request.json['campo']
+    if body["estado"] not in ["Aprobado", "Denegado", "Pendiente"]:
+        return jsonify({"error": "Valor inválido para el campo estado"}), 400
 
-        peticion = Peticiones(None, id_docente, descripcion, estado, id_estudiante, id_materia, campo)
-        affected_rows = PeticionesModel.add_peticion(peticion)
+    await add_peticion(body)
 
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Añadir Petición para el estudiante con cédula: {id_estudiante}, materia: {id_materia}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Peticiones",
-                nivel_alerta=2
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
+    await add_trazabilidad({
+        "accion": f"Añadir Petición para el estudiante con cédula: {body['id_estudiante']}, materia: {body['id_materia']}",
+        "usuario": usuario,
+        "modulo": "Peticiones",
+        "nivel_alerta": 2
+    })
 
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 500, "data": {"message": affected_rows}}), 500
-    except Exception as ex:
-        traceback.print_exc()
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+    return jsonify({"ok": True, "status": 200})
 
-@peticion.route('/update/<id>', methods=["PATCH"])
-def update_peticion(id):
-    try:
-        data = request.json
-
-        # Definimos una lista de campos permitidos para actualizar.
-        allowed_fields = ["id_docente", "descripcion", "estado", "id_estudiante", "id_materia", "campo"]
-
-        # Filtramos los campos proporcionados en la solicitud para asegurarnos de que solo se actualicen los campos permitidos.
-        fields_to_update = {field: data[field] for field in allowed_fields if field in data}
-
-        # Si no se proporcionan campos permitidos para actualizar, devolvemos un error con código 400.
-        if not fields_to_update:
-            return jsonify({"error": "No se proporcionaron campos válidos para actualizar"}), 400
-
-        # Agregamos el ID de la solicitud a los campos a actualizar para asegurarnos de que actualicemos la solicitud correcta.
-        fields_to_update["id"] = id
-        peticion = Peticiones(**fields_to_update)
-
-        # Llamamos a la función update_peticion del modelo para actualizar la solicitud en la base de datos.
-        affected_rows = PeticionesModel.update_peticion(peticion)
-
-        if affected_rows == 1:
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 500, "data": {"message": affected_rows}}), 500
-    except Exception as ex:
-        print(ex)
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
-
-@peticion.route('/delete/<id>', methods=['DELETE'])
+@ptc.route('/update/<id>', methods=["PATCH"])
 @jwt_required()
-def delete_peticion(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
+async def patch_peticion(id):
+    data = request.json
+    allowed_fields = ["id_docente", "descripcion", "estado", "id_estudiante", "id_materia", "campo"]
+    fields = {k: v for k, v in data.items() if k in allowed_fields}
+    if not fields:
+        return jsonify({"error": "No se proporcionaron campos válidos para actualizar"}), 400
 
-        peticion = Peticiones(str(id))
-        affected_rows = PeticionesModel.delete_peticion(peticion)
+    await update_peticion(id, fields)
+    return jsonify({"ok": True, "status": 200})
 
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Eliminar Petición con id: {id}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Peticiones",
-                nivel_alerta=3
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
+@ptc.route('/delete/<id>', methods=["DELETE"])
+@jwt_required()
+async def remove_peticion(id):
+    claims = get_jwt()
+    usuario = claims.get('nombre')
+    result = await delete_peticion(id)
 
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "peticion no encontrada"}}), 404
-    except Exception as ex:
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+    if result:
+        await add_trazabilidad({
+            "accion": f"Eliminar Petición con id: {id}",
+            "usuario": usuario,
+            "modulo": "Peticiones",
+            "nivel_alerta": 3
+        })
+        return jsonify({"ok": True, "status": 200})
+    return jsonify({"ok": False, "status": 404, "data": {"message": "peticion no encontrada"}}), 404

@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     SECRET_KEY: str
@@ -14,3 +14,18 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
+
+TORTOISE_ORM = {
+    "connections": {
+        "default": f"postgres://{settings.PGSQL_USER}:{settings.PGSQL_PASSWORD}@{settings.PGSQL_HOST}:{settings.PGSQL_PORT}/{settings.PGSQL_DB}",
+    },
+    "apps": {
+        "models": {
+            "models": [
+                "src.model",        
+                "aerich.models"
+            ],
+            "default_connection": "default",
+        },
+    },
+}

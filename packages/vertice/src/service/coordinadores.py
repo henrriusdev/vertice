@@ -1,10 +1,10 @@
-from model.coordinador import Coordinador
-from model.usuario import Usuario
-from model.carrera import Carrera
+from src.model.coordinador import Coordinador
+from src.model.usuario import Usuario
+from src.model.carrera import Carrera
 from tortoise.exceptions import DoesNotExist
-from model.configuracion import Configuracion
-from model.estudiante import Estudiante
-from model.matricula import Matricula
+from src.model.configuracion import Configuracion
+from src.model.estudiante import Estudiante
+from src.model.matricula import Matricula
 
 
 async def get_coordinadores():
@@ -25,7 +25,7 @@ async def get_coordinadores():
         raise Exception(ex)
 
 
-async def get_coordinador_by_id(id: int):
+async def get_coordinador(id: int):
     try:
         c = await Coordinador.get(id=id).prefetch_related("usuario", "carrera")
         return {

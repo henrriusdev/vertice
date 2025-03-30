@@ -1,8 +1,8 @@
 import datetime
-from model.estudiante import Estudiante
-from model.matricula import Matricula
-from model.configuracion import Configuracion
-from model.pago import Pago
+from src.model.estudiante import Estudiante
+from src.model.matricula import Matricula
+from src.model.configuracion import Configuracion
+from src.model.pago import Pago
 from tortoise.exceptions import DoesNotExist
 
 async def get_students():
@@ -50,7 +50,7 @@ async def get_student(cedula: str):
         raise Exception(ex)
 
 
-from model.usuario import Usuario
+from src.model.usuario import Usuario
 
 async def add_student(data):
     try:

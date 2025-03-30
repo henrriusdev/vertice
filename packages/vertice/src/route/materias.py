@@ -1,215 +1,113 @@
-from service.entities.materias import Materias
-from packages.vertice.src.service.materias import MateriaModel
-from packages.vertice.src.service.configuracion import ConfigModel
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
-import traceback
 from datetime import datetime
-from packages.vertice.src.service.trazabilidad import TrazabilidadModel
-from service.entities.trazabilidad import Trazabilidad
+import traceback
 
-materia = Blueprint('materia_blueprint', __name__)
+from src.service.materias import (
+    get_materias, get_materia, get_materias_validas,
+    add_materia, modificar_materia_estudiante, update_materia, delete_materia
+)
+from src.service.trazabilidad import add_trazabilidad
+from src.service.configuracion import get_configuracion
 
-@materia.after_request
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response
+mat = Blueprint('materia_blueprint', __name__)
 
-@materia.route('/')
+@mat.route('/')
 @jwt_required()
-def get_materias():
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        materias = MateriaModel.get_materias()
+async def listar_materias():
+    usuario = get_jwt().get('nombre')
+    await add_trazabilidad({"accion": "Obtener todas las Materias", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
+    data = await get_materias()
+    return jsonify({"ok": True, "status": 200, "data": data})
 
-        # Registrar trazabilidad
-        trazabilidad = Trazabilidad(
-            accion="Obtener todas las Materias",
-            usuario=usuario,
-            fecha=datetime.now(),
-            modulo="Materias",
-            nivel_alerta=1
-        )
-        TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-        return jsonify({"ok": True, "status": 200, "data": materias})
-    except Exception as ex:
-        traceback.print_exc()
-        return jsonify({"message": str(ex)}), 500
-
-@materia.route('/<id>')
+@mat.route('/<id>')
 @jwt_required()
-def get_materia(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        materias = MateriaModel.get_materia(id)
-        
-        if materias is not None:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Obtener Materia con id: {id}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Materias",
-                nivel_alerta=1
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
+async def obtener_materia(id: str):
+    usuario = get_jwt().get('nombre')
+    data = await get_materia(id)
+    if data:
+        await add_trazabilidad({"accion": f"Obtener Materia con id: {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
+        return jsonify({"ok": True, "status": 200, "data": data})
+    return jsonify({"ok": False, "status": 404, "data": {"message": "materia no encontrada"}}), 404
 
-            return jsonify({"ok": True, "status": 200, "data": materias})
-        else:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "materia no encontrada"}}), 404
-    except Exception as ex:
-        print(ex)
-        return jsonify({"message": str(ex)}), 500
-
-@materia.route('/inscribir/<cedula_estudiante>', methods=['GET'])
+@mat.route('/inscribir/<cedula_estudiante>', methods=['GET'])
 @jwt_required()
-def get_materias_validas(cedula_estudiante: str):
+async def materias_validas(cedula_estudiante: str):
+    usuario = get_jwt().get('nombre')
     try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-        materias = MateriaModel.get_materias_validas(cedula_estudiante)
-        
-        if materias:
-            # Convertimos cada objeto de la clase Materias en JSON
-            materias_json = [materia.to_JSON_with_quantity() for materia in materias]
-            
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Obtener materias válidas para inscripción del estudiante con cédula: {cedula_estudiante}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Materias",
-                nivel_alerta=1
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": {"materias": materias_json}}), 200
-        else:
+        materias = await get_materias_validas(cedula_estudiante)
+        if not materias:
             return jsonify({"ok": False, "status": 404, "data": {"message": "No se pueden inscribir materias"}}), 404
+        await add_trazabilidad({"accion": f"Materias válidas para inscripción de {cedula_estudiante}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
+        return jsonify({"ok": True, "status": 200, "data": {"materias": materias}})
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
-@materia.route('/add', methods=['POST'])
+@mat.route('/add', methods=['POST'])
 @jwt_required()
-def add_materia():
+async def crear_materia():
+    usuario = get_jwt().get('nombre')
+    data = request.json
+    config = await get_configuracion("1")
+    data["ciclo"] = config["ciclo"]
     try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-
-        cod = request.json['id']
-        nombre = request.json['nombre']
-        prelacion = request.json.get('prelacion', None)
-        unidad_credito = request.json['unidad_credito']
-        hp = request.json['hp']
-        ht = request.json['ht']
-        semestre = request.json['semestre']
-        id_carrera = request.json['id_carrera']
-        id_docente = request.json['id_docente']
-        dia = request.json.get('dia', None)
-        hora_inicio = request.json.get('hora_inicio', None)
-        hora_fin = request.json.get('hora_fin', None)
-        dia2 = request.json.get('dia2', None)
-        hora_inicio2 = request.json.get('hora_inicio2', None)
-        hora_fin2 = request.json.get('hora_fin2', None)
-        maximo = request.json['maximo']
-        ciclo = ConfigModel.get_configuracion("1").ciclo
-        modalidad = request.json['modalidad']
-
-        materia = Materias(cod, nombre, prelacion, unidad_credito, hp, ht, semestre, id_carrera, id_docente, dia, hora_inicio, hora_fin, dia2, hora_inicio2, hora_fin2, None, ciclo, modalidad, maximo)
-        affected_rows = MateriaModel.add_materia(materia)
-
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Añadir Materia con id: {cod}, nombre: {nombre}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Materias",
-                nivel_alerta=2
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 500, "data": {"message": affected_rows}}), 500
-    except Exception as ex:
-        print(ex)
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
-
-@materia.route('/update/<id>', methods=['PUT'])
-@jwt_required()
-def update_materia(id):
-    try:
-        claims = get_jwt()
-        usuario = claims.get('nombre')
-
-        nombre = request.json['nombre']
-        prelacion = request.json['prelacion']
-        unidad_credito = request.json['unidad_credito']
-        hp = request.json['hp']
-        ht = request.json['ht']
-        semestre = request.json['semestre']
-        id_carrera = request.json['id_carrera']
-        id_docente = request.json['id_docente']
-        dia = request.json.get('dia', None)
-        hora_inicio = request.json.get('hora_inicio', None)
-        hora_fin = request.json.get('hora_fin', None)
-        modalidad = request.json['modalidad']
-        dia2 = request.json.get('dia2', None)
-        hora_inicio2 = request.json.get('hora_inicio2', None)
-        hora_fin2 = request.json.get('hora_fin2', None)
-        maximo = request.json['maximo']
-        ciclo = ConfigModel.get_configuracion("1").ciclo
-
-        materia = Materias(str(id), nombre, prelacion, unidad_credito, hp, ht, semestre, id_carrera, id_docente, dia, hora_inicio, hora_fin, dia2, hora_inicio2, hora_fin2, None, ciclo, modalidad, maximo)
-        affected_rows = MateriaModel.update_materia(materia)
-
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Actualizar Materia con id: {id}, nombre: {nombre}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Materias",
-                nivel_alerta=2
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
-
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 500, "data": {"message": "Error al actualizar, compruebe los datos e intente nuevamente"}}), 500
+        await add_materia(data)
+        await add_trazabilidad({"accion": f"Añadir Materia {data['id']}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 2})
+        return jsonify({"ok": True, "status": 200})
     except Exception as ex:
         traceback.print_exc()
-        return jsonify({"ok": False, "status": 500, "data": {"message": "Error al actualizar, compruebe los datos e intente nuevamente"}}), 500
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
-@materia.route('/delete/<id>', methods=['DELETE'])
+@mat.route('/update/<id>', methods=['PUT'])
 @jwt_required()
-def delete_materia(id):
+async def modificar_materia(id):
+    usuario = get_jwt().get('nombre')
+    data = request.json
+    data["id"] = id
+    config = await get_configuracion("1")
+    data["ciclo"] = config["ciclo"]
+    try:
+        await update_materia(id, data)
+        await add_trazabilidad({"accion": f"Actualizar Materia {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 2})
+        return jsonify({"ok": True, "status": 200})
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+@mat.route('/delete/<id>', methods=['DELETE'])
+@jwt_required()
+async def eliminar_materia(id):
+    usuario = get_jwt().get('nombre')
+    try:
+        await delete_materia(id)
+        await add_trazabilidad({"accion": f"Eliminar Materia {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 3})
+        return jsonify({"ok": True, "status": 200})
+    except Exception as ex:
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@mat.route("/upload", methods=["PATCH"])
+@jwt_required()
+async def modificar_materia_estudiante_route():
     try:
         claims = get_jwt()
         usuario = claims.get('nombre')
 
-        materia = Materias(str(id))
-        affected_rows = MateriaModel.delete_materia(materia)
+        cedula_estudiante = request.json.get('cedula_estudiante')
+        nombre_campo = request.json.get('nombre_campo')
+        valor = request.json.get('valor')
+        materia = request.json.get('materia')
 
-        if affected_rows == 1:
-            # Registrar trazabilidad
-            trazabilidad = Trazabilidad(
-                accion=f"Eliminar Materia con id: {id}",
-                usuario=usuario,
-                fecha=datetime.now(),
-                modulo="Materias",
-                nivel_alerta=3
-            )
-            TrazabilidadModel.add_trazabilidad(trazabilidad)
+        await modificar_materia_estudiante(materia, cedula_estudiante, nombre_campo, valor)
 
-            return jsonify({"ok": True, "status": 200, "data": None})
-        else:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "materia no encontrada"}}), 404
+        await add_trazabilidad({
+            "accion": f"Modificar nota del estudiante {cedula_estudiante}, campo: {nombre_campo}, valor: {valor}",
+            "usuario": usuario,
+            "modulo": "Materias",
+            "nivel_alerta": 2
+        })
+
+        return jsonify({"ok": True, "status": 200, "data": None}), 200
     except Exception as ex:
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
