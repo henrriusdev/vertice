@@ -14,6 +14,22 @@ class Usuario(Model):
     ultima_sesion = fields.DatetimeField(null=True)  # ✅ Último acceso/login
 
     rol = fields.ForeignKeyField("model.Rol", related_name="usuarios")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "cedula": self.cedula,
+            "nombre": self.nombre,
+            "correo": self.correo,
+            "activo": self.activo,
+            "ruta_foto": self.ruta_foto,
+            "fecha_creacion": self.fecha_creacion.isoformat() if self.fecha_creacion else None,
+            "ultima_sesion": self.ultima_sesion.isoformat() if self.ultima_sesion else None,
+            "rol": {
+                "id": self.rol.id,
+                "nombre": self.rol.nombre
+            }
+        }
 
     class Meta:
         table = "usuarios"

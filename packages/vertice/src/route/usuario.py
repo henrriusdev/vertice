@@ -2,18 +2,13 @@ from datetime import timedelta, datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from src.model.trazabilidad import Trazabilidad
-from src.service.sesiones import registrar_sesion
+from src.service.sesiones import eliminar_sesion_por_jti, registrar_sesion
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import bloquear_usuario, login, reactivar_usuario, update_password, get_usuario_por_correo, update_email, registrar_usuario
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.model.usuario import Usuario
 
 usr = Blueprint('usuario_blueprint', __name__)
-
-@usr.after_request
-def after_request(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
 
 
 @usr.post('/login')
@@ -24,6 +19,7 @@ async def login_usuario():
         password = data.get('password')
 
         usuario = await login(correo, password)
+        await usuario.fetch_related('rol')
         if not usuario:
             return jsonify({"ok": False, "status": 401, "data": {"message": "Correo y/o clave incorrectos"}}), 401
 
@@ -66,10 +62,6 @@ async def login_usuario():
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
     
 
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from flask import jsonify
-from src.service.sesiones import eliminar_sesion_por_jti
-
 @usr.post('/logout')
 @jwt_required()
 async def logout_usuario():
@@ -91,6 +83,7 @@ async def refresh_usuario():
     try:
         correo = get_jwt_identity()
         usuario = await get_usuario_por_correo(correo)
+        await usuario.fetch_related('rol')
         if not usuario:
             return jsonify({"ok": False, "status": 401, "data": {"message": "No autorizado"}}), 401
 
