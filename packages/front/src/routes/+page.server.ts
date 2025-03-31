@@ -1,5 +1,5 @@
 // src/routes/+page.server.ts
-import { login } from '$lib/servicios/autenticacion';
+import { login } from '$lib';
 import { redirect, fail } from '@sveltejs/kit';
 
 export const load = async ({ locals }) => {
@@ -15,6 +15,7 @@ export const actions = {
 		const correo = data.get('correo') as string;
 		const password = data.get('password') as string;
 
+		let destino = '/';
 		try {
 			const { usuario, token } = await login(fetch, correo, password);
 
@@ -25,12 +26,14 @@ export const actions = {
 				secure: false, // true en producción
 				maxAge: 60 * 60 * 2 // 2h
 			});
+			console.log('logueado', usuario);
 
-			const destino = `/${usuario.rol.nombre.toLowerCase()}`;
-			redirect(302, destino);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+			destino = `/${usuario.rol.nombre.toLowerCase()}`;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (e: any) {
+			console.error("A", e);
 			return fail(401, { mensaje: e.message });
 		}
+		throw redirect(302, destino);
 	}
 };

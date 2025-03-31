@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import DataTable from '$lib/componentes/DataTable.svelte';
-	import Datepicker from '$lib/componentes/Datepicker.svelte';
-	import { maxYearDate } from '$lib/utilidades/fechas.js';
-	import { cedulaMask, nota } from '$lib/utilidades/mascaras';
-	import { imask } from "@imask/svelte";
+	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
+	import { imask } from '@imask/svelte';
 	import {
 		Alert,
 		Button,
@@ -26,6 +23,7 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
+	import { Estudiante } from '../../../../app.js';
 
 	// Datos de la página
 	export let data;
@@ -98,21 +96,20 @@
 		modalVisible = true;
 	}
 
-  // Función para eliminar un estudiante
-  function eliminarEstudiante(estudiante: any) {
-    fetch(`/api/estudiantes/${estudiante.id}`, {
-      method: 'DELETE'
-    })
-      .then((response) => {
-        if (response.ok) {
-          mostrarAlerta('Estudiante eliminado exitosamente', 'success');
-        } else {
-          mostrarAlerta('Error al eliminar el estudiante', 'error');
-        }
-      })
-      .catch((error) => {
-    
-  })}
+	// Función para eliminar un estudiante
+	function eliminarEstudiante(estudiante: any) {
+		fetch(`/api/estudiantes/${estudiante.id}`, {
+			method: 'DELETE'
+		})
+			.then((response) => {
+				if (response.ok) {
+					mostrarAlerta('Estudiante eliminado exitosamente', 'success');
+				} else {
+					mostrarAlerta('Error al eliminar el estudiante', 'error');
+				}
+			})
+			.catch((error) => {});
+	}
 
 	// Calcular edad automáticamente al cambiar fecha de nacimiento
 	function calcularEdad(fechaNacimiento: string): number {
@@ -165,23 +162,24 @@
 	<div class="mb-4">
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
 	</div>
-
+	
 	<div class="overflow-x-auto">
 		<div class="w-max min-w-full">
-			<DataTable data={estudiantesFiltrados} total={estudiantesFiltrados.length} headers={[
-  "nombre", "cedula", "correo", "carrera", "semestre", "promedio", "estado"
-]}>
-  <svelte:fragment slot="actions" let:row>
-    <div class="flex gap-2">
-      <Button size="xs" color="light" on:click={() => editarEstudiante(row)}>
-        <PenOutline class="w-4 h-4" />
-      </Button>
-      <Button size="xs" color="red" on:click={() => eliminarEstudiante(row)}>
-        <TrashBinOutline class="w-4 h-4" />
-      </Button>
-    </div>
-  </svelte:fragment>
-</DataTable>
+			{#snippet actions(row: Estudiante)}
+				<div class="flex gap-2">
+					<Button size="xs" color="light" on:click={() => editarEstudiante(row)}>
+						<PenOutline class="w-4 h-4" />
+					</Button>
+					<Button size="xs" color="red" on:click={() => eliminarEstudiante(row)}>
+						<TrashBinOutline class="w-4 h-4" />
+					</Button>
+				</div>
+			{/snippet}
+			<DataTable
+				data={estudiantesFiltrados}
+				{actions}
+			>
+			</DataTable>
 		</div>
 	</div>
 
@@ -221,14 +219,14 @@
 								placeholder="Ingrese la cédula"
 								value={estudianteActual.cedula}
 								required
-                use:imask={cedulaMask as any}
-                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+								use:imask={cedulaMask as any}
+								class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
 								color={form?.errores?.cedula ? 'red' : undefined}
 							/>
 
-              {#if form?.errores?.cedula}
-              <Helper class="mt-2" color="red">{form?.errores.cedula}</Helper>
-              {/if}
+							{#if form?.errores?.cedula}
+								<Helper class="mt-2" color="red">{form?.errores.cedula}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Label for="nombre" class="mb-2">Nombre Completo</Label>
@@ -240,9 +238,9 @@
 								required
 								color={form?.errores?.nombre ? 'red' : undefined}
 							/>
-              {#if form?.errores?.nombre}
-              <Helper class="mt-2" color="red">{form?.errores.nombre}</Helper>
-              {/if}
+							{#if form?.errores?.nombre}
+								<Helper class="mt-2" color="red">{form?.errores.nombre}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Label for="correo" class="mb-2">Correo Electrónico</Label>
@@ -255,9 +253,9 @@
 								required
 								color={form?.errores?.correo ? 'red' : undefined}
 							/>
-              {#if form?.errores?.correo}
-              <Helper class="mt-2" color="red">{form?.errores.correo}</Helper>
-              {/if}
+							{#if form?.errores?.correo}
+								<Helper class="mt-2" color="red">{form?.errores.correo}</Helper>
+							{/if}
 						</div>
 						<div class="flex items-center">
 							<Checkbox id="activo" name="activo" checked={estudianteActual.activo} />
@@ -269,17 +267,17 @@
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 						<div>
 							<Label for="fecha_nac" class="mb-2">Fecha de Nacimiento</Label>
-              <input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac} />
+							<input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac} />
 							<Datepicker
-							id="fecha_nac"
-							name="fecha_nac"
-							maxDate={maxYearDate()}
+								id="fecha_nac"
+								name="fecha_nac"
+								maxDate={maxYearDate()}
 								bind:value={estudianteActual.fecha_nac}
-								/>
-								
-              {#if form?.errores?.fecha_nac}
-              <Helper class="mt-2" color="red">{form?.errores.fecha_nac}</Helper>
-              {/if}
+							/>
+
+							{#if form?.errores?.fecha_nac}
+								<Helper class="mt-2" color="red">{form?.errores.fecha_nac}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Label for="edad" class="mb-2">Edad</Label>
@@ -293,14 +291,14 @@
 								value={estudianteActual.sexo}
 								required
 								color={form?.errores?.sexo ? 'red' : undefined}
-                items={[
-                  {value: 'M', name: 'Masculino'},
-                  {value: 'F', name: 'Femenino'},
-                ]}
+								items={[
+									{ value: 'M', name: 'Masculino' },
+									{ value: 'F', name: 'Femenino' }
+								]}
 							/>
-              {#if form?.errores?.sexo}
-              <Helper class="mt-2" color="red">{form?.errores.sexo}</Helper>
-              {/if}
+							{#if form?.errores?.sexo}
+								<Helper class="mt-2" color="red">{form?.errores.sexo}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Label for="carrera" class="mb-2">Carrera</Label>
@@ -310,11 +308,14 @@
 								value={estudianteActual.carrera}
 								required
 								color={form?.errores?.carrera ? 'red' : undefined}
-                items={data.carreras.map((carrera) => ({value: carrera.id, name: carrera.nombre}))}
+								items={data.carreras.map((carrera) => ({
+									value: carrera.id,
+									name: carrera.nombre
+								}))}
 							/>
-              {#if form?.errores?.carrera}
-              <Helper class="mt-2" color="red">{form?.errores.carrera}</Helper>
-              {/if}
+							{#if form?.errores?.carrera}
+								<Helper class="mt-2" color="red">{form?.errores.carrera}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Label for="semestre" class="mb-2">Semestre</Label>
@@ -324,11 +325,13 @@
 								value={estudianteActual.semestre}
 								required
 								color={form?.errores?.semestre ? 'red' : undefined}
-                items={Array(10).fill(null).map((_, i) => ({value: i + 1, name: `${i + 1}° Semestre`}))}
+								items={Array(10)
+									.fill(null)
+									.map((_, i) => ({ value: i + 1, name: `${i + 1}° Semestre` }))}
 							/>
-              {#if form?.errores?.semestre}
-              <Helper class="mt-2" color="red">{form?.errores.semestre}</Helper>
-              {/if}
+							{#if form?.errores?.semestre}
+								<Helper class="mt-2" color="red">{form?.errores.semestre}</Helper>
+							{/if}
 						</div>
 						<div>
 							<Label for="promedio" class="mb-2">Promedio</Label>
@@ -338,14 +341,13 @@
 								type="number"
 								class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
 								use:imask={nota}
-								
 								value={estudianteActual.promedio}
 								required
 								color={form?.errores?.promedio ? 'red' : undefined}
 							/>
-              {#if form?.errores?.promedio}
-              <Helper class="mt-2" color="red">{form?.errores.promedio}</Helper>
-              {/if}
+							{#if form?.errores?.promedio}
+								<Helper class="mt-2" color="red">{form?.errores.promedio}</Helper>
+							{/if}
 						</div>
 						<div class="md:col-span-3">
 							<Label for="direccion" class="mb-2">Dirección</Label>
@@ -357,9 +359,9 @@
 								rows={3}
 								color={form?.errores?.direccion ? 'red' : undefined}
 							/>
-              {#if form?.errores?.direccion}
-              <Helper class="mt-2" color="red">{form?.errores.direccion}</Helper>
-              {/if}
+							{#if form?.errores?.direccion}
+								<Helper class="mt-2" color="red">{form?.errores.direccion}</Helper>
+							{/if}
 						</div>
 					</div>
 				</TabItem>

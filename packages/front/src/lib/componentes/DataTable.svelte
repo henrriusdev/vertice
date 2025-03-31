@@ -13,12 +13,11 @@
 		type SelectOptionType
 	} from 'flowbite-svelte';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import type { Estudiante } from '../../app';
 
-	export let data: any[] = [];
-	export let total = 0;
-	export let headers: string[] = [];
+	let {data = [], actions} = $props<{data: any[], actions: (row: any) => ReturnType<import("svelte").Snippet>}>();
 
 	const pageOptions: SelectOptionType<number>[] = [
 		{ value: 3, name: '3' },
@@ -28,20 +27,21 @@
 	];
 
 	// lee de URL
-	$: currentPage = parseInt($page.url.searchParams.get('page') || '1');
-	$: perPage = parseInt($page.url.searchParams.get('perPage') || '25');
+	let currentPage = $derived(parseInt(page.url.searchParams.get('page') || '1'));
+	let perPage = $derived(parseInt(page.url.searchParams.get('perPage') || '25'));
 
-	$: start = (currentPage - 1) * perPage + 1;
-	$: end = Math.min(start + perPage - 1, total);
-	$: paginated = data.slice(start - 1, end);
-	$: totalPages = Math.ceil(total / perPage);
+	let total = $derived(data.length);
+	const headers = $derived(Object.keys(data[0] || {}));
+	let start = $derived((currentPage - 1) * perPage + 1);
+	let end = $derived(Math.min(start + perPage - 1, total));
+	let paginated = $derived(data.slice(start - 1, end));
+	let totalPages = $derived(Math.ceil(total / perPage));
 
-	let pages: LinkType[] = [];
-	$: pages = Array.from({ length: totalPages }, (_, i) => ({
+	let pages: LinkType[] = $derived(Array.from({ length: totalPages }, (_, i) => ({
 		name: String(i + 1),
 		href: `?page=${i + 1}&perPage=${perPage}`,
 		active: i + 1 === currentPage
-	}));
+	})));
 
 	// navegación reactiva
 	function goTo(p: number) {
@@ -69,7 +69,7 @@
 						<TableBodyCell>{row[h]}</TableBodyCell>
 					{/each}
 					<TableBodyCell>
-						<slot name="actions" {row} />
+						{@render actions(row)}
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}
