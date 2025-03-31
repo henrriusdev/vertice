@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
-	import { imask } from '@imask/svelte';
+	import { DataTable } from '$lib';
 	import {
 		Alert,
 		Button,
 		ButtonGroup,
-		Checkbox,
 		Helper,
 		Input,
 		Label,
 		Modal,
-		Select,
-		TabItem,
-		TableSearch,
-		Tabs,
-		Textarea
+		TableSearch
 	} from 'flowbite-svelte';
 	import {
 		CheckCircleOutline,
@@ -24,8 +18,8 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import type { ActionData, PageData } from './$types';
 	import type { Carrera } from '../../../../app';
+	import type { ActionData, PageData } from './$types';
 
 	// Datos de la página
 	let { data, form }: { data: PageData; form: ActionData } = $props<{
@@ -109,20 +103,6 @@
 		modalVisible = true;
 	}
 
-	// Función para eliminar un estudiante
-	function eliminarEstudiante(estudiante: any) {
-		fetch(`/api/estudiantes/${estudiante.id}`, {
-			method: 'DELETE'
-		})
-			.then((response) => {
-				if (response.ok) {
-					mostrarAlerta('Estudiante eliminado exitosamente', 'success');
-				} else {
-					mostrarAlerta('Error al eliminar el estudiante', 'error');
-				}
-			})
-			.catch((error) => {});
-	}
 </script>
 
 <div class="w-full">
@@ -164,9 +144,12 @@
 					<Button size="xs" color="light" on:click={() => editarEstudiante(row)}>
 						<PenOutline class="w-4 h-4" />
 					</Button>
-					<Button size="xs" color="red" on:click={() => eliminarEstudiante(row)}>
+          <form action="?/delete" method="POST">
+            <input type="hidden" name="id" value={row.id} />
+					<Button size="xs" color="red" type="submit">
 						<TrashBinOutline class="w-4 h-4" />
 					</Button>
+          </form>
 				</div>
 			{/snippet}
 			<DataTable data={carrerasFiltradas} {actions}></DataTable>
@@ -177,17 +160,6 @@
 		<form
 			action={isEditing ? '?/edit' : '?/create'}
 			method="POST"
-			use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') {
-						modalVisible = false;
-						mostrarAlerta(
-							isEditing ? 'Estudiante actualizado exitosamente' : 'Estudiante creado exitosamente',
-							'success'
-						);
-					}
-				};
-			}}
 		>
 			{#if isEditing}
 				<input type="hidden" name="id" value={estudianteActual.id} />

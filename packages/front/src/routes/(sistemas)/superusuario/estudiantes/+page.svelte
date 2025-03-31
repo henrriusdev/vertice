@@ -23,7 +23,7 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import { Estudiante } from '../../../../app.js';
+	import type { Estudiante } from '../../../../app';
 
 	// Datos de la página
 	export let data;

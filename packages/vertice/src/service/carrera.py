@@ -10,14 +10,14 @@ async def get_carrera(id: int):
     return carrera
 
 async def add_carrera(data):
-    existe = await Carrera.get_or_none(id=data["id"])
+    existe = await Carrera.get_or_none(nombre=data["nombre"])
     if existe:
         raise Exception("Carrera ya existe")
-    carrera = await Carrera.create(**data)
+    carrera = await Carrera.create(nombre=data["nombre"])
     return carrera.id
 
 async def update_carrera(id: int, data):
-    updated = await Carrera.filter(id=id).update(**data)
+    updated = await Carrera.filter(id=id).update(nombre=data["nombre"])
     if updated == 0:
         raise Exception("Carrera no encontrada")
     return updated

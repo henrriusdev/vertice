@@ -5,7 +5,8 @@ const API = 'http://127.0.0.1:8000/api/carreras';
 export const obtenerCarreras = async (fetch: typeof window.fetch) => {
   const res = await fetch(`${API}`);
   const carreras = await res.json();
-  return carreras.data.carreras as Carrera[];
+  console.log('carreras', carreras);
+  return carreras.data as Carrera[];
 };
 
 export const obtenerCarrera = async (fetch: typeof window.fetch, id: number) => {
@@ -15,29 +16,30 @@ export const obtenerCarrera = async (fetch: typeof window.fetch, id: number) => 
 };
 
 export const crearCarrera = async (fetch: typeof window.fetch, carrera: Carrera) => {
-  const res = await fetch(`${API}`, {
+  const res = await fetch(`${API}/add`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(carrera)
   });
   const carreraCreada = await res.json();
+  console.log('carreraCreada', carreraCreada);
   return carreraCreada.data.carrera as Carrera;
 };
 
 export const actualizarCarrera = async (fetch: typeof window.fetch, id: number, carrera: Carrera) => {
-  const res = await fetch(`${API}/${id}`, {
+  const res = await fetch(`${API}/update/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(carrera)
+    body: JSON.stringify({nombre: carrera.nombre})
   });
   const carreraActualizada = await res.json();
-  return carreraActualizada.data.carrera as Carrera;
+  return carreraActualizada;
 };
 
 export const eliminarCarrera = async (fetch: typeof window.fetch, id: number) => {
-  const res = await fetch(`${API}/${id}`, {
+  const res = await fetch(`${API}/delete/${id}`, {
     method: 'DELETE'
   });
   const carreraEliminada = await res.json();
-  return carreraEliminada.data.carrera as Carrera;
+  return carreraEliminada;
 };

@@ -17,7 +17,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		// Clona headers y añade Authorization si no existe
 		init.headers = new Headers(init.headers);
 		if (token && !init.headers.has('Authorization')) {
-			init.headers.set('Authorization', `Bearer ${token}`);
+			init.headers.set('Authorization', token);
 		}
 		return originalFetch(input, init);
 	};
