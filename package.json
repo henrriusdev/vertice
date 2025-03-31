@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,10 +12,14 @@
       "esbuild"
     ]
   },
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend -c yellow,cyan \"run_backend.bat\" \"cd packages/front && pnpm run dev\""
+  
+  },
   "devDependencies": {
-    "@imask/svelte": "^7.6.1",
-    "flatpickr": "^4.6.13",
-    "imask": "^7.6.1",
-    "svelte-flatpickr": "^3.3.5"
-  }
+    "concurrently": "^9.1.2"
+  },
+  "workspaces":[
+    "packages/*"
+  ]
 }

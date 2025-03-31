@@ -38,9 +38,9 @@ export interface Docente {
 }
 
 export interface Estudiante {
-	usuario: number | object;
+	usuario:  Usuario;
 	semestre: number;
-	carrera: number | object;
+	carrera: Carrera;
 	promedio: number;
 	direccion: string;
 	fecha_nac: string;

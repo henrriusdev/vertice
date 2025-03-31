@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
-	import { imask } from '@imask/svelte';
 	import {
 		Alert,
 		Button,
+		ButtonGroup,
 		Checkbox,
 		Helper,
 		Input,
@@ -13,8 +13,12 @@
 		Select,
 		TabItem,
 		TableSearch,
+
 		Tabs,
+
 		Textarea
+
+
 	} from 'flowbite-svelte';
 	import {
 		CheckCircleOutline,
@@ -23,22 +27,26 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import type { Estudiante } from '../../../../app';
+	import type { Carrera } from '../../../../app';
+	import type { ActionData, PageData } from './$types';
+	import {imask} from "@imask/svelte"
 
 	// Datos de la página
-	export let data;
-	export let form;
+	let { data, form }: { data: PageData; form: ActionData } = $props<{
+		data: PageData;
+		form: ActionData;
+	}>();
 
 	// Estado para el modal
-	let modalVisible = false;
-	let isEditing = false;
-	let searchTerm = '';
+	let modalVisible = $state(true);
+	let isEditing = $state(false);
+	let searchTerm = $state('');
 	let currentPage = 1;
 	const pageSize = 10;
-	let estudianteActual: any = {};
-	let showAlert = false;
-	let alertMessage = '';
-	let alertType: 'success' | 'error' = 'success';
+	let estudianteActual: any = $state({});
+	let showAlert = $state(false);
+	let alertMessage = $state('');
+	let alertType: 'success' | 'error' = $state('success');
 
 	// Función para mostrar alerta
 	function mostrarAlerta(mensaje: string, tipo: 'success' | 'error') {
@@ -51,22 +59,37 @@
 	}
 
 	// Procesar respuesta del formulario
-	$: if (form) {
-		if (form.success) {
-			modalVisible = false;
-			mostrarAlerta(form.message, 'success');
-		} else if (form.error) {
-			mostrarAlerta(form.error, 'error');
+	$effect(() => {
+		if (form) {
+			if ((form as any).success) {
+				modalVisible = false;
+				mostrarAlerta((form as any).message, 'success');
+			} else if ((form as any).error) {
+				mostrarAlerta((form as any).error, 'error');
+			}
 		}
-	}
+	});
+
+  $effect(() => {
+    if (!modalVisible) {
+      estudianteActual = {};
+    }
+  })
 
 	// Filtrar estudiantes por término de búsqueda
-	$: estudiantesFiltrados = data.estudiantes.filter(
-		(est: any) =>
-			est.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			est.cedula.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			est.correo.toLowerCase().includes(searchTerm.toLowerCase())
+	let carrerasFiltradas = $derived(
+		data.carreras.filter(
+			(car) =>
+				car.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				car.id.toString().toLowerCase().includes(searchTerm.toLowerCase())
+		)
 	);
+
+	let estudiantesFiltrados = $derived(
+		data.estudiantes.filter((est) => est.usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			est.usuario.cedula.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			est.usuario.correo.toLowerCase().includes(searchTerm.toLowerCase()) || est.direccion.toLowerCase().includes(searchTerm.toLowerCase()))
+	)
 
 	// Función para abrir el modal en modo edición
 	function editarEstudiante(estudiante: any) {
@@ -96,22 +119,6 @@
 		modalVisible = true;
 	}
 
-	// Función para eliminar un estudiante
-	function eliminarEstudiante(estudiante: any) {
-		fetch(`/api/estudiantes/${estudiante.id}`, {
-			method: 'DELETE'
-		})
-			.then((response) => {
-				if (response.ok) {
-					mostrarAlerta('Estudiante eliminado exitosamente', 'success');
-				} else {
-					mostrarAlerta('Error al eliminar el estudiante', 'error');
-				}
-			})
-			.catch((error) => {});
-	}
-
-	// Calcular edad automáticamente al cambiar fecha de nacimiento
 	function calcularEdad(fechaNacimiento: string): number {
 		if (!fechaNacimiento) return 0;
 
@@ -128,7 +135,8 @@
 	}
 
 	// Actualizar edad cuando cambia la fecha de nacimiento
-	$: edad = calcularEdad(estudianteActual.fecha_nac);
+	let edad = $derived(calcularEdad(estudianteActual.fecha_nac));
+
 </script>
 
 <div class="w-full">
@@ -136,7 +144,7 @@
 		<h1 class="text-2xl font-bold">Estudiantes</h1>
 		<Button color="blue" on:click={crearEstudiante}>
 			<PlusOutline class="mr-2 h-5 w-5" />
-			Nuevo Estudiante
+			Registrar
 		</Button>
 	</div>
 
@@ -162,28 +170,26 @@
 	<div class="mb-4">
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
 	</div>
-	
+
 	<div class="overflow-x-auto">
 		<div class="w-max min-w-full">
-			{#snippet actions(row: Estudiante)}
+			{#snippet actions(row: Carrera)}
 				<div class="flex gap-2">
 					<Button size="xs" color="light" on:click={() => editarEstudiante(row)}>
 						<PenOutline class="w-4 h-4" />
 					</Button>
-					<Button size="xs" color="red" on:click={() => eliminarEstudiante(row)}>
+          <form action="?/delete" method="POST">
+            <input type="hidden" name="id" value={row.id} />
+					<Button size="xs" color="red" type="submit">
 						<TrashBinOutline class="w-4 h-4" />
 					</Button>
+          </form>
 				</div>
 			{/snippet}
-			<DataTable
-				data={estudiantesFiltrados}
-				{actions}
-			>
-			</DataTable>
+			<DataTable data={carrerasFiltradas} {actions}></DataTable>
 		</div>
 	</div>
 
-	<!-- Modal para crear/editar estudiante -->
 	<Modal
 		title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}
 		bind:open={modalVisible}
