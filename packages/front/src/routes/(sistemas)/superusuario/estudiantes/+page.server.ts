@@ -1,5 +1,5 @@
-import { actualizarCarrera, crearCarrera, eliminarCarrera, obtenerCarreras, obtenerEstudiantes } from "$lib";
-import type { Carrera } from "../../../../app";
+import { actualizarEstudiante, actualizarUsuario, crearEstudiante, crearUsuario, eliminarEstudiante, obtenerCarreras, obtenerEstudiantes, type EstudianteReq } from "$lib";
+import type { Usuario } from "../../../../app";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch }) => {
@@ -16,45 +16,87 @@ export const load: PageServerLoad = async ({ fetch }) => {
 export const actions: Actions = {
 	// Acción para crear un usuario y un estudiante
 	create: async ({ request, fetch }) => {
-		const formData = await request.formData();
-		const carrera: Carrera = {
+		const payload = Object.fromEntries(await request.formData()) as unknown as EstudianteReq & (Usuario & {password:string})
+		const usuario: Partial<Usuario & {password: string, rol_id: number}> = {
 			id: 0,
-			nombre: formData.get('nombre')?.toString() || '',
-		};
+			cedula: payload.cedula,
+			correo: payload.correo,
+			activo: true,
+			nombre: payload.nombre,
+			password: payload.password,
+			rol_id: 5,
+		}
 
 		try {
-			const res = await crearCarrera(fetch, carrera);
-			console.log('carrera creada', res);
-			return { exito: true };
+			const {data}: {data: Usuario} = await crearUsuario(fetch, usuario);
+			usuario.id = data.id;
 		} catch (error) {
 			console.error('Error al crear carrera:', error);
 			return { errores: {nombre: 'Error al crear la carrera'} };
 		}
+
+		const estudiante: EstudianteReq = {
+			carrera: payload.carrera,
+			edad: payload.edad,
+			fecha_nac: payload.fecha_nac,
+			direccion: payload.direccion,
+			semestre: payload.semestre,
+			sexo: payload.sexo,
+			promedio: payload.promedio,
+			usuario: usuario.id,
+		}
+
+		try {
+			 await crearEstudiante(fetch, estudiante)
+			return {estudiante: usuario.nombre}
+		} catch (e) {
+			console.error(e)
+		}
 	},
 
 	edit: async ({ request, fetch }) => {
-		const formData = await request.formData();
-		const carrera: Carrera = {
-			id: parseInt(formData.get('id')?.toString() || '0'),
-			nombre: formData.get('nombre')?.toString() || '',
+		const payload = Object.fromEntries(await request.formData()) as unknown as EstudianteReq &
+			Usuario & {id_estudiante: number};
+		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+			cedula: payload.cedula,
+			correo: payload.correo,
+			activo: true,
+			nombre: payload.nombre,
+			rol_id: 5
 		};
 
 		try {
-			const res = await actualizarCarrera(fetch, carrera.id, carrera);
-			console.log('carrera actualizada', res);
-			return { exito: true };
+			await actualizarUsuario(fetch, payload.id, usuario);
 		} catch (error) {
-			console.error('Error al actualizar carrera:', error);
-			return { errores: {nombre: 'Error al actualizar la carrera' } };
+			console.error('Error al crear carrera:', error);
+			return { errores: { nombre: 'Error al crear la carrera' } };
+		}
+
+		const estudiante: EstudianteReq = {
+			carrera: payload.carrera,
+			edad: payload.edad,
+			fecha_nac: payload.fecha_nac,
+			direccion: payload.direccion,
+			semestre: payload.semestre,
+			sexo: payload.sexo,
+			promedio: payload.promedio,
+			usuario: payload.id
+		};
+
+		try {
+			await actualizarEstudiante(fetch, payload.id_estudiante, estudiante);
+			return { estudiante: usuario.nombre };
+		} catch (e) {
+			console.error(e);
 		}
 	},
 
 	delete: async ({ request, fetch }) => {
 		const formData = await request.formData();
-		const id = parseInt(formData.get('id')?.toString() || '0');
+		const cedula = parseInt(formData.get('cedula')?.toString() || '0');
 
 		try {
-			const res = await eliminarCarrera(fetch, id);
+			const res = await eliminarEstudiante(fetch, cedula);
 			console.log('carrera eliminada', res);
 			return { exito: true };
 		} catch (error) {
@@ -63,3 +105,4 @@ export const actions: Actions = {
 		}
 	}
 };
+

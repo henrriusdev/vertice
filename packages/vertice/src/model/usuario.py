@@ -16,6 +16,7 @@ class Usuario(Model):
     rol = fields.ForeignKeyField("models.Rol", related_name="usuarios")
     
     def to_dict(self):
+        
         return {
             "id": self.id,
             "cedula": self.cedula,
@@ -26,8 +27,8 @@ class Usuario(Model):
             "fecha_creacion": self.fecha_creacion.isoformat() if self.fecha_creacion else None,
             "ultima_sesion": self.ultima_sesion.isoformat() if self.ultima_sesion else None,
             "rol": {
-                "id": self.rol.id,
-                "nombre": self.rol.nombre
+                "id": self.rol.id if self.rol else None,
+                "nombre": self.rol.nombre if self.rol else None,
             }
         }
 

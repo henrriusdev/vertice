@@ -1,4 +1,7 @@
-import datetime
+from datetime import datetime
+
+from tomlkit import date
+from src.model.usuario import Usuario
 from src.model.estudiante import Estudiante
 from src.model.matricula import Matricula
 from src.model.configuracion import Configuracion
@@ -11,17 +14,20 @@ async def get_students():
         return [
             {
                 "cedula": e.usuario.cedula,
-                "fullname": e.usuario.fullname,
+                "nombre": e.usuario.nombre,
                 "correo": e.usuario.correo,
-                "telefono": e.usuario.telefono,
                 "semestre": e.semestre,
-                "estado": e.usuario.rol.nombre,  # opcional según cómo definas estado
                 "carrera": e.carrera.nombre,
                 "edad": e.edad,
                 "sexo": e.sexo,
                 "promedio": float(e.promedio),
                 "direccion": e.direccion,
-                "fecha_nac": e.fecha_nac.isoformat()
+                "fecha_nacimiento": e.fecha_nac.isoformat(),
+                "id": e.id,
+                "activo": e.usuario.activo,
+                "usuario": {
+                    "id": e.usuario.id
+                }
             }
             for e in estudiantes
         ]
@@ -44,58 +50,49 @@ async def get_student(cedula: str):
             "sexo": estudiante.sexo,
             "promedio": float(estudiante.promedio),
             "direccion": estudiante.direccion,
-            "fecha_nac": estudiante.fecha_nac.isoformat()
+            "fecha_nacimiento": format_fecha(estudiante.fecha_nac)
         }
     except Exception as ex:
         raise Exception(ex)
 
 
-from src.model.usuario import Usuario
-
 async def add_student(data):
     try:
-        usuario = await Usuario.create(
-            cedula=data.cedula,
-            fullname=data.fullname,
-            correo=data.correo,
-            telefono=data.telefono,
-            password=data.password,
-            rol_id=data.rol_id  # Asegúrate de pasar el ID del rol "Estudiante"
-        )
+        usuario = await Usuario.filter(id=data["usuario"]).first()
         await Estudiante.create(
             usuario=usuario,
-            semestre=data.semestre,
-            carrera_id=data.carrera,
-            promedio=0,
-            direccion=data.direccion,
-            fecha_nac=data.fecha_nac,
-            edad=data.edad,
-            sexo=data.sexo
+            semestre=data["semestre"],
+            carrera_id=data["carrera"],
+            promedio=data["promedio"],
+            direccion=data["direccion"],
+            fecha_nac=parse_fecha(data["fecha_nac"]),
+            edad=data["edad"],
+            sexo=data["sexo"]
         )
-        return 1
+        return usuario
     except Exception as ex:
         raise Exception(ex)
 
 
-async def update_student(data):
-    try:
-        estudiante = await Estudiante.get(usuario__cedula=data.cedula).prefetch_related("usuario")
+def parse_fecha(fecha_str: str) -> datetime:
+    return datetime.strptime(fecha_str, "%d/%m/%Y")
 
-        # Actualizar datos personales (usuario)
-        u = estudiante.usuario
-        u.fullname = data.fullname
-        u.correo = data.correo
-        u.telefono = data.telefono
-        await u.save()
+def format_fecha(fecha: datetime):
+    return datetime.strftime("%d/%m/%Y")
+
+
+async def update_student(id_estudiante: int, data: dict):
+    try:
+        estudiante = await Estudiante.get(id=id_estudiante).prefetch_related("usuario")
 
         # Actualizar datos académicos (estudiante)
-        estudiante.semestre = data.semestre
-        estudiante.carrera_id = data.carrera
-        estudiante.promedio = data.promedio
-        estudiante.edad = data.edad
-        estudiante.sexo = data.sexo
-        estudiante.direccion = data.direccion
-        estudiante.fecha_nac = data.fecha_nac
+        estudiante.semestre = data["semestre"]
+        estudiante.carrera_id = data["carrera"]
+        estudiante.promedio = data["promedio"]
+        estudiante.edad = data["edad"]
+        estudiante.sexo = data["sexo"]
+        estudiante.direccion = data["direccion"]
+        estudiante.fecha_nac = parse_fecha(data["fecha_nac"])
         await estudiante.save()
 
         return 1

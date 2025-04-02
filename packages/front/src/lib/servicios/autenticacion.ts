@@ -64,3 +64,45 @@ export async function logout(fetch: typeof window.fetch, token: string): Promise
 
 	return true;
 }
+
+export async function crearUsuario(fetch: typeof window.fetch, usuario: Partial<Usuario & {password: string}>) {
+	const res = await fetch(`${API}/register`, {
+		method: "POST",
+		body: JSON.stringify(usuario),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	})
+	if (!res.ok) {
+		const err = await res.json()
+		throw new Error(err?.message ?? 'Error al crear usuario')
+	}
+
+	return await res.json();
+}
+
+export async function actualizarUsuario(fetch: typeof window.fetch, id: number, usuario: Partial<Usuario>) {
+	const res = await fetch(`${API}/update/${id}`, {
+		method: "PUT",
+		body: JSON.stringify(usuario),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	})
+	if (!res.ok) {
+		const err = await res.json();
+		throw new Error(err?.message ?? 'Error al crear usuario');
+	}
+
+	return await res.json();
+}
+
+export async function eliminarUsuario(fetch: typeof window.fetch, id: number) {
+	const res = await fetch(`${API}/delete/${id}`)
+	if (!res.ok) {
+		const err = await res.json();
+		throw new Error(err?.message ?? 'Error al crear usuario');
+	}
+
+	return await res.json();
+}

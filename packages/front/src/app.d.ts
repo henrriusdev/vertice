@@ -1,16 +1,16 @@
-export interface Billete {
+export type Billete = {
 	id: number;
 	serial: string;
 	monto: number;
 	pago_id: number;
 }
 
-export interface Carrera {
+export type Carrera = {
 	id: number;
 	nombre: string;
 }
 
-export interface Configuracion {
+export type Configuracion = {
 	id: number;
 	ciclo: string;
 	num_porcentaje: number;
@@ -21,13 +21,13 @@ export interface Configuracion {
 	porcentajes: number[];
 }
 
-export interface Coordinador {
+export type Coordinador = {
 	usuario: number | object;
 	carrera: number | object;
 	telefono: string;
 }
 
-export interface Docente {
+export type Docente = {
 	usuario: number | object;
 	titulo: string;
 	dedicacion: string;
@@ -37,7 +37,7 @@ export interface Docente {
 	observaciones: string;
 }
 
-export interface Estudiante {
+export type Estudiante = {
 	usuario:  Usuario;
 	semestre: number;
 	carrera: Carrera;
@@ -46,15 +46,18 @@ export interface Estudiante {
 	fecha_nac: string;
 	edad: number;
 	sexo: string;
+	cedula?: string;
+	nombre?: string;
+	correo?: string;
 }
 
-export interface Horario {
+export type Horario = {
 	dia: string;
 	hora_inicio: string;
 	hora_fin: string;
 }
 
-export interface Materia {
+export type Materia = {
 	id: string;
 	nombre: string;
 	prelacion: string;
@@ -70,7 +73,7 @@ export interface Materia {
 	id_docente: number | object;
 }
 
-export interface Matricula {
+export type Matricula = {
 	id: number;
 	cod_materia: number | object;
 	cedula_estudiante: number | object;
@@ -79,12 +82,12 @@ export interface Matricula {
 	ciclo: string;
 }
 
-export interface Metodo_pago {
+export type Metodo_pago = {
 	id: number;
 	nombre: string;
 }
 
-export interface Pago {
+export type Pago = {
 	id: number;
 	cedula_estudiante: number | object;
 	metodo_pago: number | object;
@@ -95,7 +98,7 @@ export interface Pago {
 	ciclo: string;
 }
 
-export interface Peticion {
+export type Peticion = {
 	id: number;
 	id_docente: number | object;
 	descripcion: string;
@@ -105,14 +108,14 @@ export interface Peticion {
 	campo: string;
 }
 
-export interface Sesion_activa {
+export type Sesion_activa = {
 	id: number;
 	usuario: number | object;
 	jti: string;
 	creado_en: string;
 }
 
-export interface Trazabilidad {
+export type Trazabilidad = {
 	id: number;
 	accion: string;
 	usuario: number | object;
@@ -121,7 +124,7 @@ export interface Trazabilidad {
 	nivel_alerta: number;
 }
 
-export interface Usuario {
+export type Usuario = {
 	id: number;
 	cedula: string;
 	nombre: string;

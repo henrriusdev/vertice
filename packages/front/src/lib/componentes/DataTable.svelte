@@ -1,21 +1,20 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import {
+		Label,
+		Pagination,
+		Select,
 		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		TableBody,
-		TableBodyRow,
-		TableBodyCell,
-		Label,
-		Select,
-		Pagination,
 		type LinkType,
 		type SelectOptionType
 	} from 'flowbite-svelte';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import type { Estudiante } from '../../app';
 
 	let {data = [], actions} = $props<{data: any[], actions: (row: any) => ReturnType<import("svelte").Snippet>}>();
 
@@ -31,7 +30,7 @@
 	let perPage = $derived(parseInt(page.url.searchParams.get('perPage') || '25'));
 
 	let total = $derived(data.length);
-	const headers = $derived(Object.keys(data[0] || {}));
+	const headers = $derived(Object.keys(data[0] || {}).filter((k) => !['usuario', 'activo'].includes(k)));
 	let start = $derived((currentPage - 1) * perPage + 1);
 	let end = $derived(Math.min(start + perPage - 1, total));
 	let paginated = $derived(data.slice(start - 1, end));

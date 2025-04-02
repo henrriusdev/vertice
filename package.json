@@ -13,7 +13,8 @@
     ]
   },
   "scripts": {
-    "dev": "concurrently -k -n backend,frontend -c yellow,cyan \"run_backend.bat\" \"cd packages/front && pnpm run dev\""
+    "dev": "concurrently -k -n backend,frontend -c yellow,cyan \"run_backend.bat\" \"cd packages/front && pnpm run dev\"",
+    "dev:front": "cd packages/front && pnpm run dev"
   
   },
   "devDependencies": {

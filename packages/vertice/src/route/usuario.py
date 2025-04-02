@@ -1,11 +1,11 @@
 from datetime import timedelta, datetime
 import traceback
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import create_access_token, decode_token, jwt_required, get_jwt_identity, get_jwt
 from src.model.trazabilidad import Trazabilidad
 from src.service.sesiones import eliminar_sesion_por_jti, registrar_sesion
 from src.service.trazabilidad import add_trazabilidad
-from src.service.usuarios import bloquear_usuario, login, reactivar_usuario, update_password, get_usuario_por_correo, update_email, registrar_usuario
+from src.service.usuarios import bloquear_usuario, login, reactivar_usuario, update_password, get_usuario_por_correo, update_email, registrar_usuario, update_usuario
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.model.usuario import Usuario
 
@@ -37,7 +37,6 @@ async def login_usuario():
         )
 
         # Extraer jti del token generado
-        from flask_jwt_extended import decode_token
         jti = decode_token(access_token)["jti"]
 
         await registrar_sesion(usuario.correo, jti)
@@ -153,8 +152,20 @@ async def registrar():
         return jsonify({"ok": True, "status": 200, "data": creado.to_dict()})
 
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
+
+@usr.put('/update/<int:id>')
+@jwt_required()
+async def update(id):
+    try:
+        payload = request.json
+        await update_usuario(id, payload)
+        return jsonify({"ok": True, "status": 200})
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 @usr.patch("/bloquear/<correo>")
 @jwt_required()

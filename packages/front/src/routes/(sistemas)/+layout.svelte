@@ -16,15 +16,9 @@
 		BreadcrumbItem,
 		Alert,
 		Tooltip,
-
 		DropdownItem,
-
 		DropdownDivider,
-
 		Dropdown
-
-
-
 	} from 'flowbite-svelte';
 	import {
 		HomeOutline,
@@ -349,8 +343,13 @@
 		</main>
 	</div>
 </div>
+
 <style>
-	:global(.absolute.bottom-0 li::marker){
+	:global(.absolute.bottom-0 li::marker) {
 		content: none;
+	}
+
+	:global(input + div.flex.absolute) {
+		padding: 0 !important;
 	}
 </style>

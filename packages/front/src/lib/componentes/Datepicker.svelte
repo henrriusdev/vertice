@@ -57,7 +57,6 @@
 		}
 	}
 
-	console.log('options', mergedOptions);
 </script>
 
 <div class="form-control w-full">

@@ -28,11 +28,10 @@ def after_request(response):
 @jwt_required()
 async def list_students():
     claims = get_jwt()
-    usuario = claims.get('nombre')
     data = await get_students()
     await add_trazabilidad({
         "accion": "Obtener todos los estudiantes",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })
@@ -48,7 +47,7 @@ async def one_student(cedula):
         return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
     await add_trazabilidad({
         "accion": f"Obtener estudiante con cédula: {cedula}",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })
@@ -59,28 +58,27 @@ async def one_student(cedula):
 async def create_student():
     body = request.json
     claims = get_jwt()
-    usuario = claims.get("nombre")
 
-    await add_student(body)
+    usuario = await add_student(body)
     await add_trazabilidad({
-        "accion": f"Añadir estudiante con cédula: {body['cedula']}, nombre: {body['fullname']}",
-        "usuario": usuario,
+        "accion": f"Añadir estudiante con cédula: {usuario.cedula}, nombre: {usuario.nombre}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 2
     })
     return jsonify({"ok": True, "status": 200})
 
-@est.route('/update/<cedula>', methods=["PUT"])
+@est.route('/update/<int:id_estudiante>', methods=["PUT"])
 @jwt_required()
-async def patch_student(cedula):
+async def patch_student(id_estudiante):
     body = request.json
     claims = get_jwt()
     usuario = claims.get("nombre")
 
-    await update_student(cedula, body)
+    await update_student(id_estudiante, body)
     await add_trazabilidad({
-        "accion": f"Actualizar estudiante con cédula: {cedula}",
-        "usuario": usuario,
+        "accion": f"Actualizar estudiante {usuario}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 2
     })
@@ -96,7 +94,7 @@ async def remove_student(cedula):
         return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
     await add_trazabilidad({
         "accion": f"Eliminar estudiante con cédula: {cedula}",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 3
     })
@@ -114,7 +112,7 @@ async def inscribir_materia(materia: str):
 
     await add_trazabilidad({
         "accion": f"Añadir materia {materia} al estudiante con cédula: {estudiante['cedula']}",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 2
     })
@@ -134,7 +132,7 @@ async def listar_notas():
 
     await add_trazabilidad({
         "accion": f"Obtener notas del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })
@@ -152,7 +150,7 @@ async def listar_historico():
 
     await add_trazabilidad({
         "accion": f"Obtener histórico del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })
@@ -170,7 +168,7 @@ async def listar_horario():
 
     await add_trazabilidad({
         "accion": f"Obtener horario del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": usuario,
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })

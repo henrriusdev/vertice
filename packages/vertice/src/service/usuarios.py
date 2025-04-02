@@ -22,6 +22,13 @@ async def login(correo: str, password: str):
         raise Exception(ex)
 
 
+async def get_usuario(id: int):
+    try:
+        usuario = await Usuario.filter(id=id).first()
+        return usuario;
+    except Exception as ex:
+        raise Exception(ex)
+
 async def get_usuario_por_correo(correo: str, incluir: str = None):
     try:
         relations = ["rol"]
@@ -60,6 +67,13 @@ async def update_email(correo: str, new_email: str):
     except Exception as ex:
         raise Exception(ex)
     
+    
+async def update_usuario(id: int, payload: dict):
+    try:
+        await Usuario.filter(id=id).update(**payload)
+        return True
+    except Exception as ex:
+        raise Exception(ex)
 
 async def registrar_usuario(usuario: Usuario):
     try:
@@ -72,6 +86,7 @@ async def registrar_usuario(usuario: Usuario):
             raise Exception("Ya existe un usuario con esta cédula")
 
         await usuario.save()
+        usuario = await Usuario.get(id=usuario.id).select_related("rol")
         return usuario
 
     except IntegrityError:

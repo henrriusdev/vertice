@@ -3,7 +3,6 @@ import { login } from '$lib';
 import { redirect, fail } from '@sveltejs/kit';
 
 export const load = async ({ locals }) => {
-	console.log('locals', locals);
 	if (locals.usuario) {
 		throw redirect(302, `/${locals.usuario.rol.nombre.toLowerCase()}`);
 	}
