@@ -36,7 +36,7 @@ export const actions: Actions = {
 			activo: true,
 			nombre: payload.nombre,
 			password: payload.password,
-			rol_id: 5
+			rol_id: 4
 		};
 
 		try {
@@ -71,7 +71,7 @@ export const actions: Actions = {
 			correo: payload.correo,
 			activo: true,
 			nombre: payload.nombre,
-			rol_id: 5
+			rol_id: 4
 		};
 
 		try {

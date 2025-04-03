@@ -97,12 +97,25 @@ export async function actualizarUsuario(fetch: typeof window.fetch, id: number, 
 	return await res.json();
 }
 
-export async function eliminarUsuario(fetch: typeof window.fetch, id: number) {
-	const res = await fetch(`${API}/delete/${id}`)
+export async function eliminarUsuario(fetch: typeof window.fetch, cedula: string) {
+	const res = await fetch(`${API}/delete/${cedula}`, {
+		method: "DELETE"
+	})
 	if (!res.ok) {
 		const err = await res.json();
 		throw new Error(err?.message ?? 'Error al crear usuario');
 	}
 
 	return await res.json();
+}
+
+export async function obtenerUsuarios(fetch: typeof window.fetch) {
+	const res = await fetch(`${API}`)
+	if (!res.ok) {
+		const err = await res.json();
+		throw new Error(err?.message ?? 'Error al crear usuario');
+	}
+
+	const data = await res.json();
+	return data.data as Usuario[]
 }

@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token, decode_token, jwt_required, 
 from src.model.trazabilidad import Trazabilidad
 from src.service.sesiones import eliminar_sesion_por_jti, registrar_sesion
 from src.service.trazabilidad import add_trazabilidad
-from src.service.usuarios import bloquear_usuario, login, reactivar_usuario, update_password, get_usuario_por_correo, update_email, registrar_usuario, update_usuario
+from src.service.usuarios import bloquear_usuario, delete_usuario, get_usuarios, login, reactivar_usuario, update_password, get_usuario_por_correo, update_email, registrar_usuario, update_usuario
 from werkzeug.security import generate_password_hash, check_password_hash
 from src.model.usuario import Usuario
 
@@ -127,6 +127,16 @@ async def update_usuario_password():
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 
+@usr.get('/')
+@jwt_required()
+async def obtener_usuarios():
+    try:
+        usuarios = await get_usuarios()
+        return jsonify({"ok": True, "status": 200, "data": usuarios})
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
 @usr.post('/register')
 async def registrar():
     try:
@@ -195,5 +205,15 @@ async def reactivar(correo):
             return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado o ya estaba activo"}}), 404
 
         return jsonify({"ok": True, "status": 200, "data": f"Usuario {correo} reactivado correctamente"})
+    except Exception as ex:
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@usr.delete('/delete/<cedula>')
+@jwt_required()
+async def delete(cedula):
+    try:
+        await delete_usuario(cedula)
+        return jsonify({"ok": True, "status": 200})
     except Exception as ex:
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500

@@ -35,7 +35,7 @@
 	let total = $derived(data.length);
 	const headers = $derived(
 		Object.keys(data[0] || {})
-			.filter((k) => !['usuario', 'activo'].includes(k))
+			.filter((k) => !['usuario', 'activo', 'rol', 'ruta_foto', 'ultima_sesion'].includes(k))
 			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : 0))
 	);
 	let start = $derived((currentPage - 1) * perPage + 1);
@@ -65,7 +65,7 @@
 	<Table striped hoverable shadow>
 		<TableHead>
 			{#each headers as h}
-				<TableHeadCell>{h}</TableHeadCell>
+				<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
 			{/each}
 			<TableHeadCell>Acciones</TableHeadCell>
 		</TableHead>

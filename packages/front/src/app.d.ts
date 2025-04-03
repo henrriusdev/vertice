@@ -132,14 +132,15 @@ export type Trazabilidad = {
 }
 
 export type Usuario = {
+	password?: string;
 	id: number;
 	cedula: string;
 	nombre: string;
 	correo: string;
 	activo: boolean;
-	ruta_foto: string;
+	ruta_foto?: string;
 	fecha_creacion: string;
-	ultima_sesion: string;
+	ultima_sesion?: string;
 	rol: { id: number; nombre: string };
 }
 

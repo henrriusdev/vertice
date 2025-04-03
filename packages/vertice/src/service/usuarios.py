@@ -22,6 +22,15 @@ async def login(correo: str, password: str):
         raise Exception(ex)
 
 
+async def get_usuarios():
+    try:
+        # get only users with rol superusuario and control
+        data = await Usuario.filter(rol__nombre="control").prefetch_related("rol").all()
+        response = [u.to_dict() for u in data]
+        return response
+    except Exception as ex:
+        raise Exception(ex)
+
 async def get_usuario(id: int):
     try:
         usuario = await Usuario.filter(id=id).first()
@@ -117,3 +126,14 @@ async def reactivar_usuario(correo: str):
         raise Exception("Usuario no encontrado")
     except Exception as ex:
         raise Exception(f"Error al reactivar usuario: {ex}")
+    
+
+async def delete_usuario(cedula: str):
+    try:
+        await Usuario.filter(cedula=cedula).delete()
+        return True
+    except DoesNotExist:
+        raise Exception("Usuario no encontrado")
+    except Exception as ex:
+        raise Exception(f"Error al eliminar usuario: {ex}")
+    

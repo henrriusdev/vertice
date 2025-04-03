@@ -24,8 +24,8 @@ class Usuario(Model):
             "correo": self.correo,
             "activo": self.activo,
             "ruta_foto": self.ruta_foto,
-            "fecha_creacion": self.fecha_creacion.isoformat() if self.fecha_creacion else None,
-            "ultima_sesion": self.ultima_sesion.isoformat() if self.ultima_sesion else None,
+            "fecha_creacion": self.fecha_creacion.strftime("%d/%m/%Y") if self.fecha_creacion else None,
+            "ultima_sesion": self.ultima_sesion.strftime("%d/%m/%Y") if self.ultima_sesion else None,
             "rol": {
                 "id": self.rol.id if self.rol else None,
                 "nombre": self.rol.nombre if self.rol else None,

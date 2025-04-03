@@ -103,6 +103,12 @@
 			titulo: 'Asignaturas',
 			icono: ListOutline,
 			href: '/superusuario/asignaturas',
+			roles: ['coordinador', 'control']
+		},
+		{
+			titulo: "Usuarios",
+			icono: UsersOutline,
+			href: '/superusuario/usuarios',
 			roles: ['superusuario']
 		},
 		{
