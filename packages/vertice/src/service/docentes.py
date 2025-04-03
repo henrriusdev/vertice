@@ -1,3 +1,4 @@
+from datetime import datetime
 from src.model.docente import Docente
 from src.model.peticion import Peticion
 from src.model.usuario import Usuario
@@ -11,14 +12,14 @@ async def get_docentes():
             resultado.append({
                 "id": d.id,
                 "cedula": d.usuario.cedula,
-                "nombre": d.usuario.fullname,
+                "nombre": d.usuario.nombre,
                 "correo": d.usuario.correo,
-                "telefono": d.usuario.telefono,
+                "usuario": d.usuario.id,
                 "titulo": d.titulo,
                 "dedicacion": d.dedicacion,
                 "especialidad": d.especialidad,
                 "estatus": d.estatus,
-                "fecha_ingreso": str(d.fecha_ingreso) if d.fecha_ingreso else None,
+                "fecha_ingreso": format_fecha(d.fecha_ingreso) if d.fecha_ingreso else None,
                 "observaciones": d.observaciones
             })
         return resultado
@@ -32,14 +33,13 @@ async def get_docente(id: int):
         return {
             "id": d.id,
             "cedula": d.usuario.cedula,
-            "nombre": d.usuario.fullname,
+            "nombre": d.usuario.nombre,
             "correo": d.usuario.correo,
-            "telefono": d.usuario.telefono,
             "titulo": d.titulo,
             "dedicacion": d.dedicacion,
             "especialidad": d.especialidad,
             "estatus": d.estatus,
-            "fecha_ingreso": str(d.fecha_ingreso) if d.fecha_ingreso else None,
+            "fecha_ingreso": format_fecha(d.fecha_ingreso) if d.fecha_ingreso else None,
             "observaciones": d.observaciones
         }
     except DoesNotExist:
@@ -47,6 +47,11 @@ async def get_docente(id: int):
     except Exception as ex:
         raise Exception(ex)
 
+def parse_fecha(fecha_str: str) -> datetime:
+    return datetime.strptime(fecha_str, "%d/%m/%Y")
+
+def format_fecha(fecha: datetime):
+    return fecha.strftime("%d/%m/%Y")
 
 async def add_docente(usuario_id: int, titulo: str, dedicacion: str, especialidad: str, estatus: str = "Activo", fecha_ingreso=None, observaciones=None):
     try:
@@ -57,7 +62,7 @@ async def add_docente(usuario_id: int, titulo: str, dedicacion: str, especialida
             dedicacion=dedicacion,
             especialidad=especialidad,
             estatus=estatus,
-            fecha_ingreso=fecha_ingreso,
+            fecha_ingreso=parse_fecha(fecha_ingreso) if fecha_ingreso else None,
             observaciones=observaciones
         )
         await docente.save()
@@ -70,7 +75,10 @@ async def update_docente(id: int, **kwargs):
     try:
         docente = await Docente.get(id=id)
         for key, value in kwargs.items():
-            if hasattr(docente, key):
+            if key == "fecha_ingreso":
+                if isinstance(value, str):
+                    value = parse_fecha(value)
+            elif hasattr(docente, key):
                 setattr(docente, key, value)
         await docente.save()
         return True
@@ -80,10 +88,11 @@ async def update_docente(id: int, **kwargs):
         raise Exception(ex)
 
 
-async def delete_docente(id: int):
+async def delete_docente(cedula: str):
     try:
-        docente = await Docente.get(id=id)
+        docente = await Docente.get(usuario__cedula=cedula)
         await docente.delete()
+        await docente.usuario.delete()
         return True
     except DoesNotExist:
         return False

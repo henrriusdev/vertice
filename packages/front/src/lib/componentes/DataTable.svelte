@@ -16,7 +16,10 @@
 	} from 'flowbite-svelte';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 
-	let {data = [], actions} = $props<{data: any[], actions: (row: any) => ReturnType<import("svelte").Snippet>}>();
+	let { data = [], actions } = $props<{
+		data: any[];
+		actions: (row: any) => ReturnType<import('svelte').Snippet>;
+	}>();
 
 	const pageOptions: SelectOptionType<number>[] = [
 		{ value: 3, name: '3' },
@@ -30,17 +33,23 @@
 	let perPage = $derived(parseInt(page.url.searchParams.get('perPage') || '25'));
 
 	let total = $derived(data.length);
-	const headers = $derived(Object.keys(data[0] || {}).filter((k) => !['usuario', 'activo'].includes(k)));
+	const headers = $derived(
+		Object.keys(data[0] || {})
+			.filter((k) => !['usuario', 'activo'].includes(k))
+			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : 0))
+	);
 	let start = $derived((currentPage - 1) * perPage + 1);
 	let end = $derived(Math.min(start + perPage - 1, total));
 	let paginated = $derived(data.slice(start - 1, end));
 	let totalPages = $derived(Math.ceil(total / perPage));
 
-	let pages: LinkType[] = $derived(Array.from({ length: totalPages }, (_, i) => ({
-		name: String(i + 1),
-		href: `?page=${i + 1}&perPage=${perPage}`,
-		active: i + 1 === currentPage
-	})));
+	let pages: LinkType[] = $derived(
+		Array.from({ length: totalPages }, (_, i) => ({
+			name: String(i + 1),
+			href: `?page=${i + 1}&perPage=${perPage}`,
+			active: i + 1 === currentPage
+		}))
+	);
 
 	// navegación reactiva
 	function goTo(p: number) {
@@ -55,7 +64,7 @@
 <div class="w-full">
 	<Table striped hoverable shadow>
 		<TableHead>
-			{#each headers.length ? headers : Object.keys(data[0] || {}) as h}
+			{#each headers as h}
 				<TableHeadCell>{h}</TableHeadCell>
 			{/each}
 			<TableHeadCell>Acciones</TableHeadCell>

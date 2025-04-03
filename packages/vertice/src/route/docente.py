@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from src.service.usuarios import get_usuario_por_correo
 from src.service.docentes import (
     get_docentes,
     get_docente,
@@ -11,8 +12,6 @@ from src.service.trazabilidad import add_trazabilidad
 from src.service.materias import modificar_materia_estudiante
 from flask_jwt_extended import jwt_required, get_jwt
 
-from datetime import datetime
-
 doc = Blueprint('docentes_blueprint', __name__)
 
 @doc.route('/')
@@ -21,7 +20,7 @@ async def get_all_docentes():
     claims = get_jwt()
     await add_trazabilidad({
         "accion": "Obtener Docentes",
-        "usuario": claims.get('nombre'),
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 1
     })
@@ -39,7 +38,7 @@ async def get_one_docente(cedula: str):
 
     await add_trazabilidad({
         "accion": f"Obtener Docente con cédula: {cedula}",
-        "usuario": claims.get('nombre'),
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 1
     })
@@ -54,7 +53,7 @@ async def get_peticiones(cedula: str):
 
     await add_trazabilidad({
         "accion": f"Obtener Peticiones del Docente con cédula: {cedula}",
-        "usuario": claims.get('nombre'),
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 1
     })
@@ -66,27 +65,27 @@ async def get_peticiones(cedula: str):
 async def add_new_docente():
     claims = get_jwt()
     payload = request.json
-    await add_docente(payload)
+    await add_docente(**payload)
 
     await add_trazabilidad({
         "accion": f"Añadir Docente con cédula: {payload['usuario']}",
-        "usuario": claims.get('nombre'),
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 2
     })
     return jsonify({"ok": True, "status": 200})
 
 
-@doc.route('/update/<cedula>', methods=["PUT"])
+@doc.route('/update/<int:id_docente>', methods=["PUT"])
 @jwt_required()
-async def update_one_docente(cedula: str):
+async def update_one_docente(id_docente: int):
     claims = get_jwt()
     payload = request.json
-    await update_docente(cedula, payload)
+    await update_docente(id_docente, **payload)
 
     await add_trazabilidad({
-        "accion": f"Actualizar Docente con cédula: {cedula}",
-        "usuario": claims.get('nombre'),
+        "accion": f"Actualizar Docente con ID: {id_docente}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 2
     })
@@ -101,7 +100,7 @@ async def delete_one_docente(cedula: str):
 
     await add_trazabilidad({
         "accion": f"Eliminar Docente con cédula: {cedula}",
-        "usuario": claims.get('nombre'),
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 3
     })

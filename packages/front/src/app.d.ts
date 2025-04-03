@@ -28,7 +28,12 @@ export type Coordinador = {
 }
 
 export type Docente = {
-	usuario: number | object;
+	id?: number;
+	cedula: string;
+	nombre: string;
+	correo: string;
+	telefono: string;
+	usuario: number;
 	titulo: string;
 	dedicacion: string;
 	especialidad: string;

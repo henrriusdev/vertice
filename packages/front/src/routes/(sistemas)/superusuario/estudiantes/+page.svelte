@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
 	import { imask } from '@imask/svelte';
 	import {
@@ -23,9 +22,8 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import type { Carrera, Estudiante } from '../../../../app';
+	import type { Estudiante } from '../../../../app';
 	import type { ActionData, PageData } from './$types';
-	import { invalidate } from '$app/navigation';
 
 	// Datos de la página
 	let { data, form }: { data: PageData; form: ActionData } = $props<{
@@ -40,7 +38,33 @@
 	let confirmPVisible = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
-	let estudianteActual: any = $state({});
+	let estudianteActual: Partial<{
+			id: number
+			cedula: string
+			nombre: string
+			correo: string
+			activo: boolean,
+			semestre: number,
+			carrera: number,
+			promedio: number,
+			direccion: string,
+			fecha_nac: Date | string,
+			sexo: 'M' | 'F' | '',
+			usuario?: {
+				id: number
+			}
+		}> = $state({
+			cedula: '',
+			nombre: '',
+			correo: '',
+			activo: true,
+			semestre: 1,
+			carrera: 1,
+			promedio: 0,
+			direccion: '',
+			fecha_nac: maxYearDate(),
+			sexo: 'M'
+		});
 	let showAlert = $state(false);
 	let alertMessage = $state('');
 	let password = $state('');
@@ -63,8 +87,7 @@
 			if ((form as any).success) {
 				modalVisible = false;
 				mostrarAlerta((form as any).message, 'success');
-			} else if ((form as any).error) {
-				mostrarAlerta((form as any).error, 'error');
+			} else if (form.errores) {
 			}
 		}
 	});
@@ -119,7 +142,7 @@
 			carrera: 1,
 			promedio: 0,
 			direccion: '',
-			fecha_nac: '',
+			fecha_nac: maxYearDate(),
 			sexo: 'M'
 		};
 		isEditing = false;
@@ -142,7 +165,7 @@
 	}
 
 	// Actualizar edad cuando cambia la fecha de nacimiento
-	let edad = $derived(calcularEdad(estudianteActual.fecha_nac));
+	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac as string));
 </script>
 
 <div class="w-full">
@@ -179,13 +202,13 @@
 
 	<div class="overflow-x-auto">
 		<div class="w-max min-w-full">
-			{#snippet actions(row: Carrera)}
+			{#snippet actions(row: Estudiante)}
 				<div class="flex gap-2">
 					<Button size="xs" color="light" on:click={() => editarEstudiante(row)}>
 						<PenOutline class="w-4 h-4" />
 					</Button>
 					<form action="?/delete" method="POST">
-						<input type="hidden" name="id" value={row.id} />
+						<input type="hidden" name="cedula" value={row.cedula} />
 						<Button size="xs" color="red" type="submit">
 							<TrashBinOutline class="w-4 h-4" />
 						</Button>
@@ -205,11 +228,10 @@
 			action={isEditing ? '?/edit' : '?/create'}
 			method="POST"
 			bind:this={formEl}
-			onsubmit={() => modalVisible = false}
 		>
 			{#if isEditing}
-				<input type="hidden" name="id_estudiante" value={estudianteActual.id} />
-				<input type="hidden" name="id" value={estudianteActual.usuario.id} />
+				<input type="hidden" name="id_estudiante" value={estudianteActual!.id} />
+				<input type="hidden" name="id" value={estudianteActual!.usuario?.id} />
 			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
@@ -219,7 +241,7 @@
 						id="cedula"
 						name="cedula"
 						placeholder="Ingrese la cédula"
-						value={estudianteActual.cedula}
+						value={estudianteActual?.cedula}
 						required
 						use:imask={cedulaMask as any}
 						class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
@@ -236,7 +258,7 @@
 						id="nombre"
 						name="nombre"
 						placeholder="Ingrese el nombre completo"
-						value={estudianteActual.nombre}
+						value={estudianteActual!.nombre}
 						required
 						color={form?.errores?.nombre ? 'red' : undefined}
 					/>
@@ -263,7 +285,7 @@
 						name="correo"
 						type="email"
 						placeholder="correo@ejemplo.com"
-						value={estudianteActual.correo}
+						value={estudianteActual?.correo}
 						required
 						color={form?.errores?.correo ? 'red' : undefined}
 					/>
@@ -341,7 +363,7 @@
 					<Select
 						id="carrera"
 						name="carrera"
-						value={estudianteActual.carrera}
+						value={estudianteActual?.carrera}
 						required
 						color={form?.errores?.carrera ? 'red' : undefined}
 						items={data.carreras.map((carrera) => ({
@@ -358,7 +380,7 @@
 					<Select
 						id="sexo"
 						name="sexo"
-						value={estudianteActual.sexo}
+						value={estudianteActual?.sexo}
 						placeholder=""
 						required
 						color={form?.errores?.sexo ? 'red' : undefined}
@@ -376,7 +398,7 @@
 					<Select
 						id="semestre"
 						name="semestre"
-						value={estudianteActual.semestre}
+						value={estudianteActual?.semestre}
 						placeholder=""
 						required
 						color={form?.errores?.semestre ? 'red' : undefined}
@@ -396,7 +418,7 @@
 						type="number"
 						class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
 						use:imask={nota}
-						value={estudianteActual.promedio}
+						value={estudianteActual?.promedio}
 						required
 						color={form?.errores?.promedio ? 'red' : undefined}
 					/>
@@ -414,7 +436,7 @@
 						id="direccion"
 						name="direccion"
 						placeholder="Ingrese la dirección completa"
-						value={estudianteActual.direccion}
+						value={estudianteActual?.direccion}
 						rows={3}
 						color={form?.errores?.direccion ? 'red' : undefined}
 					/>
@@ -424,7 +446,7 @@
 				</div>
 				{#if isEditing}
 					<div class="flex items-center">
-						<Checkbox id="activo" name="activo" checked={estudianteActual.activo} />
+						<Checkbox id="activo" name="activo" checked={estudianteActual?.activo} />
 						<Label for="activo" class="ml-2">Usuario Activo</Label>
 					</div>
 				{/if}

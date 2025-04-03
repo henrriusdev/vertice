@@ -22,7 +22,7 @@ def create_app():
         (carreras.car,     '/api/carreras'),
         (config.cfg,       '/api/config'),
         (coordinacion.crd, '/api/coordinacion'),
-        (docente.doc,      '/api/docente'),
+        (docente.doc,      '/api/docentes'),
         (estudiantes.est,  '/api/estudiantes'),
         (materias.mat,     '/api/materias'),
         (pagos.pago,       '/api/pagos'),

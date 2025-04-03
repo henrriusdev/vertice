@@ -35,8 +35,8 @@ export const actualizarEstudiante = async (fetch: typeof window.fetch, id: numbe
   return estudianteActualizado.data as Estudiante;
 };
 
-export const eliminarEstudiante = async (fetch: typeof window.fetch, id: number) => {
-  const res = await fetch(`${API}/delete/${id}`, {
+export const eliminarEstudiante = async (fetch: typeof window.fetch, cedula: string) => {
+  const res = await fetch(`${API}/delete/${cedula}`, {
     method: 'DELETE'
   });
   const estudianteEliminado = await res.json();

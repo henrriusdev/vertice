@@ -9,3 +9,15 @@ export type EstudianteReq = {
 	edad: number;
 	sexo: string;
 };
+
+export type DocenteReq = {
+	usuario_id: number;
+	titulo: string;
+	dedicacion: string;
+	password?: string;
+	especialidad: string;
+	estatus: string;
+	fecha_ingreso: string;
+	observaciones: string;
+
+};
