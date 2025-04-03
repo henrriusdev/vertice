@@ -19,5 +19,11 @@ export type DocenteReq = {
 	estatus: string;
 	fecha_ingreso: string;
 	observaciones: string;
-
 };
+
+export type CoordinadorReq = {
+	usuario_id?: number;
+	carrera_id: number;
+	telefono: string;
+	password?: string;
+}

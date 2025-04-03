@@ -22,17 +22,19 @@ export type Configuracion = {
 }
 
 export type Coordinador = {
-	usuario: number | object;
-	carrera: number | object;
+	cedula: string;
+	nombre: string;
+	correo: string;
+	usuario: number;
+	carrera: number;
 	telefono: string;
-}
+};
 
 export type Docente = {
 	id?: number;
 	cedula: string;
 	nombre: string;
 	correo: string;
-	telefono: string;
 	usuario: number;
 	titulo: string;
 	dedicacion: string;

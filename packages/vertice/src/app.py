@@ -21,7 +21,7 @@ def create_app():
         (billete.bil,      '/api/billetes'),
         (carreras.car,     '/api/carreras'),
         (config.cfg,       '/api/config'),
-        (coordinacion.crd, '/api/coordinacion'),
+        (coordinacion.crd, '/api/coordinadores'),
         (docente.doc,      '/api/docentes'),
         (estudiantes.est,  '/api/estudiantes'),
         (materias.mat,     '/api/materias'),

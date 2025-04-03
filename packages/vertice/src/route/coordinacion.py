@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from src.service.usuarios import get_usuario_por_correo
 from src.service.coordinadores import (
     get_coordinadores,
     get_coordinador,
@@ -18,7 +19,7 @@ crd = Blueprint('coordinacion_blueprint', __name__)
 @jwt_required()
 async def listar_coordinadores():
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     data = await get_coordinadores()
     await add_trazabilidad({"accion": "Obtener Coordinadores", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 1})
     return jsonify({"ok": True, "status": 200, "data": data})
@@ -27,7 +28,7 @@ async def listar_coordinadores():
 @jwt_required()
 async def obtener_coordinador(cedula):
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     data = await get_coordinador(cedula)
     if data:
         await add_trazabilidad({"accion": f"Obtener Coordinador {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 1})
@@ -38,27 +39,27 @@ async def obtener_coordinador(cedula):
 @jwt_required()
 async def nuevo_coordinador():
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     payload = request.json
-    await add_coordinador(payload)
-    await add_trazabilidad({"accion": f"Añadir Coordinador {payload['correo']}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 2})
+    await add_coordinador(payload["usuario_id"], payload["carrera_id"], payload["telefono"])
+    await add_trazabilidad({"accion": f"Añadir Coordinador {payload['usuario_id']}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 2})
     return jsonify({"ok": True, "status": 200})
 
-@crd.route('/update/<cedula>', methods=['PUT'])
+@crd.route('/update/<int:id_coordinador>', methods=['PUT'])
 @jwt_required()
-async def actualizar_coordinador(cedula):
+async def actualizar_coordinador(id_coordinador):
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     payload = request.json
-    await update_coordinador(cedula, payload)
-    await add_trazabilidad({"accion": f"Actualizar Coordinador {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 2})
+    await update_coordinador(id_coordinador, payload["carrera_id"], payload["telefono"])
+    await add_trazabilidad({"accion": f"Actualizar Coordinador {id_coordinador}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 2})
     return jsonify({"ok": True, "status": 200})
 
 @crd.route('/delete/<cedula>', methods=['DELETE'])
 @jwt_required()
 async def eliminar_coordinador(cedula):
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     await delete_coordinador(cedula)
     await add_trazabilidad({"accion": f"Eliminar Coordinador {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 3})
     return jsonify({"ok": True, "status": 200})
@@ -67,7 +68,7 @@ async def eliminar_coordinador(cedula):
 @jwt_required()
 async def obtener_notas_estudiante(cedula):
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     data = await get_notas_estudiante(cedula)
     await add_trazabilidad({"accion": f"Obtener Notas del Estudiante {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Estudiante", "nivel_alerta": 1})
     return jsonify({"ok": True, "status": 200, "data": data})

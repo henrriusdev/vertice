@@ -5,7 +5,6 @@ const API = 'http://127.0.0.1:8000/api/carreras';
 export const obtenerCarreras = async (fetch: typeof window.fetch) => {
   const res = await fetch(`${API}`);
   const carreras = await res.json();
-  console.log('carreras', carreras);
   return carreras.data as Carrera[];
 };
 

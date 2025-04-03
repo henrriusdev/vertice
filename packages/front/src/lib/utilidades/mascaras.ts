@@ -52,3 +52,9 @@ export const nota = {
 	max: 20,
 	autofix: true
 }
+
+export const telefono = {
+	mask: '(0000) 000-0000',
+	autofix: true,
+	normalizeZeros: true
+}

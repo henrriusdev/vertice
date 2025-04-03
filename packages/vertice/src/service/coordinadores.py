@@ -14,8 +14,9 @@ async def get_coordinadores():
         for c in coordinadores:
             resultado.append({
                 "id": c.id,
+                "usuario": c.usuario.id,
                 "cedula": c.usuario.cedula,
-                "nombre": c.usuario.fullname,
+                "nombre": c.usuario.nombre,
                 "correo": c.usuario.correo,
                 "telefono": c.telefono,
                 "carrera": c.carrera.nombre
@@ -30,8 +31,9 @@ async def get_coordinador(id: int):
         c = await Coordinador.get(id=id).prefetch_related("usuario", "carrera")
         return {
             "id": c.id,
+            "usuario": c.usuario.id,
             "cedula": c.usuario.cedula,
-            "nombre": c.usuario.fullname,
+            "nombre": c.usuario.nombre,
             "correo": c.usuario.correo,
             "telefono": c.telefono,
             "carrera": c.carrera.nombre
@@ -73,10 +75,11 @@ async def update_coordinador(id: int, carrera_id: int = None, telefono: str = No
         raise Exception(ex)
 
 
-async def delete_coordinador(id: int):
+async def delete_coordinador(cedula: str):
     try:
-        coordinador = await Coordinador.get(id=id)
+        coordinador = await Coordinador.get(usuario__cedula=cedula)
         await coordinador.delete()
+        await coordinador.usuario.delete()
         return True
     except DoesNotExist:
         return False
