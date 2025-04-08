@@ -1,53 +1,47 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import {
-		Sidebar,
-		SidebarGroup,
-		SidebarItem,
-		SidebarWrapper,
-		SidebarDropdownWrapper,
-		SidebarDropdownItem,
-		Button,
-		Navbar,
-		NavBrand,
+		Alert,
 		Avatar,
 		Breadcrumb,
 		BreadcrumbItem,
-		Alert,
-		Tooltip,
-		DropdownItem,
+		Button,
+		Dropdown,
 		DropdownDivider,
-		Dropdown
+		DropdownItem,
+		Navbar,
+		Sidebar,
+		SidebarGroup,
+		SidebarItem,
+		SidebarWrapper
 	} from 'flowbite-svelte';
 	import {
-		HomeOutline,
-		ChartPieOutline,
-		CogOutline,
-		UserCircleOutline,
-		UsersOutline,
-		FileOutline,
-		ShieldCheckOutline,
-		ChevronDownOutline,
-		BarsOutline,
-		ChevronRightOutline,
-		ChevronLeftOutline,
-		UsersGroupOutline,
-		ListOutline,
-		UserHeadsetOutline,
+		BookOpenOutline,
 		BuildingOutline,
-		BookOpenOutline
+		ChevronLeftOutline,
+		ChevronRightOutline,
+		CogOutline,
+		HomeOutline,
+		ListOutline,
+		ReceiptOutline,
+		ShieldCheckOutline,
+		UserCircleOutline,
+		UserHeadsetOutline,
+		UsersGroupOutline,
+		UsersOutline
 	} from 'flowbite-svelte-icons';
+	import type { LayoutData } from './$types';
+	import { page } from '$app/state';
 
 	// Obtener los datos del usuario desde los datos proporcionados por +layout.server.ts
-	export let data;
+	let { data } = $props<{ data: LayoutData }>();
 
 	// Estado para controlar si el sidebar está abierto o cerrado
-	let sidebarOpen = true;
+	let sidebarOpen = $state(true);
 
 	// Estado para mostrar alertas
-	let showAlert = false;
-	let alertMessage = '';
+	let showAlert = $state(false);
+	let alertMessage = $state('');
 	let alertColor:
 		| 'red'
 		| 'form'
@@ -67,8 +61,8 @@
 		| 'navbarUl'
 		| 'primary'
 		| 'orange'
-		| undefined = 'red';
-	let userDropdownOpen = false;
+		| undefined = $state('red');
+	let userDropdownOpen = $state(false);
 
 	// Función para alternar el estado del sidebar
 	function toggleSidebar() {
@@ -90,14 +84,14 @@
 		{
 			titulo: 'Docentes',
 			icono: UsersOutline,
-			href: '/superusuario/docentes',
+			href: '/docentes',
 			roles: ['superusuario']
 		},
 		{
 			titulo: 'Estudiantes',
 			icono: UsersGroupOutline,
-			href: '/superusuario/estudiantes',
-			roles: ['superusuario']
+			href: '/estudiantes',
+			roles: ['superusuario', 'caja']
 		},
 		{
 			titulo: 'Asignaturas',
@@ -106,7 +100,7 @@
 			roles: ['coordinador', 'control']
 		},
 		{
-			titulo: "Usuarios",
+			titulo: 'Usuarios',
 			icono: UsersOutline,
 			href: '/superusuario/usuarios',
 			roles: ['superusuario']
@@ -128,13 +122,18 @@
 			icono: BookOpenOutline,
 			href: '/superusuario/movimientos',
 			roles: ['superusuario']
+		},
+		{
+			titulo: 'Pagos',
+			icono: ReceiptOutline,
+			href: '/caja/pagos',
+			roles: ['caja']
 		}
 	];
 
 	// Función para generar las migas de pan basadas en la URL
-	$: rutaActual = $page.url.pathname;
-
-	$: migasDePan = generarMigasDePan(rutaActual);
+	let rutaActual = $derived(page.url.pathname);
+	let migasDePan = $derived(generarMigasDePan(rutaActual));
 
 	function generarMigasDePan(ruta: string) {
 		// Ignorar la primera barra y dividir la ruta
@@ -183,21 +182,23 @@
 	}
 
 	// Verificar acceso a la ruta actual
-	$: if (data && data.nombre) {
-		const rutaActual = $page.url.pathname;
-		const rutaEncontrada = elementosNav.find((item) => item.href === rutaActual);
+	$effect(() => {
+		if (data && data.nombre) {
+			const rutaActual = page.url.pathname;
+			const rutaEncontrada = elementosNav.find((item) => item.href === rutaActual);
 
-		if (rutaEncontrada && !hasAccess(rutaEncontrada.roles, data.rol)) {
-			showAlert = true;
-			alertMessage = 'No tienes permiso para acceder a esta página';
-			alertColor = 'red';
+			if (rutaEncontrada && !hasAccess(rutaEncontrada.roles, data.rol)) {
+				showAlert = true;
+				alertMessage = 'No tienes permiso para acceder a esta página';
+				alertColor = 'red';
 
-			// Redirigir al inicio después de mostrar la alerta
-			setTimeout(() => {
-				goto('/');
-			}, 2000);
+				// Redirigir al inicio después de mostrar la alerta
+				setTimeout(() => {
+					goto('/');
+				}, 2000);
+			}
 		}
-	}
+	});
 
 	// Función para cerrar sesión (redirige a la ruta de logout)
 	function cerrarSesion() {

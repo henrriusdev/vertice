@@ -7,7 +7,8 @@ import {
 	obtenerDocentes,
 	type DocenteReq
 } from '$lib';
-import type { Usuario } from '../../../../app';
+import { redirect } from '@sveltejs/kit';
+import type { Usuario } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
 
 export type ErroresDocente = {
@@ -26,7 +27,11 @@ export type ErroresDocente = {
 
 
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, parent }) => {
+	const { rol } = await parent();
+	if (!['caja', 'superusuario'].includes(rol)) {
+		redirect(302, '/' + rol);
+	}
 	try {
 		const res = await obtenerDocentes(fetch);
 		return { docentes: res };
