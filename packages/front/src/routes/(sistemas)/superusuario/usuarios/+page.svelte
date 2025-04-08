@@ -180,8 +180,7 @@
 			{#if isEditing}
 				<input type="hidden" name="id" value={usuarioActual!.id} />
 			{/if}
-			<input type="hidden" name="rol" value={usuarioActual?.rol?.id ?? 3} />
-			<div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
 				<div class="md:col-span-2">
 					<Label for="cedula" class="mb-2">Cédula</Label>
 					<input
@@ -215,8 +214,21 @@
 						required
 					/>
 				</div>
+				<div class="md:col-span-2">
+					<Label for="rol" class="mb-2">Rol</Label>
+					<Select
+						id="rol"
+						name="rol"
+						value={usuarioActual?.rol?.id ?? 3}
+						required
+						items={[
+							{ name: 'Personal de caja', value: 2 },
+							{ name: 'Personal de control de estudio', value: 3 },
+						]}
+					/>
+				</div>
 				{#if !isEditing}
-					<div class="md:col-span-3">
+					<div class="md:col-span-2">
 						<Label for="password" class="mb-2">Contraseña</Label>
 						<Input
 							id="password"
@@ -246,7 +258,7 @@
 							</Button>
 						</Input>
 					</div>
-					<div class="md:col-span-3">
+					<div class="md:col-span-2">
 						<Label for="password" class="mb-2">Confirmar contraseña</Label>
 						<Input
 							id="password"

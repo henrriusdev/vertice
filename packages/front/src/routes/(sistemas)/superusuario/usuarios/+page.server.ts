@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 export const actions: Actions = {
 	// Acción para crear un usuario y un usuario
 	create: async ({ request, fetch }) => {
-		const payload = Object.fromEntries(await request.formData()) as unknown as Usuario;
+		const payload = Object.fromEntries(await request.formData()) as unknown as Omit<Usuario, "rol"> & { rol: number };
 
 		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
 			id: 0,
@@ -24,7 +24,7 @@ export const actions: Actions = {
 			activo: true,
 			nombre: payload.nombre,
 			password: payload.password,
-			rol_id: 3
+			rol_id: payload.rol
 		};
 
 		try {
@@ -44,7 +44,6 @@ export const actions: Actions = {
 			rol: number;
 		};
 
-		console.log(payload);
 
 		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
 			cedula: payload.cedula,

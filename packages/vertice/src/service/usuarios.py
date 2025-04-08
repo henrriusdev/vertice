@@ -25,7 +25,7 @@ async def login(correo: str, password: str):
 async def get_usuarios():
     try:
         # get only users with rol superusuario and control
-        data = await Usuario.filter(rol__nombre="control").prefetch_related("rol").all()
+        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).prefetch_related("rol").all()
         response = [u.to_dict() for u in data]
         return response
     except Exception as ex:
