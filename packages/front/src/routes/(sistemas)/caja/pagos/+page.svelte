@@ -14,6 +14,12 @@
 		Navbar,
 		NavBrand,
 		Select,
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
 		Toggle
 	} from 'flowbite-svelte';
 
@@ -22,8 +28,14 @@
 		CreditCardOutline,
 		FileLinesOutline,
 		PlusOutline,
-		SearchOutline
+		SearchOutline,
+		TrashBinOutline
 	} from 'flowbite-svelte-icons';
+	import type { PageServerData } from './$types';
+	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
+
+	let { data }: { data: PageServerData } = $props();
 
 	// Main view state
 	let searchQuery = $state('');
@@ -33,14 +45,15 @@
 	let reportDate = $state(new Date());
 
 	// Modal state
-	let showPaymentModal = $state(false);
-	
+	let showPaymentModal = $state(true);
+
 	// Payment form state
 	let student = $state('');
 	let paymentConcept = $state('pre-inscription');
 	let paymentDate = $state<Date | null>(null);
-	let paymentMethod = $state('transfer');
+	let paymentMethod = $state('cash');
 	let amount = $state('');
+	let form: HTMLFormElement | null = $state(null);
 
 	// Report types
 	const reportTypes = [
@@ -55,22 +68,29 @@
 		{ value: 'pending', name: 'Pendientes' },
 		{ value: 'completed', name: 'Completados' }
 	];
-	
+
 	// Payment concepts
 	const paymentConcepts = [
-		{ value: 'pre-inscription', name: 'Pre Inscripción' },
-		{ value: 'monthly-fee', name: 'Mensualidad' },
-		{ value: 'materials', name: 'Materiales' },
-		{ value: 'other', name: 'Otro' }
+		{ value: 'inscripcion', name: 'Inscripción' },
+		{ value: 'servicios', name: 'Servicios Estudiantiles' },
+		{ value: 'cuota1', name: 'Cuota 1' },
+		{ value: 'cuota2', name: 'Cuota 2' },
+		{ value: 'cuota3', name: 'Cuota 3' },
+		{ value: 'cuota4', name: 'Cuota 4' },
+		{ value: 'cuota5', name: 'Cuota 5' }
 	];
+
+	let serial: string = $state('');
+	let monto: number = $state(1);
+	let billetes: { serial: string; monto: number }[] = $state([]);
 
 	// Derived state for form validation
 	const isFormValid = $derived(
-		student.trim() !== '' && 
-		paymentConcept !== '' && 
-		paymentDate !== null && 
-		paymentMethod !== '' && 
-		amount.trim() !== ''
+		student.trim() !== '' &&
+			paymentConcept !== '' &&
+			paymentDate !== null &&
+			paymentMethod !== '' &&
+			amount.trim() !== ''
 	);
 
 	// Functions for main view
@@ -85,7 +105,7 @@
 	function generateReport() {
 		alert(`Generando reporte: Tipo=${reportType}, Pagos=${paymentSelection}, Fecha=${reportDate}`);
 	}
-	
+
 	// Functions for payment form
 	function openPaymentModal() {
 		// Reset form fields when opening modal
@@ -96,34 +116,61 @@
 		amount = '';
 		showPaymentModal = true;
 	}
-	
+
 	function closePaymentModal() {
 		showPaymentModal = false;
 	}
-	
-	function submitPayment() {
-		if (isFormValid) {
-			alert(`Pago registrado:
-				Estudiante: ${student}
-				Concepto: ${paymentConcept}
-				Fecha: ${paymentDate?.toLocaleDateString()}
-				Método: ${paymentMethod}
-				Monto: ${amount} Bs.`);
-			closePaymentModal();
-		} else {
-			alert('Por favor complete todos los campos requeridos');
+
+	const handleSubmit: SubmitFunction = ({ formData, cancel }) => {
+		// Validación de campos
+		if (!data.estudiantes.includes(student)) {
+			alert('No hay algún estudiante con esa cédula en nuestro sistema');
+			return cancel();
 		}
+
+		if (!student.includes('-')) {
+			alert('Por favor, seleccione si el estudiante es extranjero o no');
+			return cancel();
+		}
+
+		// Agrega campos dinámicos
+		if (paymentMethod === 'cash') {
+			for (const billete of billetes) {
+				formData.append('billetes', JSON.stringify(billete));
+			}
+		}
+
+		if (paymentMethod === 'transfer') {
+			const refInput = document.getElementById('payment-reference') as HTMLInputElement;
+			if (!refInput?.value.trim()) {
+				alert('Por favor, introduzca la referencia de transferencia');
+				return cancel();
+			}
+			formData.append('referencia_transferencia', refInput.value.trim());
+		}
+
+		// fecha formateada
+		if (paymentDate) {
+			formData.append('fecha_pago', paymentDate.toISOString().split('T')[0]);
+		}
+
+		return async ({ update }) => {
+			await update(); // actualiza el estado del formulario según lo que devuelva el server
+			closePaymentModal();
+		};
+	};
+
+	function agregarBillete() {
+		billetes.push({ serial: serial, monto: monto });
 	}
-	
+
+	function borrarBillete(i: number) {
+		billetes = billetes.filter((bil, index) => i !== index);
+	}
+
 	function selectPaymentMethod(method: string) {
 		paymentMethod = method;
 	}
-
-	// Effect example - log state changes
-	$effect(() => {
-		console.log('Current search query:', searchQuery);
-		console.log('Current cycle only:', currentCycleOnly);
-	});
 </script>
 
 <div class="w-full h-full flex items-center justify-around relative">
@@ -213,12 +260,12 @@
 			</div>
 		</Card>
 	</div>
-	
+
 	<!-- Payment Form Modal -->
-	<Modal title="Formulario de Pago" bind:open={showPaymentModal} size="md" autoclose>
-		<div class="space-y-5 space-x-5 grid md:grid-cols-2">
+	<Modal title="Formulario de Pago" bind:open={showPaymentModal} size="md">
+		<form bind:this={form} method="post" use:enhance={handleSubmit} class="space-y-5 space-x-5 grid md:grid-cols-6">
 			<!-- Student Field -->
-			<div>
+			<div class="md:col-span-3">
 				<Label for="student" class="mb-2 font-medium">Estudiante</Label>
 				<div class="relative">
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2">
@@ -233,20 +280,20 @@
 					/>
 				</div>
 			</div>
-			
+
 			<!-- Payment Concept -->
-			<div>
+			<div class="md:col-span-3">
 				<Label for="payment-concept" class="mb-2 font-medium">Concepto del pago</Label>
-				<Select 
-					id="payment-concept" 
-					items={paymentConcepts} 
+				<Select
+					id="payment-concept"
+					items={paymentConcepts}
 					bind:value={paymentConcept}
 					class="bg-purple-50 border-purple-200"
 				/>
 			</div>
-			
+
 			<!-- Payment Date -->
-			<div>
+			<div class="md:col-span-3">
 				<Label for="payment-date" class="mb-2 font-medium">Fecha del Pago</Label>
 				<Datepicker
 					id="payment-date"
@@ -256,40 +303,40 @@
 				/>
 			</div>
 
-			<div>
+			<div class="md:col-span-3">
 				<Label for="amount" class="mb-2 font-medium">Monto (Bs.)</Label>
-				<Input 
-					id="amount" 
-					type="number" 
-					placeholder="Monto" 
+				<Input
+					id="amount"
+					type="number"
+					placeholder="Monto"
 					bind:value={amount}
 					class="bg-purple-50 border-purple-200"
 				/>
 			</div>
-			
+
 			<!-- Payment Method -->
-			<div class="md:col-span-2">
+			<div class="md:col-span-full">
 				<Label class="mb-2 font-medium">Método de Pago</Label>
 				<div class="flex w-full">
 					<ButtonGroup class="w-full">
-						<Button 
-							color={paymentMethod === 'transfer' ? 'purple' : 'light'} 
+						<Button
+							color={paymentMethod === 'transfer' ? 'purple' : 'light'}
 							class="flex-1"
 							type="button"
 							on:click={() => selectPaymentMethod('transfer')}
 						>
 							Transferencia
 						</Button>
-						<Button 
-							color={paymentMethod === 'cash' ? 'purple' : 'light'} 
+						<Button
+							color={paymentMethod === 'cash' ? 'purple' : 'light'}
 							class="flex-1"
 							type="button"
 							on:click={() => selectPaymentMethod('cash')}
 						>
 							Efectivo
 						</Button>
-						<Button 
-							color={paymentMethod === 'point' ? 'purple' : 'light'} 
+						<Button
+							color={paymentMethod === 'point' ? 'purple' : 'light'}
 							class="flex-1"
 							type="button"
 							on:click={() => selectPaymentMethod('point')}
@@ -299,17 +346,69 @@
 					</ButtonGroup>
 				</div>
 			</div>
-			
-		</div>
-		
+
+			<!-- Payment Reference (if transfer) -->
+			{#if paymentMethod === 'transfer'}
+				<div class="md:col-span-full">
+					<Label for="payment-reference" class="mb-2 font-medium">Referencia</Label>
+					<Input id="payment-reference" type="text" placeholder="Referencia" />
+				</div>
+				<!-- Table for cash-->
+			{:else if paymentMethod === 'cash'}
+				<div class="md:col-span-full">
+					<div class="flex justify-between items-end w-full gap-5 mb-4">
+						<div class="w-full">
+							<Label for="reference" class="mb-2 font-medium">Serial del billete</Label>
+							<Input id="reference" type="text" bind:value={serial} />
+						</div>
+						<div class="w-full">
+							<Label for="amount" class="mb-2 font-medium">Monto</Label>
+							<Select
+								id="amount"
+								bind:value={monto}
+								items={[
+									{ value: 1, name: '1$' },
+									{ value: 2, name: '2$' },
+									{ value: 5, name: '5$' },
+									{ value: 10, name: '10$' },
+									{ value: 20, name: '20$' },
+									{ value: 50, name: '50$' },
+									{ value: 100, name: '100$' }
+								]}
+							/>
+						</div>
+						<Button color="purple" class="w-full" outline onclick={agregarBillete}
+							>Añadir billete</Button
+						>
+					</div>
+					<Table>
+						<TableHead>
+							<TableHeadCell>Serial</TableHeadCell>
+							<TableHeadCell>Monto</TableHeadCell>
+							<TableHeadCell>Acciones</TableHeadCell>
+						</TableHead>
+						<TableBody tableBodyClass="divide-y">
+							{#each billetes as billete, i}
+								<TableBodyRow>
+									<TableBodyCell>{billete.serial}</TableBodyCell>
+									<TableBodyCell>{billete.monto}$</TableBodyCell>
+									<TableBodyCell>
+										<Button color="red" onclick={() => borrarBillete(i)} size="xs" outline>
+											<TrashBinOutline class="w-5 h-5" />
+										</Button>
+									</TableBodyCell>
+								</TableBodyRow>
+							{/each}
+						</TableBody>
+					</Table>
+				</div>
+			{/if}
+		</form>
+
 		<!-- Modal Footer -->
 		<svelte:fragment slot="footer">
 			<Button color="alternative" on:click={closePaymentModal}>Cancelar</Button>
-			<Button 
-				color="primary" 
-				on:click={submitPayment}
-				disabled={!isFormValid}
-			>
+			<Button color="primary" onclick={()=>form.requestSubmit()} disabled={!isFormValid}>
 				<CreditCardOutline class="mr-2 h-5 w-5" />
 				Realizar Pago
 			</Button>
@@ -323,18 +422,20 @@
 		padding: 0;
 		font-family: 'Inter', sans-serif;
 	}
-	
+
 	/* Custom styling for Flatpickr */
 	:global(.flatpickr-calendar) {
 		border-radius: 0.5rem;
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -2px rgba(0, 0, 0, 0.05);
 	}
-	
+
 	:global(.flatpickr-day.selected) {
 		background: #9333ea !important;
 		border-color: #9333ea !important;
 	}
-	
+
 	:global(.flatpickr-day:hover) {
 		background: #f3e8ff !important;
 	}

@@ -115,7 +115,7 @@ export type Peticion = {
 	campo: string;
 }
 
-export type Sesion_activa = {
+export type SesionActiva = {
 	id: number;
 	usuario: number | object;
 	jti: string;
