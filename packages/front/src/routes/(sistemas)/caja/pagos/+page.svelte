@@ -45,7 +45,7 @@
 	let reportDate = $state(new Date());
 
 	// Modal state
-	let showPaymentModal = $state(true);
+	let showPaymentModal = $state(false);
 
 	// Payment form state
 	let student = $state('');
@@ -90,7 +90,7 @@
 			paymentConcept !== '' &&
 			paymentDate !== null &&
 			paymentMethod !== '' &&
-			amount.trim() !== ''
+			amount !== ''
 	);
 
 	// Functions for main view
@@ -148,6 +148,8 @@
 			}
 			formData.append('referencia_transferencia', refInput.value.trim());
 		}
+
+		formData.append('payment-method', paymentMethod);
 
 		// fecha formateada
 		if (paymentDate) {
@@ -273,6 +275,7 @@
 					</span>
 					<input
 						id="student"
+						name="student"
 						placeholder="Buscar estudiante..."
 						bind:value={student}
 						use:imask={cedulaMask as any}
@@ -286,6 +289,7 @@
 				<Label for="payment-concept" class="mb-2 font-medium">Concepto del pago</Label>
 				<Select
 					id="payment-concept"
+					name="payment-concept"
 					items={paymentConcepts}
 					bind:value={paymentConcept}
 					class="bg-purple-50 border-purple-200"
@@ -297,6 +301,7 @@
 				<Label for="payment-date" class="mb-2 font-medium">Fecha del Pago</Label>
 				<Datepicker
 					id="payment-date"
+					name="payment-date"
 					bind:value={paymentDate}
 					maxDate={new Date()}
 					placeholder="dd/mm/aaaa"
@@ -307,6 +312,7 @@
 				<Label for="amount" class="mb-2 font-medium">Monto (Bs.)</Label>
 				<Input
 					id="amount"
+					name="amount"
 					type="number"
 					placeholder="Monto"
 					bind:value={amount}

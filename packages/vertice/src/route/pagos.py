@@ -51,13 +51,13 @@ async def add_pago_route():
     usuario = claims.get('nombre')
 
     data = {
-        "cedula_estudiante_id": request.json['cedula_estudiante_id'],
-        "metodo_pago_id": request.json['metodo_pago_id'],
-        "monto": request.json['monto'],
-        "concepto": request.json["concepto"],
-        "fecha_pago": request.json['fecha_pago'],
-        "referencia_transferencia": request.json.get('referencia_transferencia'),
-        "ciclo": request.json.get('ciclo')
+        "cedula_estudiante_id": request.json['student'],
+        "metodo_pago_id": request.json['method'],
+        "monto": request.json['amount'],
+        "concepto": request.json["concept"],
+        "fecha_pago": request.json['date'],
+        "referencia_transferencia": request.json.get('referencia_transferencia', None),
+        "ciclo": request.json.get('ciclo', None)
     }
 
     pago_id = await add_pago(data)
