@@ -1,4 +1,4 @@
-import { crearPago, obtenerEstudiantes } from '$lib';
+import { crearPago, generarReporte, obtenerEstudiantes } from '$lib';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, fetch }) => {
+	crear: async ({ request, fetch }) => {
 		const formData = await request.formData();
 
 		const student = formData.get('student') as string;
@@ -19,7 +19,7 @@ export const actions: Actions = {
 		const referencia = formData.get('referencia_transferencia') as string | null;
 		const billetesRaw = formData.getAll('billetes');
 
-    console.log(student, concept, method, amount, fecha_pago);
+		console.log(student, concept, method, amount, fecha_pago);
 		if (!student || !concept || !method || !amount || !fecha_pago) {
 			return fail(400, { error: 'Faltan campos requeridos' });
 		}
@@ -50,5 +50,29 @@ export const actions: Actions = {
 			console.error('Error al registrar el pago', e);
 			return fail(500, { error: 'No se pudo registrar el pago' });
 		}
+	},
+	generarReporte: async ({ fetch, request }) => {
+		const formData = await request.formData();
+
+		const tipo = formData.get('tipo');
+		const filtro = formData.get('filtro');
+		const fecha = formData.get('fecha');
+		const fi = formData.get('fi');
+		const ff = formData.get('ff');
+
+		const params = new URLSearchParams();
+		if (tipo) params.set('tipo', tipo.toString());
+		if (filtro && filtro !== 'todos') params.set('f', filtro.toString());
+		if (tipo === 'dia' && fecha) params.set('d', fecha.toString());
+		if ((tipo === 'fechas' || tipo === 'monto') && fi && ff) {
+			params.set('fi', fi.toString());
+			params.set('ff', ff.toString());
+		}
+
+		const { base64 } = await generarReporte(fetch, params.toString());
+
+		return {
+			base64
+		};
 	}
 };

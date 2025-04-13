@@ -2,8 +2,6 @@
 	import { cedulaMask, Datepicker } from '$lib';
 	import { imask } from '@imask/svelte';
 	import {
-		Breadcrumb,
-		BreadcrumbItem,
 		Button,
 		ButtonGroup,
 		Card,
@@ -11,8 +9,6 @@
 		Input,
 		Label,
 		Modal,
-		Navbar,
-		NavBrand,
 		Select,
 		Table,
 		TableBody,
@@ -23,8 +19,9 @@
 		Toggle
 	} from 'flowbite-svelte';
 
+	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import {
-		ArrowRightOutline,
 		CreditCardOutline,
 		FileLinesOutline,
 		PlusOutline,
@@ -32,17 +29,16 @@
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
 	import type { PageServerData } from './$types';
-	import { enhance } from '$app/forms';
-	import type { SubmitFunction } from '@sveltejs/kit';
+	import { goto } from '$app/navigation';
 
 	let { data }: { data: PageServerData } = $props();
 
 	// Main view state
 	let searchQuery = $state('');
 	let currentCycleOnly = $state(true);
-	let reportType = $state('day');
-	let paymentSelection = $state('all');
-	let reportDate = $state(new Date());
+	let reportType = $state('dia');
+	let paymentSelection = $state('todos');
+	let reportDate: Date | Date[] | null = $state(new Date());
 
 	// Modal state
 	let showPaymentModal = $state(false);
@@ -57,16 +53,17 @@
 
 	// Report types
 	const reportTypes = [
-		{ value: 'day', name: 'Día' },
-		{ value: 'week', name: 'Semana' },
-		{ value: 'month', name: 'Mes' }
+		{ value: 'dia', name: 'Día' },
+		{ value: 'fecha', name: 'Entre fechas especificas' },
+		{ value: 'monto', name: 'Montos totales' }
 	];
 
 	// Payment selections
 	const paymentSelections = [
-		{ value: 'all', name: 'Todos' },
-		{ value: 'pending', name: 'Pendientes' },
-		{ value: 'completed', name: 'Completados' }
+		{ value: 'todos', name: 'Todos' },
+		{ value: 'transferencia', name: 'Transferencias' },
+		{ value: 'efectivo', name: 'Efectivo' },
+		{ value: 'punto', name: 'Punto de venta' }
 	];
 
 	// Payment concepts
@@ -93,18 +90,19 @@
 			amount !== ''
 	);
 
-	// Functions for main view
-	function viewPayment() {
-		if (searchQuery) {
-			alert('Ver pago: ' + searchQuery);
-		} else {
-			alert('Por favor ingrese un término de búsqueda');
+	$effect(() => {
+		if (!showPaymentModal) {
+			// Reset form fields when modal is closed
+			student = '';
+			paymentConcept = 'pre-inscription';
+			paymentDate = null;
+			paymentMethod = 'transfer';
+			amount = '';
+			billetes = [];
+			serial = '';
 		}
-	}
+	});
 
-	function generateReport() {
-		alert(`Generando reporte: Tipo=${reportType}, Pagos=${paymentSelection}, Fecha=${reportDate}`);
-	}
 
 	// Functions for payment form
 	function openPaymentModal() {
@@ -173,6 +171,14 @@
 	function selectPaymentMethod(method: string) {
 		paymentMethod = method;
 	}
+
+	function viewPayment() {
+		if (!searchQuery) return;
+		const params = new URLSearchParams();
+		if (currentCycleOnly) params.set('ciclo_actual', 'true');
+		searchQuery = searchQuery.split('_')[0]
+		goto(`/caja/pagos/${searchQuery}?${params.toString()}`);
+	}
 </script>
 
 <div class="w-full h-full flex items-center justify-around relative">
@@ -226,7 +232,42 @@
 		<Card padding="xl">
 			<Heading tag="h2" class="text-2xl font-bold text-blue-600 mb-6">Reportes</Heading>
 
-			<div class="space-y-6">
+			<form
+				method="POST"
+				action="?/generarReporte"
+				use:enhance={({ formData }) => {
+					formData.append('tipo', reportType);
+					formData.append('filtro', paymentSelection);
+					if (reportType === 'dia') {
+						formData.append('fecha', (reportDate as Date)?.toISOString().split('T')[0]);
+					}
+					if (reportType === 'fechas' || reportType === 'monto') {
+						formData.append('fi', (reportDate as Date[])[0].toISOString().split('T')[0]);
+						formData.append('ff', (reportDate as Date[])[1].toISOString().split('T')[0]);
+					}
+					return async ({ result, update }) => {
+						const { base64 } = result.data;
+
+						const byteCharacters = atob(base64);
+						const byteArrays = [new Uint8Array(byteCharacters.length)];
+
+						for (let i = 0; i < byteCharacters.length; i++) {
+							byteArrays[0][i] = byteCharacters.charCodeAt(i);
+						}
+
+						const blob = new Blob(byteArrays, { type: 'application/pdf' });
+
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement('a');
+						a.href = url;
+						a.download = 'reporte.pdf';
+						a.click();
+						URL.revokeObjectURL(url);
+						await update();
+					};
+				}}
+				class="space-y-6"
+			>
 				<div>
 					<Label for="report-type" class="mb-2">Seleccione su tipo de reporte</Label>
 					<Select id="report-type" items={reportTypes} bind:value={reportType} />
@@ -244,28 +285,29 @@
 					<Datepicker
 						id="report-date"
 						bind:value={reportDate}
+						dateRange={reportType === 'fecha'}
 						maxDate={new Date()}
 						placeholder="dd/mm/aaaa"
 					/>
 				</div>
 
-				<Button
-					color="primary"
-					size="lg"
-					class="w-full"
-					on:click={generateReport}
-					disabled={!reportDate}
-				>
+				<Button color="primary" size="lg" class="w-full" disabled={!reportDate} type="submit">
 					<FileLinesOutline class="mr-2 h-5 w-5" />
 					Generar reporte
 				</Button>
-			</div>
+			</form>
 		</Card>
 	</div>
 
 	<!-- Payment Form Modal -->
 	<Modal title="Formulario de Pago" bind:open={showPaymentModal} size="md">
-		<form bind:this={form} method="post" use:enhance={handleSubmit} class="space-y-5 space-x-5 grid md:grid-cols-6">
+		<form
+			bind:this={form}
+			method="post"
+			use:enhance={handleSubmit}
+			action="?/crear"
+			class="space-y-5 space-x-5 grid md:grid-cols-6"
+		>
 			<!-- Student Field -->
 			<div class="md:col-span-3">
 				<Label for="student" class="mb-2 font-medium">Estudiante</Label>
@@ -414,7 +456,7 @@
 		<!-- Modal Footer -->
 		<svelte:fragment slot="footer">
 			<Button color="alternative" on:click={closePaymentModal}>Cancelar</Button>
-			<Button color="primary" onclick={()=>form.requestSubmit()} disabled={!isFormValid}>
+			<Button color="primary" onclick={() => form.requestSubmit()} disabled={!isFormValid}>
 				<CreditCardOutline class="mr-2 h-5 w-5" />
 				Realizar Pago
 			</Button>

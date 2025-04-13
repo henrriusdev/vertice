@@ -47,7 +47,6 @@ export async function refresh(fetch: typeof window.fetch, token: string): Promis
 	return usuario;
 }
 
-
 export async function logout(fetch: typeof window.fetch, token: string): Promise<boolean> {
 	const res = await fetch(`${API}/logout`, {
 		method: 'POST',
@@ -65,30 +64,37 @@ export async function logout(fetch: typeof window.fetch, token: string): Promise
 	return true;
 }
 
-export async function crearUsuario(fetch: typeof window.fetch, usuario: Partial<Usuario & {password: string}>) {
+export async function crearUsuario(
+	fetch: typeof window.fetch,
+	usuario: Partial<Usuario & { password: string }>
+) {
 	const res = await fetch(`${API}/register`, {
-		method: "POST",
+		method: 'POST',
 		body: JSON.stringify(usuario),
 		headers: {
 			'Content-Type': 'application/json'
 		}
-	})
+	});
 	if (!res.ok) {
-		const err = await res.json()
-		throw new Error(err?.message ?? 'Error al crear usuario')
+		const err = await res.json();
+		throw new Error(err?.message ?? 'Error al crear usuario');
 	}
 
 	return await res.json();
 }
 
-export async function actualizarUsuario(fetch: typeof window.fetch, id: number, usuario: Partial<Usuario>) {
+export async function actualizarUsuario(
+	fetch: typeof window.fetch,
+	id: number,
+	usuario: Partial<Usuario>
+) {
 	const res = await fetch(`${API}/update/${id}`, {
-		method: "PUT",
+		method: 'PUT',
 		body: JSON.stringify(usuario),
 		headers: {
 			'Content-Type': 'application/json'
 		}
-	})
+	});
 	if (!res.ok) {
 		const err = await res.json();
 		throw new Error(err?.message ?? 'Error al crear usuario');
@@ -99,8 +105,8 @@ export async function actualizarUsuario(fetch: typeof window.fetch, id: number, 
 
 export async function eliminarUsuario(fetch: typeof window.fetch, cedula: string) {
 	const res = await fetch(`${API}/delete/${cedula}`, {
-		method: "DELETE"
-	})
+		method: 'DELETE'
+	});
 	if (!res.ok) {
 		const err = await res.json();
 		throw new Error(err?.message ?? 'Error al crear usuario');
@@ -110,12 +116,23 @@ export async function eliminarUsuario(fetch: typeof window.fetch, cedula: string
 }
 
 export async function obtenerUsuarios(fetch: typeof window.fetch) {
-	const res = await fetch(`${API}`)
+	const res = await fetch(`${API}`);
 	if (!res.ok) {
 		const err = await res.json();
 		throw new Error(err?.message ?? 'Error al crear usuario');
 	}
 
 	const data = await res.json();
-	return data.data as Usuario[]
+	return data.data as Usuario[];
+}
+
+export async function obtenerUsuario(fetch: typeof window.fetch, cedula: string) {
+	const res = await fetch(`${API}/${cedula}`);
+	if (!res.ok) {
+		const err = await res.json();
+		throw new Error(err?.message ?? 'Error al crear usuario');
+	}
+
+	const data = await res.json();
+	return data.data as Usuario;
 }

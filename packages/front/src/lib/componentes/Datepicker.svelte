@@ -51,6 +51,12 @@
 		...options
 	});
 
+	$effect(() => {
+		if (!dateRange && Array.isArray(value)) {
+			value = value[0];
+		}
+	})
+
 	function change() {
 		if (onChange) {
 			onChange();

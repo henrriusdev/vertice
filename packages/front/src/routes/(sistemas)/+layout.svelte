@@ -34,7 +34,7 @@
 	import { page } from '$app/state';
 
 	// Obtener los datos del usuario desde los datos proporcionados por +layout.server.ts
-	let { data } = $props<{ data: LayoutData }>();
+	let { data, children } = $props<{ data: LayoutData }>();
 
 	// Estado para controlar si el sidebar está abierto o cerrado
 	let sidebarOpen = $state(true);
@@ -233,14 +233,14 @@
 							{#if sidebarOpen}
 								<SidebarItem href={item.href} label={item.titulo}>
 									<svelte:fragment slot="icon">
-										<svelte:component this={item.icono} class="w-5 h-5" />
+										<item.icono class="w-5 h-5" />
 									</svelte:fragment>
 								</SidebarItem>
 							{:else}
 								<div class="mb-2">
 									<SidebarItem href={item.href} spanClass="!px-2 !py-1" title={item.titulo}>
 										<svelte:fragment slot="icon">
-											<svelte:component this={item.icono} class="w-5 h-5" />
+											<item.icono class="w-5 h-5" />
 										</svelte:fragment>
 									</SidebarItem>
 								</div>
@@ -346,7 +346,7 @@
 
 		<!-- Main content - only this should scroll vertically -->
 		<main class="flex-1 overflow-y-auto p-6 w-full">
-			<slot />
+			{@render children()}
 		</main>
 	</div>
 </div>
