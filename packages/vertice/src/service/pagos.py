@@ -1,5 +1,8 @@
 # services/pagos_service.py
+from datetime import datetime
 from src.model.pago import Pago
+from tortoise.expressions import Q
+from src.utils.reporte_pdf import generar_html_reporte, generar_html_montos
 
 async def get_all_pagos():
     result = {"pagos": [], "metodos": []}
@@ -63,3 +66,48 @@ async def update_pago(pago_id: int, data: dict):
 async def delete_pago(pago_id: int):
     deleted = await Pago.filter(id=pago_id).delete()
     return deleted
+
+async def generar_reporte_dia(fecha_str: str, filtro: str, usuario: str):
+    fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
+
+    inicio_dia = datetime.combine(fecha.date(), datetime.min.time())
+    fin_dia = datetime.combine(fecha.date(), datetime.max.time())
+
+    q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
+    if filtro:
+        q &= Q(metodo_pago__nombre=filtro)
+
+    pagos = await Pago.filter(q).prefetch_related("cedula_estudiante__usuario", "metodo_pago")
+
+    return generar_html_reporte(
+        pagos, usuario, "Día", filtro if filtro else "Todos", fecha.strftime("%d/%m/%Y")
+    )
+
+
+async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str, usuario: str):
+    fi = datetime.strptime(fi_str, "%Y-%m-%d")
+    ff = datetime.strptime(ff_str, "%Y-%m-%d")
+
+    q = Q(fecha_pago__date__gte=fi.date(), fecha_pago__date__lte=ff.date())
+    if filtro:
+        q &= Q(metodo_pago__nombre=filtro)
+
+    pagos = await Pago.filter(q).prefetch_related("cedula_estudiante__usuario", "metodo_pago")
+
+    return generar_html_reporte(
+        pagos, usuario, "Fechas específicas", filtro if filtro else "Todos",
+        f"{fi.strftime('%d/%m/%Y')} a {ff.strftime('%d/%m/%Y')}"
+    )
+
+
+async def generar_reporte_monto(fi_str: str, ff_str: str, usuario: str):
+    fi = datetime.strptime(fi_str, "%Y-%m-%d")
+    ff = datetime.strptime(ff_str, "%Y-%m-%d")
+
+    q = Q(fecha_pago__date__gte=fi.date(), fecha_pago__date__lte=ff.date())
+    pagos = await Pago.filter(q).prefetch_related("metodo_pago")
+
+    return generar_html_montos(
+        pagos, usuario, f"{fi.strftime('%d/%m/%Y')} a {ff.strftime('%d/%m/%Y')}"
+    )
+    

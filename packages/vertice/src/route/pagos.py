@@ -1,6 +1,13 @@
-from flask import Blueprint, jsonify, request
+from decimal import Decimal
+from io import BytesIO
+import traceback
+from flask import Blueprint, Response, jsonify, request
+from weasyprint import HTML
+from src.model.pago import Pago
+from src.service.billetes import add_billete
+from src.model.estudiante import Estudiante
 from src.service.pagos import (
-    get_all_pagos, get_pago_by_id, add_pago, update_pago
+    generar_reporte_dia, generar_reporte_fechas, generar_reporte_monto, get_all_pagos, get_pago_by_id, add_pago, update_pago
 )
 from src.service.trazabilidad import add_trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
@@ -46,30 +53,56 @@ async def get_pago(id):
 
 @pago.route("/add", methods=["POST"])
 @jwt_required()
-async def add_pago_route():
-    claims = get_jwt()
-    usuario = claims.get('nombre')
+async def crear_pago():
+    try:
+        body = request.json
 
-    data = {
-        "cedula_estudiante_id": request.json['student'],
-        "metodo_pago_id": request.json['method'],
-        "monto": request.json['amount'],
-        "concepto": request.json["concept"],
-        "fecha_pago": request.json['date'],
-        "referencia_transferencia": request.json.get('referencia_transferencia', None),
-        "ciclo": request.json.get('ciclo', None)
-    }
+        cedula_str: str = body.get('student')
+        metodo_pago: str = body.get('method')
+        monto: float = body.get('amount')
+        concepto: str = body.get('concept')
+        fecha_pago_str: str = body.get('date')
+        referencia: str = body.get('reference')
+        ciclo: str = body.get('ciclo', '2025-1')
+        billetes = body.get('billetes', [])
 
-    pago_id = await add_pago(data)
+        # Buscar estudiante
+        estudiante = await Estudiante.get(usuario__cedula=cedula_str)
+        if not estudiante:
+            return jsonify({"error": "Estudiante no encontrado"}), 404
 
-    await add_trazabilidad({
-        "accion": f"Añadir pago para estudiante: {data['cedula_estudiante_id']} monto: {data['monto']}",
-        "usuario": usuario,
-        "modulo": "Administración",
-        "nivel_alerta": 2
-    })
+        # Mapear método de pago a ID
+        metodo_pago_id = {
+            "transfer": 1,
+            "cash": 2,
+            "point": 3
+        }.get(metodo_pago, 3)
 
-    return jsonify({"ok": True, "status": 200, "data": {"pagoId": pago_id}})
+        # Crear el pago
+        pago_id = await add_pago({
+            "cedula_estudiante": estudiante,
+            "metodo_pago_id": metodo_pago_id,
+            "monto": Decimal(monto),
+            "concepto": concepto,
+            "fecha_pago": datetime.strptime(fecha_pago_str, "%Y-%m-%d"),
+            "referencia_transferencia": referencia,
+            "ciclo": ciclo
+        })
+
+        # Agregar billetes directamente
+        for billete in billetes:
+            billete_data = {
+                "serial": billete["serial"],
+                "monto": Decimal(billete["monto"]),
+                "pago_id": pago_id
+            }
+            await add_billete(billete_data)
+
+        return jsonify({"ok": True, "pago_id": pago_id})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 
 @pago.route("/update/<int:id>", methods=["PUT"])
@@ -100,3 +133,90 @@ async def update_pago_route(id):
         return jsonify({"ok": True, "status": 200, "data": None})
     else:
         return jsonify({"ok": False, "status": 500, "data": {"message": "Error al actualizar"}}), 500
+
+
+def pdf_response(html: str, filename: str):
+    pdf_io = BytesIO()
+    HTML(string=html).write_pdf(pdf_io)
+    pdf_io.seek(0)
+
+    return Response(
+        pdf_io.read(),
+        mimetype='application/pdf',
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+
+@pago.get("/reporte")
+@jwt_required()
+async def generar_reporte():
+    tipo = request.args.get("tipo")              # dia | fechas | monto
+    filtro = request.args.get("f", "")           # filtro por método
+    claims = get_jwt()
+    usuario = claims.get('nombre')
+    print(request.args)
+
+    if tipo == "dia":
+        fecha_str = request.args.get("d")
+        html = await generar_reporte_dia(fecha_str, filtro, usuario)
+        return pdf_response(html, f"reporte_dia_{fecha_str}.pdf")
+
+    elif tipo == "fechas":
+        fi_str = request.args.get("fi")
+        ff_str = request.args.get("ff")
+        html = await generar_reporte_fechas(fi_str, ff_str, filtro, usuario)
+        return pdf_response(html, f"reporte_fechas_{fi_str}_to_{ff_str}.pdf")
+
+    elif tipo == "monto":
+        fi_str = request.args.get("fi")
+        ff_str = request.args.get("ff")
+        html = await generar_reporte_monto(fi_str, ff_str, usuario)
+        return pdf_response(html, f"reporte_montos_{fi_str}_to_{ff_str}.pdf")
+
+    return Response("Tipo de reporte inválido", status=400)
+
+
+@pago.route("/estudiante")
+@jwt_required()
+async def get_pagos_by_estudiante():
+    cedula = request.args.get("cedula")
+    if not cedula:
+        return jsonify({"ok": False, "message": "Cédula requerida"}), 400
+    
+    # trim underscore
+    cedula = cedula.replace("_", "")
+
+    estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario")
+    if not estudiante:
+        return jsonify({"ok": False, "message": "Estudiante no encontrado"}), 404
+
+    pagos = await Pago.filter(cedula_estudiante=estudiante).prefetch_related("metodo_pago")
+
+    resultado = []
+    for pago in pagos:
+        metodo = pago.metodo_pago.nombre
+
+        # Solo buscar billetes si aplica
+        billetes = []
+        if metodo.lower() == "efectivo":
+            from src.model.billete import Billete
+            billetes_query = await Billete.filter(pago_id=pago.id)
+            billetes = [{"denominacion": str(b.monto), "cantidad": 1} for b in billetes_query]
+
+        resultado.append({
+            "id": pago.id,
+            "fecha": pago.fecha_pago.strftime("%d-%m-%Y"),
+            "monto": str(pago.monto),
+            "metodo": metodo,
+            "descripcion": pago.concepto,
+            "ciclo": pago.ciclo,
+            "referencia": pago.referencia_transferencia,
+            "estudiante": estudiante.usuario.nombre,
+            "billetes": billetes
+        })
+
+    return jsonify({
+        "nombre": estudiante.usuario.nombre,
+        "pagos": resultado
+    })

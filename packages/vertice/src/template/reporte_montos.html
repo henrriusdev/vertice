@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Reporte de Montos</title>
+  <style>
+    body {
+      font-family: 'Helvetica', sans-serif;
+      padding: 30px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .title {
+      font-size: 24px;
+      color: #0b5394;
+    }
+
+    .info {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e0e0e0;
+    }
+
+    .total {
+      text-align: right;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1 class="title">Resumen de Montos por Método de Pago</h1>
+    <div class="info">
+      Generado por: <strong>{{ usuario }}</strong><br>
+      Fecha del reporte: {{ fecha_actual }}<br>
+      Rango: {{ fecha_rango }}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Método</th>
+        <th>Monto Total (Bs.)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for metodo, monto in totales.items() %}
+      <tr>
+        <td>{{ metodo }}</td>
+        <td>Bs. {{ "{:,.2f}".format(monto) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="total">
+    Gran total: Bs. {{ "{:,.2f}".format(gran_total) }}
+  </div>
+
+</body>
+
+</html>
