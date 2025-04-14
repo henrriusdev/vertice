@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
 import traceback
 
+from src.service.usuarios import get_usuario_por_correo
 from src.service.materias import (
     get_materias, get_materia, get_materias_validas,
     add_materia, modificar_materia_estudiante, update_materia, delete_materia
@@ -15,7 +16,7 @@ mat = Blueprint('materia_blueprint', __name__)
 @mat.route('/')
 @jwt_required()
 async def listar_materias():
-    usuario = get_jwt().get('nombre')
+    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     await add_trazabilidad({"accion": "Obtener todas las Materias", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
     data = await get_materias()
     return jsonify({"ok": True, "status": 200, "data": data})

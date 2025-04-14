@@ -94,9 +94,9 @@
 			roles: ['superusuario', 'caja', 'coordinador']
 		},
 		{
-			titulo: 'Asignaturas',
+			titulo: 'Materias',
 			icono: ListOutline,
-			href: '/superusuario/asignaturas',
+			href: '/materias',
 			roles: ['coordinador', 'control']
 		},
 		{

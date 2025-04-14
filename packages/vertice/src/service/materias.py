@@ -6,7 +6,7 @@ from src.model.estudiante import Estudiante
 async def get_materias():
     try:
         materias = await Materia.all().prefetch_related("id_carrera")
-        join = {"materias": [], "carreras": []}
+        join = {"materias": []}
 
         for m in materias:
             horarios = m.horarios or []
@@ -25,7 +25,6 @@ async def get_materias():
             m.hora_fin2 = hora_fin2
 
             join["materias"].append(m.to_JSON())
-            join["carreras"].append(m.id_carrera.to_JSON())
 
         return join
     except Exception as ex:

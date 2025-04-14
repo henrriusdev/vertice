@@ -49,3 +49,19 @@ export type PagosEstudianteResponse = {
 	nombre: string;
 	pagos: Pago[];
 };
+
+export type MateriaReq = {
+	id: string;
+	nombre: string;
+	prelacion: string;
+	unidad_credito: number;
+	hp: number;
+	ht: number;
+	semestre: number;
+	id_carrera: string;
+	ciclo: string;
+	modalidad?: string;
+	maximo?: number;
+	id_docente?: string;
+	horarios: { dia: string; inicio: string; fin: string }[];
+}
