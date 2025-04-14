@@ -29,8 +29,8 @@
 {#if pagos.length > 0}
 	{#snippet actions(row: Pago)}
 		<div class="flex gap-2">
-			<Button size="xs" color="light" on:click={() => mostrarPago(row)}>
-				<EyeOutline class="w-4 h-4" />
+			<Button pill size="xs" color="light" class="p-1!"  on:click={() => mostrarPago(row)}>
+				<EyeOutline class="w-5 h-5" />
 			</Button>
 		</div>
 	{/snippet}

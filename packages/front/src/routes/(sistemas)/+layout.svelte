@@ -85,13 +85,13 @@
 			titulo: 'Docentes',
 			icono: UsersOutline,
 			href: '/docentes',
-			roles: ['superusuario']
+			roles: ['superusuario', 'coordinador', 'control']
 		},
 		{
 			titulo: 'Estudiantes',
 			icono: UsersGroupOutline,
 			href: '/estudiantes',
-			roles: ['superusuario', 'caja']
+			roles: ['superusuario', 'caja', 'coordinador']
 		},
 		{
 			titulo: 'Asignaturas',
@@ -128,6 +128,12 @@
 			icono: ReceiptOutline,
 			href: '/caja/pagos',
 			roles: ['caja']
+		},
+		{
+			titulo: 'Configuración',
+			icono: CogOutline,
+			href: '/superusuario/configuracion',
+			roles: ['superusuario','coordinador']
 		}
 	];
 

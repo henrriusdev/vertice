@@ -29,7 +29,7 @@ type ErroresEstudiante = {
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const { rol } = await parent();
-	if (!['caja', 'superusuario'].includes(rol)) {
+	if (!['caja', 'superusuario', 'coordinador'].includes(rol)) {
 		redirect(302, '/'+rol);
 	}
 	try {
