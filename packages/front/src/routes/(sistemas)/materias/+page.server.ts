@@ -32,12 +32,22 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 export const actions: Actions = {
 	// Acción para crear una materia
 	create: async ({ request, fetch }) => {
-		const payload = Object.fromEntries(await request.formData()) as unknown as MateriaReq;
+		const form = await request.formData()
+		const payload = Object.fromEntries(form) as unknown as MateriaReq;
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
 			return { errores };
 		}
+
+		let horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
+			dia: string;
+			inicio: string;
+			fin: string;
+		}[];
+
+		payload.horarios = horarios
+		payload.prelacion = payload?.prelacion ?? ''
 
 		try {
 			await crearMateria(fetch, payload);
@@ -95,7 +105,6 @@ function validarPayload(
 		'ht',
 		'semestre',
 		'id_carrera',
-		'ciclo',
 		'modalidad',
 		'maximo'
 	];

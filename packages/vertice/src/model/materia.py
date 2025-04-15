@@ -11,10 +11,9 @@ class Materia(Model):
     semestre = fields.IntField()
     id_carrera = fields.ForeignKeyField("models.Carrera", related_name='materias')
     horarios = fields.JSONField(null=True)  # Nuevo campo agrupado
-    ciclo = fields.CharField(max_length=10)
     modalidad = fields.CharField(max_length=20, null=True)
     maximo = fields.IntField(null=True)
-    id_docente = fields.ForeignKeyField("models.Usuario", related_name='materias', null=True)
+    id_docente = fields.ForeignKeyField("models.Docente", related_name='materias', null=True)
 
     class Meta:
         table = "materias"

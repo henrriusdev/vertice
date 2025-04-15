@@ -48,10 +48,8 @@ async def materias_validas(cedula_estudiante: str):
 @mat.route('/add', methods=['POST'])
 @jwt_required()
 async def crear_materia():
-    usuario = get_jwt().get('nombre')
+    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = request.json
-    config = await get_configuracion("1")
-    data["ciclo"] = config["ciclo"]
     try:
         await add_materia(data)
         await add_trazabilidad({"accion": f"Añadir Materia {data['id']}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 2})
@@ -63,11 +61,9 @@ async def crear_materia():
 @mat.route('/update/<id>', methods=['PUT'])
 @jwt_required()
 async def modificar_materia(id):
-    usuario = get_jwt().get('nombre')
+    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = request.json
     data["id"] = id
-    config = await get_configuracion("1")
-    data["ciclo"] = config["ciclo"]
     try:
         await update_materia(id, data)
         await add_trazabilidad({"accion": f"Actualizar Materia {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 2})

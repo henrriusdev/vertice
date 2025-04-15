@@ -68,7 +68,7 @@ async def add_new_docente():
     await add_docente(**payload)
 
     await add_trazabilidad({
-        "accion": f"Añadir Docente con cédula: {payload['usuario']}",
+        "accion": f"Añadir Docente con cédula: {payload['usuario_id']}",
         "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Docentes",
         "nivel_alerta": 2

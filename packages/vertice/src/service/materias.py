@@ -1,3 +1,4 @@
+import json
 from src.model.materia import Materia
 from src.model.configuracion import Configuracion
 from src.model.matricula import Matricula
@@ -9,62 +10,64 @@ async def get_materias():
         join = {"materias": []}
 
         for m in materias:
-            horarios = m.horarios or []
-            dia = horarios[0]["dia"] if len(horarios) > 0 else None
-            hora_inicio = horarios[0]["hora_inicio"] if len(horarios) > 0 else None
-            hora_fin = horarios[0]["hora_fin"] if len(horarios) > 0 else None
-            dia2 = horarios[1]["dia"] if len(horarios) > 1 else None
-            hora_inicio2 = horarios[1]["hora_inicio"] if len(horarios) > 1 else None
-            hora_fin2 = horarios[1]["hora_fin"] if len(horarios) > 1 else None
+            # Forzar a dict para hacer serializable
+            horarios = m.horarios
+            if isinstance(horarios, str):
+                try:
+                    horarios = json.loads(horarios)
+                except json.JSONDecodeError:
+                    horarios = []
 
-            m.dia = dia
-            m.hora_inicio = hora_inicio
-            m.hora_fin = hora_fin
-            m.dia2 = dia2
-            m.hora_inicio2 = hora_inicio2
-            m.hora_fin2 = hora_fin2
-
-            join["materias"].append(m.to_JSON())
+            join["materias"].append({
+                "id": m.id,
+                "nombre": m.nombre,
+                "prelacion": m.prelacion,
+                "unidad_credito": m.unidad_credito,
+                "hp": m.hp,
+                "ht": m.ht,
+                "semestre": m.semestre,
+                "id_carrera": m.id_carrera_id,  # usar el id directamente
+                "modalidad": m.modalidad,
+                "maximo": m.maximo,
+                "id_docente": m.id_docente_id,
+                "horarios": horarios
+            })
 
         return join
     except Exception as ex:
         raise Exception(ex)
 
 
-async def add_materia(materia):
+async def add_materia(materia: dict):
     try:
-        existe = await Materia.filter(id=materia.id).exists()
+        existe = await Materia.filter(id=materia["id"]).exists()
         if existe:
             return "materia ya existe"
 
         horarios = []
-        if materia.dia and materia.hora_inicio and materia.hora_fin:
-            horarios.append({
-                "dia": materia.dia,
-                "hora_inicio": materia.hora_inicio,
-                "hora_fin": materia.hora_fin
-            })
-        if materia.dia2 and materia.hora_inicio2 and materia.hora_fin2:
-            horarios.append({
-                "dia": materia.dia2,
-                "hora_inicio": materia.hora_inicio2,
-                "hora_fin": materia.hora_fin2
-            })
+        print(materia["horarios"])
+        print("AAA")
+        if materia["horarios"]:
+            for horario in materia["horarios"]:
+                horarios.append({
+                    "dia": horario["dia"],
+                    "hora_inicio": horario["inicio"],
+                    "hora_fin": horario["fin"]
+                })
 
         await Materia.create(
-            id=materia.id,
-            nombre=materia.nombre,
-            prelacion=materia.prelacion,
-            unidad_credito=materia.unidad_credito,
-            hp=materia.hp,
-            ht=materia.ht,
-            semestre=materia.semestre,
-            id_carrera_id=materia.id_carrera,
-            id_docente_id=materia.id_docente,
+            id=materia["id"],
+            nombre=materia["nombre"],
+            prelacion=materia["prelacion"] if materia["prelacion"] else "",
+            unidad_credito=materia["unidad_credito"],
+            hp=materia["hp"],
+            ht=materia["ht"],
+            semestre=materia["semestre"],
+            id_carrera_id=materia["id_carrera"],
+            id_docente_id=materia["id_docente"],
             horarios=horarios,
-            ciclo=materia.ciclo,
-            modalidad=materia.modalidad,
-            maximo=materia.maximo
+            modalidad=materia["modalidad"],
+            maximo=materia["maximo"]
         )
 
         return 1
@@ -147,8 +150,15 @@ async def get_materias_validas(cedula_estudiante: str):
                 if not aprobada:
                     continue
 
-            # Extraer horarios
             horarios = materia.horarios or []
+
+            # Si por error se guardó como string
+            if isinstance(horarios, str):
+                try:
+                    horarios = json.loads(horarios)
+                except json.JSONDecodeError:
+                    horarios = []
+
             materia.dia = horarios[0]["dia"] if len(horarios) > 0 else None
             materia.hora_inicio = horarios[0]["hora_inicio"] if len(horarios) > 0 else None
             materia.hora_fin = horarios[0]["hora_fin"] if len(horarios) > 0 else None
@@ -156,7 +166,6 @@ async def get_materias_validas(cedula_estudiante: str):
             materia.hora_inicio2 = horarios[1]["hora_inicio"] if len(horarios) > 1 else None
             materia.hora_fin2 = horarios[1]["hora_fin"] if len(horarios) > 1 else None
 
-            # Cantidad de estudiantes inscritos
             count = await Matricula.filter(cod_materia=materia, ciclo=ciclo).count()
             materia.cantidad_estudiantes = count
 
