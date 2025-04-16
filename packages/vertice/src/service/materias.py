@@ -45,14 +45,12 @@ async def add_materia(materia: dict):
             return "materia ya existe"
 
         horarios = []
-        print(materia["horarios"])
-        print("AAA")
         if materia["horarios"]:
             for horario in materia["horarios"]:
                 horarios.append({
                     "dia": horario["dia"],
-                    "hora_inicio": horario["inicio"],
-                    "hora_fin": horario["fin"]
+                    "hora_inicio": horario["hora_inicio"],
+                    "hora_fin": horario["hora_fin"]
                 })
 
         await Materia.create(
@@ -75,38 +73,33 @@ async def add_materia(materia: dict):
         raise Exception(ex)
 
 
-async def update_materia(materia):
+async def update_materia(materia: dict):
     try:
-        m = await Materia.get_or_none(id=materia.id)
+        m = await Materia.get_or_none(id=materia["id"])
         if not m:
             return 0
 
         horarios = []
-        if materia.dia and materia.hora_inicio and materia.hora_fin:
-            horarios.append({
-                "dia": materia.dia,
-                "hora_inicio": materia.hora_inicio,
-                "hora_fin": materia.hora_fin
-            })
-        if materia.dia2 and materia.hora_inicio2 and materia.hora_fin2:
-            horarios.append({
-                "dia": materia.dia2,
-                "hora_inicio": materia.hora_inicio2,
-                "hora_fin": materia.hora_fin2
-            })
+        print(materia["horarios"])
+        if materia["horarios"]:
+            for horario in materia["horarios"]:
+                horarios.append({
+                    "dia": horario["dia"],
+                    "hora_inicio": horario["hora_inicio"],
+                    "hora_fin": horario["hora_fin"]
+                })
 
-        m.nombre = materia.nombre
-        m.prelacion = materia.prelacion
-        m.unidad_credito = materia.unidad_credito
-        m.hp = materia.hp
-        m.ht = materia.ht
-        m.semestre = materia.semestre
-        m.id_carrera_id = materia.id_carrera
-        m.id_docente_id = materia.id_docente
+        m.nombre = materia["nombre"]
+        m.prelacion = materia["prelacion"]
+        m.unidad_credito = materia["unidad_credito"]
+        m.hp = materia["hp"]
+        m.ht = materia["ht"]
+        m.semestre = materia["semestre"]
+        m.id_carrera_id = materia["id_carrera"]
+        m.id_docente_id = materia["id_docente"]
         m.horarios = horarios
-        m.ciclo = materia.ciclo
-        m.modalidad = materia.modalidad
-        m.maximo = materia.maximo
+        m.modalidad = materia["modalidad"]
+        m.maximo = materia["maximo"]
 
         await m.save()
         return 1

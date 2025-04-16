@@ -21,7 +21,6 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 		const carreras = await obtenerCarreras(fetch);
 		const docentes = await obtenerDocentes(fetch);
 
-		console.log('materias', data);
 		return { materias: data.materias, carreras, docentes };
 	} catch (error) {
 		console.error('Error al obtener las materias:', error);
@@ -40,7 +39,7 @@ export const actions: Actions = {
 			return { errores };
 		}
 
-		let horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
+		const horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
 			dia: string;
 			inicio: string;
 			fin: string;
@@ -60,7 +59,8 @@ export const actions: Actions = {
 
 	// Acción para editar una materia
 	edit: async ({ request, fetch }) => {
-		const payload = Object.fromEntries(await request.formData()) as unknown as MateriaReq & {
+		const form = await request.formData();
+		const payload = Object.fromEntries(form) as unknown as MateriaReq & {
 			id: string;
 		};
 
@@ -68,6 +68,17 @@ export const actions: Actions = {
 		if (Object.keys(errores).length > 0) {
 			return { errores };
 		}
+
+		const horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
+			dia: string;
+			inicio: string;
+			fin: string;
+		}[];
+
+		console.log('horarios', horarios);
+
+		payload.horarios = horarios;
+		payload.prelacion = payload?.prelacion ?? '';
 
 		try {
 			await actualizarMateria(fetch, payload.id, payload);

@@ -18,7 +18,7 @@
 
 	let { data = [], actions } = $props<{
 		data: any[];
-		actions: (row: any) => ReturnType<import('svelte').Snippet>;
+		actions?: (row: any) => ReturnType<import('svelte').Snippet>;
 	}>();
 
 	const pageOptions: SelectOptionType<number>[] = [
@@ -35,7 +35,7 @@
 	let total = $derived(data.length);
 	const headers = $derived(
 		Object.keys(data[0] || {})
-			.filter((k) => !['usuario', 'activo', 'ruta_foto', 'ultima_sesion','billetes'].includes(k))
+			.filter((k) => !['usuario', 'activo', 'ruta_foto', 'ultima_sesion','billetes','horarios'].includes(k))
 			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : 0))
 	);
 	let start = $derived((currentPage - 1) * perPage + 1);
@@ -67,7 +67,9 @@
 			{#each headers as h}
 				<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
 			{/each}
+			{#if actions}
 			<TableHeadCell>Acciones</TableHeadCell>
+			{/if}
 		</TableHead>
 
 		<TableBody tableBodyClass="divide-y">
@@ -80,9 +82,11 @@
 							<TableBodyCell>{row[h]}</TableBodyCell>
 						{/if}
 					{/each}
+					{#if actions}
 					<TableBodyCell>
 						{@render actions(row)}
 					</TableBodyCell>
+					{/if}
 				</TableBodyRow>
 			{/each}
 			{#if paginated.length === 0}

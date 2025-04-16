@@ -58,14 +58,14 @@ async def crear_materia():
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
-@mat.route('/update/<id>', methods=['PUT'])
+@mat.route('/update/<id_materia>', methods=['PUT'])
 @jwt_required()
-async def modificar_materia(id):
+async def modificar_materia(id_materia: str):
     usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = request.json
-    data["id"] = id
+    data["id"] = id_materia
     try:
-        await update_materia(id, data)
+        await update_materia(data)
         await add_trazabilidad({"accion": f"Actualizar Materia {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 2})
         return jsonify({"ok": True, "status": 200})
     except Exception as ex:

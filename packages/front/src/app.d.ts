@@ -72,12 +72,12 @@ export type Materia = {
 	hp: number;
 	ht: number;
 	semestre: number;
-	id_carrera: number | object;
+	id_carrera: number;
 	horarios: Horario[];
 	ciclo: string;
 	modalidad: string;
 	maximo: number;
-	id_docente: number | object;
+	id_docente: number;
 }
 
 export type Matricula = {
