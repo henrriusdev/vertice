@@ -20,7 +20,7 @@ def create_app():
         (archivos.arc,     '/api/archivos'),
         (billete.bil,      '/api/billetes'),
         (carreras.car,     '/api/carreras'),
-        (config.cfg,       '/api/config'),
+        (config.cfg,       '/api/configuracion'),
         (coordinacion.crd, '/api/coordinadores'),
         (docente.doc,      '/api/docentes'),
         (estudiantes.est,  '/api/estudiantes'),

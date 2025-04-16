@@ -16,9 +16,14 @@
 	} from 'flowbite-svelte';
 	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
 
-	let { data = [], actions } = $props<{
+	let {
+		data = [],
+		actions,
+		onSearch
+	} = $props<{
 		data: any[];
 		actions?: (row: any) => ReturnType<import('svelte').Snippet>;
+		onSearch?: (key: string, value: string) => string;
 	}>();
 
 	const pageOptions: SelectOptionType<number>[] = [
@@ -35,8 +40,12 @@
 	let total = $derived(data.length);
 	const headers = $derived(
 		Object.keys(data[0] || {})
-			.filter((k) => !['usuario', 'activo', 'ruta_foto', 'ultima_sesion','billetes','horarios'].includes(k))
-			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : 0))
+			.filter(
+				(k) =>
+					!['usuario', 'activo', 'ruta_foto', 'ultima_sesion', 'billetes', 'horarios'].includes(k)
+			)
+			// place ID first, nombre second, and then the rest
+			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : a === 'nombre' ? -1 : b === 'nombre' ? 1 : 0))
 	);
 	let start = $derived((currentPage - 1) * perPage + 1);
 	let end = $derived(Math.min(start + perPage - 1, total));
@@ -65,10 +74,16 @@
 	<Table striped hoverable shadow>
 		<TableHead>
 			{#each headers as h}
-				<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
+				{#if h.includes('id_')}
+					<TableHeadCell>{h.replace('id_', '')}</TableHeadCell>
+				{:else if h === 'maximo'}
+					<TableHeadCell>Máximo de Estudiantes</TableHeadCell>
+				{:else}
+					<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
+				{/if}
 			{/each}
 			{#if actions}
-			<TableHeadCell>Acciones</TableHeadCell>
+				<TableHeadCell>Acciones</TableHeadCell>
 			{/if}
 		</TableHead>
 
@@ -78,14 +93,16 @@
 					{#each headers.length ? headers : Object.keys(row) as h}
 						{#if h === 'rol'}
 							<TableBodyCell class="capitalize">{row[h].nombre}</TableBodyCell>
+						{:else if h.includes('id_') && row[h]}
+							<TableBodyCell>{onSearch(h, row[h])}</TableBodyCell>
 						{:else}
 							<TableBodyCell>{row[h]}</TableBodyCell>
 						{/if}
 					{/each}
 					{#if actions}
-					<TableBodyCell>
-						{@render actions(row)}
-					</TableBodyCell>
+						<TableBodyCell>
+							{@render actions(row)}
+						</TableBodyCell>
 					{/if}
 				</TableBodyRow>
 			{/each}

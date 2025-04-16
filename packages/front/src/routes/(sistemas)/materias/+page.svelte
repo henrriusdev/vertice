@@ -129,6 +129,18 @@
 		showHorario = true;
 	}
 
+	function searchName(key: 'id_docente' | 'id_carrera', value: number): string {
+		if (key === 'id_docente') {
+			return data.docentes.find((d) => d.id === value)?.nombre || '';
+		}
+
+		if (key === 'id_carrera') {
+			return data.carreras.find((c) => c.id === value)?.nombre || '';
+		}
+
+		return '';
+	}
+
 	const handleSubmit: SubmitFunction = () => {
 		return async ({ result, update }) => {
 			if (result.type === 'success') {
@@ -140,84 +152,82 @@
 </script>
 
 <!-- Tabla de materias -->
-<div class="p-4">
-	<div class="flex justify-between items-center mb-4">
-		<h1 class="text-2xl font-bold">Materias</h1>
-		<Button onclick={() => openModal()} class="btn btn-primary"
-			><PlusOutline class="h-5 w-5 mr-4" />Crear Materia</Button
-		>
-	</div>
-
-	<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-		<div>
-			<Label>Carrera</Label>
-			<Select
-				bind:value={filtroCarrera}
-				items={[
-					{ value: '', name: 'Todas' },
-					...data.carreras.map((c) => ({ value: c.id, name: c.nombre }))
-				]}
-			/>
-		</div>
-		<div>
-			<Label>Docente</Label>
-			<Select
-				bind:value={filtroDocente}
-				items={[
-					{ value: '', name: 'Todos' },
-					...data.docentes.map((d) => ({ value: d.id, name: d.nombre }))
-				]}
-			/>
-		</div>
-		<div>
-			<Label>Semestre</Label>
-			<Select
-				bind:value={filtroSemestre}
-				items={[
-					{ value: '', name: 'Todos' },
-					...Array(10)
-						.fill(null)
-						.map((_, i) => ({ value: `${i + 1}`, name: `${i + 1}°` }))
-				]}
-			/>
-		</div>
-		<div>
-			<Label>Búsqueda o condición</Label>
-			<Input bind:value={searchTerm} placeholder="Nombre, código o expresión...">
-				<Button
-					slot="right"
-					color="primary"
-					size="xs"
-					title="Ayuda"
-					outline
-					class="p-1.5!"
-					on:click={() => (showAyuda = true)}
-				>
-					<InfoCircleOutline class="w-7 h-7" />
-				</Button>
-			</Input>
-		</div>
-	</div>
-
-	{#snippet action(row: Materia)}
-		<div class="flex justify-between items-center">
-			<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
-				<PenOutline class="w-5 h-5" />
-			</Button>
-			<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
-				<EyeOutline class="w-5 h-5" />
-			</Button>
-			<form action="?/delete" method="POST">
-				<input type="hidden" name="id" value={row.id} />
-				<Button pill class="p-1.5!" size="xs" color="red" type="submit">
-					<TrashBinOutline class="w-5 h-5" />
-				</Button>
-			</form>
-		</div>
-	{/snippet}
-
-	<DataTable data={materiasFiltradas} actions={action} />
+<div class="flex justify-between items-center mb-4">
+	<h1 class="text-2xl font-bold">Materias</h1>
+	<Button onclick={() => openModal()} class="btn btn-primary"
+		><PlusOutline class="h-5 w-5 mr-4" />Crear Materia</Button
+	>
 </div>
+
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+	<div>
+		<Label>Carrera</Label>
+		<Select
+			bind:value={filtroCarrera}
+			items={[
+				{ value: '', name: 'Todas' },
+				...data.carreras.map((c) => ({ value: c.id, name: c.nombre }))
+			]}
+		/>
+	</div>
+	<div>
+		<Label>Docente</Label>
+		<Select
+			bind:value={filtroDocente}
+			items={[
+				{ value: '', name: 'Todos' },
+				...data.docentes.map((d) => ({ value: d.id, name: d.nombre }))
+			]}
+		/>
+	</div>
+	<div>
+		<Label>Semestre</Label>
+		<Select
+			bind:value={filtroSemestre}
+			items={[
+				{ value: '', name: 'Todos' },
+				...Array(10)
+					.fill(null)
+					.map((_, i) => ({ value: `${i + 1}`, name: `${i + 1}°` }))
+			]}
+		/>
+	</div>
+	<div>
+		<Label>Búsqueda o condición</Label>
+		<Input bind:value={searchTerm} placeholder="Nombre, código o expresión...">
+			<Button
+				slot="right"
+				color="primary"
+				size="xs"
+				title="Ayuda"
+				outline
+				class="p-1.5!"
+				on:click={() => (showAyuda = true)}
+			>
+				<InfoCircleOutline class="w-7 h-7" />
+			</Button>
+		</Input>
+	</div>
+</div>
+
+{#snippet action(row: Materia)}
+	<div class="flex justify-between items-center">
+		<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
+			<PenOutline class="w-5 h-5" />
+		</Button>
+		<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
+			<EyeOutline class="w-5 h-5" />
+		</Button>
+		<form action="?/delete" method="POST">
+			<input type="hidden" name="id" value={row.id} />
+			<Button pill class="p-1.5!" size="xs" color="red" type="submit">
+				<TrashBinOutline class="w-5 h-5" />
+			</Button>
+		</form>
+	</div>
+{/snippet}
+
+<DataTable data={materiasFiltradas} actions={action} onSearch={searchName} />
 
 <!-- Modal de creación/edición -->
 <Modal bind:open={showModal} size="lg">

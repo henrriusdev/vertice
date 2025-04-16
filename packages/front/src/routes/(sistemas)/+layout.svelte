@@ -132,7 +132,7 @@
 		{
 			titulo: 'Configuración',
 			icono: CogOutline,
-			href: '/superusuario/configuracion',
+			href: '/configuracion',
 			roles: ['superusuario','coordinador']
 		}
 	];

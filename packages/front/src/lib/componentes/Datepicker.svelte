@@ -3,6 +3,8 @@
 	import 'flatpickr/dist/themes/material_blue.css';
 
 	import type { BaseOptions } from 'flatpickr/dist/types/options';
+	import { ButtonGroup, InputAddon } from 'flowbite-svelte';
+	import { CalendarEditOutline } from 'flowbite-svelte-icons';
 
 	type InputHTMLProps = Partial<Omit<HTMLElementTagNameMap['input'], 'value'>>;
 	// ✅ Props reactivas
@@ -12,6 +14,7 @@
 		dateRange = false,
 		timePicker = false,
     maxDate = new Date(),
+		minDate,
 		onChange,
 		...others
 	} = $props<{
@@ -20,6 +23,7 @@
 		dateRange?: boolean;
 		timePicker?: boolean;
     maxDate?: Date;
+		minDate?: Date;
 		onChange?: () => void;
 	} & InputHTMLProps>();
 
@@ -32,6 +36,7 @@
 		time_24hr: false,
 		allowInput: false,
     maxDate,
+		minDate,
 		locale: {
 			firstDayOfWeek: 1,
 			rangeSeparator: ' al ',
@@ -66,13 +71,18 @@
 </script>
 
 <div class="form-control w-full">
-	<Flatpickr
+	<ButtonGroup class="w-full">
+		<Flatpickr
 		bind:value
 		id="datepicker"
 		name="datepicker"
 		options={mergedOptions}
-		class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+		class="block w-full rounded-tl-lg rounded-bl-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
 		on:change={change}
 		{...others}
-	/>
+		/>
+    <InputAddon>
+      <CalendarEditOutline class="w-4 h-4 text-gray-500 dark:text-gray-400" />
+    </InputAddon>
+	</ButtonGroup>
 </div>

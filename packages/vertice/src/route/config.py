@@ -6,13 +6,13 @@ from datetime import datetime
 
 cfg = Blueprint('config_blueprint', __name__)
 
-@cfg.route('/<id>')
-async def get_one_config(id):
+@cfg.route('/', methods=['GET'])
+async def get_one_config():
     try:
-        configuracion = await get_configuracion(id)
+        configuracion = await get_configuracion(1)
         if configuracion:
             return jsonify({"ok": True, "status": 200, "data": configuracion})
-        return jsonify({"ok": False, "status": 404, "data": {"message": "config no disponible"}}), 404
+        return jsonify({"ok": False, "status": 204, "data": {"message": "config no disponible"}}), 204
     except Exception as ex:
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
