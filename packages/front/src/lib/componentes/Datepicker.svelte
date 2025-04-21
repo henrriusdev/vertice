@@ -1,88 +1,47 @@
 <script lang="ts">
-	import Flatpickr from 'svelte-flatpickr';
-	import 'flatpickr/dist/themes/material_blue.css';
+	import { Datepicker, Timepicker } from 'flowbite-svelte';
 
-	import type { BaseOptions } from 'flatpickr/dist/types/options';
-	import { ButtonGroup, InputAddon } from 'flowbite-svelte';
-	import { CalendarEditOutline } from 'flowbite-svelte-icons';
-
-	type InputHTMLProps = Partial<Omit<HTMLElementTagNameMap['input'], 'value'>>;
-	// ✅ Props reactivas
 	let {
-		value = $bindable(),
-		options = {},
-		dateRange = false,
-		timePicker = false,
-    maxDate = new Date(),
-		minDate,
-		onChange,
-		...others
-	} = $props<{
-		value: Date | Date[] | null;
-		options?: Partial<BaseOptions>;
+		dateRange,
+		timePicker,
+		value = $bindable()
+	}: {
 		dateRange?: boolean;
 		timePicker?: boolean;
-    maxDate?: Date;
-		minDate?: Date;
-		onChange?: () => void;
-	} & InputHTMLProps>();
-
-	// ✅ Valor derivado sin usar $:
-	const mergedOptions = $derived({
-		mode: dateRange ? 'range' : 'single',
-		enableTime: timePicker || options.enableTime,
-		noCalendar: timePicker,
-		dateFormat: timePicker ? 'H:i' : 'd/m/Y',
-		time_24hr: false,
-		allowInput: false,
-    maxDate,
-		minDate,
-		locale: {
-			firstDayOfWeek: 1,
-			rangeSeparator: ' al ',
-			weekdays: {
-				shorthand: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-				longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-			},
-			months: {
-				shorthand: [
-					'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-				],
-				longhand: [
-					'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-				]
-			}
-		},
-		...options
-	});
-
-	$effect(() => {
-		if (!dateRange && Array.isArray(value)) {
-			value = value[0];
-		}
-	})
-
-	function change() {
-		if (onChange) {
-			onChange();
-		}
-	}
+		value: Date | { from?: Date; to?: Date } | null;
+	} = $props();
 
 </script>
 
-<div class="form-control w-full">
-	<ButtonGroup class="w-full">
-		<Flatpickr
-		bind:value
-		id="datepicker"
-		name="datepicker"
-		options={mergedOptions}
-		class="block w-full rounded-tl-lg rounded-bl-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-		on:change={change}
-		{...others}
+<div class="w-full">
+	{#if dateRange}
+		<Datepicker
+			autohide
+			range
+			bind:rangeFrom={value!.from}
+			bind:rangeTo={value!.to}
+			firstDayOfWeek={1}
+			title="Selecciona fecha de inicio y fin"
+			inputClass="w-full"
+			locale="es-VE"
+			dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 		/>
-    <InputAddon>
-      <CalendarEditOutline class="w-4 h-4 text-gray-500 dark:text-gray-400" />
-    </InputAddon>
-	</ButtonGroup>
+	{:else if timePicker}
+		<Timepicker
+			bind:value
+			format="24"
+			placeholder="Selecciona una hora"
+			inputClass="w-full"
+		/>
+	{:else}
+		<Datepicker
+			bind:value
+			autohide
+			firstDayOfWeek={1}
+			locale="es-VE"
+			title="Selecciona una fecha"
+			inputClass="w-full"
+			dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
+		/>
+	{/if}
 </div>

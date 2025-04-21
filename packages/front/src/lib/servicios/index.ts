@@ -5,3 +5,4 @@ export * from './docentes';
 export * from './coordinadores';
 export * from './pagos';
 export * from './materias';
+export * from './configuracion';

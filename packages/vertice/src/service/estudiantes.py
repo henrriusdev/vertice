@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from tomlkit import date
+from src.utils.fecha import format_fecha, parse_fecha
 from src.model.usuario import Usuario
 from src.model.estudiante import Estudiante
 from src.model.matricula import Matricula
@@ -73,12 +73,6 @@ async def add_student(data):
     except Exception as ex:
         raise Exception(ex)
 
-
-def parse_fecha(fecha_str: str) -> datetime:
-    return datetime.strptime(fecha_str, "%d/%m/%Y")
-
-def format_fecha(fecha: datetime):
-    return datetime.strftime("%d/%m/%Y")
 
 
 async def update_student(id_estudiante: int, data: dict):

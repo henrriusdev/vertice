@@ -15,12 +15,13 @@
   "scripts": {
     "dev": "concurrently -k -n backend,frontend -c yellow,cyan \"run_backend.bat\" \"cd packages/front && pnpm run dev\"",
     "dev:front": "cd packages/front && pnpm run dev"
-  
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "date-fns-tz": "^3.2.0",
+    "flowbite-svelte": "^0.48.6"
   },
-  "workspaces":[
+  "workspaces": [
     "packages/*"
   ]
 }

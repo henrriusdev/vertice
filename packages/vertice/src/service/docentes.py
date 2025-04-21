@@ -1,4 +1,4 @@
-from datetime import datetime
+from src.utils.fecha import format_fecha, parse_fecha
 from src.model.docente import Docente
 from src.model.peticion import Peticion
 from src.model.usuario import Usuario
@@ -46,12 +46,6 @@ async def get_docente(id: int):
         return None
     except Exception as ex:
         raise Exception(ex)
-
-def parse_fecha(fecha_str: str) -> datetime:
-    return datetime.strptime(fecha_str, "%d/%m/%Y")
-
-def format_fecha(fecha: datetime):
-    return fecha.strftime("%d/%m/%Y")
 
 async def add_docente(usuario_id: int, titulo: str, dedicacion: str, especialidad: str, estatus: str = "Activo", fecha_ingreso=None, observaciones=None):
     try:

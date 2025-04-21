@@ -151,7 +151,7 @@
 
 		// fecha formateada
 		if (paymentDate) {
-			formData.append('fecha_pago', paymentDate.toISOString().split('T')[0]);
+			formData.append('fecha_pago', paymentDate.toUTCString().split('T')[0]);
 		}
 
 		return async ({ update }) => {
@@ -239,11 +239,11 @@
 					formData.append('tipo', reportType);
 					formData.append('filtro', paymentSelection);
 					if (reportType === 'dia') {
-						formData.append('fecha', (reportDate as Date)?.toISOString().split('T')[0]);
+						formData.append('fecha', (reportDate as Date)?.toUTCString().split('T')[0]);
 					}
 					if (reportType === 'fechas' || reportType === 'monto') {
-						formData.append('fi', (reportDate as Date[])[0].toISOString().split('T')[0]);
-						formData.append('ff', (reportDate as Date[])[1].toISOString().split('T')[0]);
+						formData.append('fi', (reportDate as Date[])[0].toUTCString().split('T')[0]);
+						formData.append('ff', (reportDate as Date[])[1].toUTCString().split('T')[0]);
 					}
 					return async ({ result, update }) => {
 						const { base64 } = result.data;

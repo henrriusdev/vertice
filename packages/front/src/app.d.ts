@@ -11,13 +11,13 @@ export type Carrera = {
 }
 
 export type Configuracion = {
-	id: number;
+	id?: number;
 	ciclo: string;
 	num_porcentaje: number;
 	num_cuotas: number;
-	horario_inicio: string;
-	horario_fin: string;
-	cuotas: number[];
+	horario_inicio: Date | string;
+	horario_fin: Date | string;
+	cuotas: Date[] | string[];
 	porcentajes: number[];
 }
 

@@ -1,4 +1,6 @@
+import traceback
 from flask import Blueprint, jsonify, request
+from src.service.usuarios import get_usuario_por_correo
 from src.service.configuracion import get_configuracion, add_configuracion, update_configuracion
 from src.service.trazabilidad import add_trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
@@ -14,13 +16,14 @@ async def get_one_config():
             return jsonify({"ok": True, "status": 200, "data": configuracion})
         return jsonify({"ok": False, "status": 204, "data": {"message": "config no disponible"}}), 204
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 @cfg.route('/add', methods=['POST'])
 @jwt_required()
 async def add_config():
     try:
-        usuario = get_jwt().get('nombre')
+        usuario = await get_usuario_por_correo(get_jwt().get('sub'))
         payload = request.json
 
         await add_configuracion(payload)
@@ -35,19 +38,20 @@ async def add_config():
 
         return jsonify({"ok": True, "status": 200})
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
-@cfg.route('/update/<id>', methods=['PUT'])
+@cfg.route('/update', methods=['PUT'])
 @jwt_required()
-async def update_config(id):
+async def update_config():
     try:
-        usuario = get_jwt().get('nombre')
+        usuario = await get_usuario_por_correo(get_jwt().get('sub'))
         payload = request.json
 
-        await update_configuracion(id, payload)
+        await update_configuracion(payload)
 
         await add_trazabilidad({
-            "accion": f"Actualizar Configuración {id}",
+            "accion": f"Actualizar Configuración",
             "usuario": usuario,
             "fecha": datetime.now(),
             "modulo": "General",
@@ -56,5 +60,6 @@ async def update_config(id):
 
         return jsonify({"ok": True, "status": 200})
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
