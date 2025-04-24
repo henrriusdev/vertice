@@ -18,6 +18,7 @@
 	import {
 		BookOpenOutline,
 		BuildingOutline,
+		CalendarMonthOutline,
 		ChevronLeftOutline,
 		ChevronRightOutline,
 		CogOutline,
@@ -134,7 +135,19 @@
 			icono: CogOutline,
 			href: '/configuracion',
 			roles: ['superusuario','coordinador']
-		}
+		},
+		{
+			titulo: 'Horario',
+			icono: CalendarMonthOutline,
+			href: '/estudiante/horario',
+			roles: ['estudiante']
+		},
+		{
+			titulo: 'Histórico de notas',
+			icono: ShieldCheckOutline,
+			href: '/estudiante/notas',
+			roles: ['estudiante']
+		},
 	];
 
 	// Función para generar las migas de pan basadas en la URL

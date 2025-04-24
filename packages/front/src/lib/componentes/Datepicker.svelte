@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Datepicker, Timepicker } from 'flowbite-svelte';
+	import FlowbiteDatePicker from './FlowbiteDatePicker.svelte';
 
 	let {
 		dateRange,
@@ -34,7 +35,7 @@
 			inputClass="w-full"
 		/>
 	{:else}
-		<Datepicker
+		<FlowbiteDatePicker
 			bind:value
 			autohide
 			firstDayOfWeek={1}
