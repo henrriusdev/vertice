@@ -5,11 +5,15 @@
 	let {
 		dateRange,
 		timePicker,
-		value = $bindable()
+		value = $bindable(),
+		minYear,
+		maxYear
 	}: {
 		dateRange?: boolean;
 		timePicker?: boolean;
 		value: Date | { from?: Date; to?: Date } | null;
+		minYear?: number;
+		maxYear?: number;
 	} = $props();
 
 </script>
@@ -38,9 +42,10 @@
 		<FlowbiteDatePicker
 			bind:value
 			autohide
-			firstDayOfWeek={1}
 			locale="es-VE"
 			title="Selecciona una fecha"
+			minYear={minYear}
+			maxYear={maxYear}
 			inputClass="w-full"
 			dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 		/>

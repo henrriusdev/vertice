@@ -24,26 +24,28 @@
 	export let autohide: boolean = true;
 	export let showActionButtons: boolean = false;
 	export let title: string = '';
+	export let minYear: number = 1940;
+	export let maxYear: number = new Date().getFullYear() + 20;
 
 	// Internal state
 	const months = [
-		{ value: 'Enero', name: 'Enero' },
-		{ value: 'Febrero', name: 'Febrero' },
-		{ value: 'Marzo', name: 'Marzo' },
-		{ value: 'Abril', name: 'Abril' },
-		{ value: 'Mayo', name: 'Mayo' },
-		{ value: 'Junio', name: 'Junio' },
-		{ value: 'Julio', name: 'Julio' },
-		{ value: 'Agosto', name: 'Agosto' },
-		{ value: 'Septiembre', name: 'Septiembre' },
-		{ value: 'Octubre', name: 'Octubre' },
-		{ value: 'Noviembre', name: 'Noviembre' },
-		{ value: 'Diciembre', name: 'Diciembre' }
+		{ value: '0', name: 'Enero' },
+		{ value: '1', name: 'Febrero' },
+		{ value: '2', name: 'Marzo' },
+		{ value: '3', name: 'Abril' },
+		{ value: '4', name: 'Mayo' },
+		{ value: '5', name: 'Junio' },
+		{ value: '6', name: 'Julio' },
+		{ value: '7', name: 'Agosto' },
+		{ value: '8', name: 'Septiembre' },
+		{ value: '9', name: 'Octubre' },
+		{ value: '10', name: 'Noviembre' },
+		{ value: '11', name: 'Diciembre' }
 	];
-  const years = Array.from({ length: 80 }, (_, index) => {
-    const currentYear = new Date().getFullYear() + 20;
-    return {value: currentYear - index, name: currentYear - index};
-  });
+	const years = Array.from({ length: maxYear - minYear + 1 }, (_, index) => {
+		const year = maxYear - index;
+		return { value: year, name: year };
+	});
 	const dispatch = createEventDispatcher();
 	let isOpen: boolean = inline;
 	let inputElement: HTMLInputElement;
@@ -353,19 +355,19 @@
 					<h2 class="text-lg font-semibold mb-4 dark:text-white">{title}</h2>
 				{/if}
 				<div class="flex items-center justify-between gap-2 mb-4 w-full">
-						<Select
-							bind:value={selectedMonth}
-							on:change={() => (currentMonth = new Date(selectedYear, selectedMonth, 1))}
-							class="px-2 py-1 text-sm rounded-md border dark:bg-gray-700 dark:text-white dark:border-gray-600"
-							items={months}
-						></Select>
+					<Select
+						bind:value={selectedMonth}
+						on:change={() => (currentMonth = new Date(selectedYear, selectedMonth, 1))}
+						class="px-2 py-1 text-sm rounded-md border dark:bg-gray-700 dark:text-white dark:border-gray-600"
+						items={months}
+					></Select>
 
-						<Select
-							bind:value={selectedYear}
-							on:change={() => (currentMonth = new Date(selectedYear, selectedMonth, 1))}
-							class="px-2 py-1 text-sm rounded-md border dark:bg-gray-700 dark:text-white dark:border-gray-600"
-							items={years}
-						></Select>
+					<Select
+						bind:value={selectedYear}
+						on:change={() => (currentMonth = new Date(selectedYear, selectedMonth, 1))}
+						class="px-2 py-1 text-sm rounded-md border dark:bg-gray-700 dark:text-white dark:border-gray-600"
+						items={years}
+					></Select>
 				</div>
 				<div class="grid grid-cols-7 gap-1" role="grid">
 					{#each weekdays as day}

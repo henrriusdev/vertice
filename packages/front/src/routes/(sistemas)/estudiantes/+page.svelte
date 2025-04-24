@@ -280,7 +280,7 @@
 					<Datepicker
 						id="fecha_nac"
 						name="fecha_nac"
-						maxDate={maxYearDate()}
+						maxYear={new Date().getFullYear() - 16}
 						bind:value={estudianteActual.fecha_nac}
 					/>
 					{#if form?.errores?.fecha_nac}
