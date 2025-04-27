@@ -279,10 +279,10 @@
 					<Label for="fecha_nac" class="mb-2">Fecha de Nacimiento</Label>
 					<Datepicker
 						id="fecha_nac"
-						name="fecha_nac"
 						maxYear={new Date().getFullYear() - 16}
 						bind:value={estudianteActual.fecha_nac}
 					/>
+					<input type="hidden" name="fecha_nac" value={estudianteActual?.fecha_nac} />
 					{#if form?.errores?.fecha_nac}
 						<Helper class="mt-2" color="red">{form?.errores.fecha_nac}</Helper>
 					{/if}

@@ -337,7 +337,7 @@
 	<!-- Content area - flex column with fixed height -->
 	<div class="flex flex-col flex-1 h-screen overflow-hidden">
 		<!-- Navbar - fixed at top -->
-		<Navbar class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
+		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
 			<div class="flex items-center justify-start">
 				<Button color="light" class="mr-2 md:mr-4 !p-2" size="xs" on:click={toggleSidebar}>
 					{#if sidebarOpen}

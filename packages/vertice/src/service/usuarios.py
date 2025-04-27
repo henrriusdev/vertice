@@ -11,8 +11,8 @@ async def login(correo: str, password: str):
         if not usuario or not check_password_hash(usuario.password, password):
             return None
 
-        if usuario.rol.nombre.lower() == "estudiante":
-            await validar_pagos_estudiante(usuario)
+        # if usuario.rol.nombre.lower() == "estudiante":
+        #     await validar_pagos_estudiante(usuario)
 
         return usuario
 

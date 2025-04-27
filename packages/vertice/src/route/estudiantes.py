@@ -105,7 +105,6 @@ async def remove_student(cedula):
 async def inscribir_materia(materia: str):
     correo = get_jwt_identity()
     claims = get_jwt()
-    usuario = claims.get("nombre")
 
     estudiante = await get_usuario_por_correo(correo, rol="estudiante")
     await add_materia(estudiante["cedula"], materia)
@@ -123,7 +122,6 @@ async def inscribir_materia(materia: str):
 async def listar_notas():
     correo = get_jwt_identity()
     claims = get_jwt()
-    usuario = claims.get("nombre")
 
     await validar_pagos_estudiante(correo)
 
@@ -132,7 +130,7 @@ async def listar_notas():
 
     await add_trazabilidad({
         "accion": f"Obtener notas del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "usuario": estudiante,
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })
@@ -143,7 +141,6 @@ async def listar_notas():
 async def listar_historico():
     correo = get_jwt_identity()
     claims = get_jwt()
-    usuario = claims.get("nombre")
 
     estudiante = await get_usuario_por_correo(correo, rol="estudiante")
     data = await get_historico(estudiante["cedula"])

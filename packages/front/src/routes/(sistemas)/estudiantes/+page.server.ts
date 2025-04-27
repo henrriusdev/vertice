@@ -11,6 +11,7 @@ import {
 import { redirect } from '@sveltejs/kit';
 import type { Usuario } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
+import { format } from 'date-fns';
 
 type ErroresEstudiante = {
 	cedula?: string;
@@ -50,6 +51,7 @@ export const actions: Actions = {
 		
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, false);
 		if (Object.keys(errores).length > 0) {
+			console.log(errores);
 			return { errores };
 		}
 		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
@@ -73,7 +75,7 @@ export const actions: Actions = {
 		const estudiante: EstudianteReq = {
 			carrera: payload.carrera,
 			edad: payload.edad,
-			fecha_nac: payload.fecha_nac,
+			fecha_nac: format(payload.fecha_nac, "dd/MM/yyyy"),
 			direccion: payload.direccion,
 			semestre: payload.semestre,
 			sexo: payload.sexo,
@@ -117,7 +119,7 @@ export const actions: Actions = {
 		const estudiante: EstudianteReq = {
 			carrera: payload.carrera,
 			edad: payload.edad,
-			fecha_nac: payload.fecha_nac,
+			fecha_nac: format(payload.fecha_nac, 'dd/MM/yyyy'),
 			direccion: payload.direccion,
 			semestre: payload.semestre,
 			sexo: payload.sexo,

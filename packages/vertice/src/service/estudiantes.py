@@ -262,59 +262,31 @@ async def get_pago_by_student(cedula: str):
 async def validar_pagos_estudiante(usuario):
     try:
         estudiante = await Estudiante.get(usuario=usuario)
-        pagos = await Pago.filter(cedula_estudiante=estudiante).prefetch_related("monto_id")
+        
+        # Buscar sólo pagos pagados
+        pagos = await Pago.filter(
+            cedula_estudiante=estudiante,
+        )
+        
         config = await Configuracion.get(id=1)
-        ciclo = config.ciclo
+        ciclo_actual = config.ciclo
         fecha_actual = datetime.now().date()
 
-        # Verificar pre_inscripcion e inscripcion
-        for concepto in ["pre_inscripcion", "inscripcion"]:
-            pagado = any(
-                p.monto_id.concepto == concepto and p.ciclo == ciclo
-                for p in pagos
-            )
-            if not pagado:
+        conceptos_requeridos = ["pre_inscripcion", "inscripcion"]
+        
+        for concepto in conceptos_requeridos:
+            if not any(p.concepto == concepto and p.ciclo == ciclo_actual for p in pagos):
                 raise Exception(f"No has realizado el pago de la {concepto.replace('_', ' ')}")
-
-        # Verificar cuotas según configuración
+        
+        # Validar cuotas
         cuotas = config.cuotas or []
-        for i, fecha in enumerate(cuotas):
-            if fecha_actual >= fecha.date():
-                concepto_cuota = f"cuota{i+1}"
-                pagado = any(
-                    p.monto_id.concepto == concepto_cuota and p.ciclo == ciclo
-                    for p in pagos
-                )
-                if not pagado:
+        for idx, fecha_cuota in enumerate(cuotas):
+            if fecha_actual >= fecha_cuota.date():
+                concepto_cuota = f"cuota{idx + 1}"
+                if not any(p.concepto == concepto_cuota and p.ciclo == ciclo_actual for p in pagos):
                     raise Exception(f"No has realizado el pago de la {concepto_cuota}")
 
     except DoesNotExist:
         raise Exception("El estudiante no está registrado")
-    except Exception as ex:
-        raise ex
-        try:
-            connection = get_connection()
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM estudiantes WHERE correo=%s", (correo,))
-                row = cursor.fetchone()
-                if row:
-                    student = Student(
-                        cedula=row[0],
-                        fullname=row[1],
-                        correo=row[2],
-                        telefono=row[3],
-                        semestre=row[4],
-                        password=row[5],
-                        estado=row[6],
-                        carrera=row[7],
-                        edad=row[8],
-                        sexo=row[9],
-                        direccion=row[10],
-                        fecha_nac=row[11]
-                    )
-                    return student
-                else:
-                    return None
-            connection.close()
-        except Exception as ex:
-            raise Exception(ex)
+    except Exception as e:
+        raise e

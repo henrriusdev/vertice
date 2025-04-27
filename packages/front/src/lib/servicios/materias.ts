@@ -1,12 +1,12 @@
 import type { MateriaReq } from '$lib/types';
-import type { Carrera, Materia } from '../../app';
+import type { Materia, MateriaDisponible, MateriaHistorico, MateriaInscrita } from '../../app';
 
 const API = 'http://127.0.0.1:8000/api/materias';
 
 export const obtenerMaterias = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}`);
 	const materias = await res.json();
-	return materias.data as {materias: Materia[]};
+	return materias.data as { materias: Materia[] };
 };
 
 export const obtenerMateria = async (fetch: typeof window.fetch, id: string) => {
@@ -45,4 +45,22 @@ export const eliminarMateria = async (fetch: typeof window.fetch, id: string) =>
 	});
 	const materiaEliminada = await res.json();
 	return materiaEliminada.data as Materia;
+};
+
+export const obtenerMateriasInscritas = async (fetch: typeof window.fetch) => {
+	const res = await fetch(`${API}/estudiante/inscritas`);
+	const materias = await res.json();
+	return materias.data as MateriaInscrita[];
+};
+
+export const obtenerHistoricoMaterias = async (fetch: typeof window.fetch) => {
+	const res = await fetch(`${API}/estudiante/historico`);
+	const materias = await res.json();
+	return materias.data as MateriaHistorico[];
+};
+
+export const obtenerMateriasDisponibles = async (fetch: typeof window.fetch, cedula: string) => {
+	const res = await fetch(`${API}/materias/inscribir/${cedula}`);
+	const materias = await res.json();
+	return materias.data as MateriaDisponible[];
 };

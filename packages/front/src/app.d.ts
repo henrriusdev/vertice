@@ -3,12 +3,12 @@ export type Billete = {
 	serial: string;
 	monto: number;
 	pago_id: number;
-}
+};
 
 export type Carrera = {
 	id: number;
 	nombre: string;
-}
+};
 
 export type Configuracion = {
 	id?: number;
@@ -19,7 +19,7 @@ export type Configuracion = {
 	horario_fin: Date | string;
 	cuotas: Date[] | string[];
 	porcentajes: number[];
-}
+};
 
 export type Coordinador = {
 	cedula: string;
@@ -42,10 +42,10 @@ export type Docente = {
 	estatus: string;
 	fecha_ingreso: string;
 	observaciones: string;
-}
+};
 
 export type Estudiante = {
-	usuario:  Usuario;
+	usuario: Usuario;
 	semestre: number;
 	carrera: Carrera;
 	promedio: number;
@@ -56,13 +56,13 @@ export type Estudiante = {
 	cedula?: string;
 	nombre?: string;
 	correo?: string;
-}
+};
 
 export type Horario = {
 	dia: string;
 	hora_inicio: string;
 	hora_fin: string;
-}
+};
 
 export type Materia = {
 	id: string;
@@ -78,7 +78,7 @@ export type Materia = {
 	modalidad: string;
 	maximo: number;
 	id_docente: number;
-}
+};
 
 export type Matricula = {
 	id: number;
@@ -87,12 +87,12 @@ export type Matricula = {
 	notas: number[];
 	uc: number;
 	ciclo: string;
-}
+};
 
 export type Metodo_pago = {
 	id: number;
 	nombre: string;
-}
+};
 
 export type Pago = {
 	id: number;
@@ -103,7 +103,7 @@ export type Pago = {
 	fecha_pago: string;
 	referencia_transferencia: string;
 	ciclo: string;
-}
+};
 
 export type Peticion = {
 	id: number;
@@ -113,14 +113,14 @@ export type Peticion = {
 	id_estudiante: number | object;
 	id_materia: number | object;
 	campo: string;
-}
+};
 
 export type SesionActiva = {
 	id: number;
 	usuario: number | object;
 	jti: string;
 	creado_en: string;
-}
+};
 
 export type Trazabilidad = {
 	id: number;
@@ -129,7 +129,7 @@ export type Trazabilidad = {
 	fecha: string;
 	modulo: string;
 	nivel_alerta: number;
-}
+};
 
 export type Usuario = {
 	password?: string;
@@ -142,7 +142,42 @@ export type Usuario = {
 	fecha_creacion: string;
 	ultima_sesion?: string;
 	rol: { id: number; nombre: string };
-}
+};
+
+export type MateriaInscrita = {
+	id: string;
+	nombre: string;
+	codigo: string;
+	ciclo: string;
+	docente: string;
+	horario: {
+		dia: string;
+		hora_inicio: string;
+		hora_fin: string;
+	}[];
+};
+
+export type MateriaHistorico = {
+	id: string;
+	nombre: string;
+	codigo: string;
+	ciclo: string;
+	docente: string;
+	nota_final: number;
+	estatus: 'Aprobada' | 'Reprobada' | 'Cursando';
+};
+
+export type MateriaDisponible = {
+	id: string;
+	nombre: string;
+	codigo: string;
+	creditos: number;
+	prelacion: string | null;
+	carrera: {
+		id: string;
+		nombre: string;
+	};
+};
 
 declare global {
 	namespace App {
