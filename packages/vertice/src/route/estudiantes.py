@@ -37,6 +37,61 @@ async def list_students():
     })
     return jsonify({"ok": True, "status": 200, "data": data})
 
+@est.route("/materias", methods=["GET"])
+@jwt_required()
+async def listar_notas():
+    correo = get_jwt_identity()
+    claims = get_jwt()
+
+    await validar_pagos_estudiante(correo)
+
+    estudiante = await get_usuario_por_correo(correo)
+    data = await get_notas_estudiante(estudiante.cedula)
+
+    await add_trazabilidad({
+        "accion": f"Obtener notas del estudiante con cédula: {estudiante.cedula}",
+        "usuario": estudiante,
+        "modulo": "Estudiantes",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": data})
+
+@est.route("/historico", methods=["GET"])
+@jwt_required()
+async def listar_historico():
+    correo = get_jwt_identity()
+    claims = get_jwt()
+
+    estudiante = await get_usuario_por_correo(correo)
+    data = await get_historico(estudiante.cedula)
+
+    await add_trazabilidad({
+        "accion": f"Obtener histórico del estudiante con cédula: {estudiante.cedula}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "modulo": "Estudiantes",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": data})
+
+@est.route("/horario", methods=["GET"])
+@jwt_required()
+async def listar_horario():
+    correo = get_jwt_identity()
+    claims = get_jwt()
+    usuario = claims.get("nombre")
+
+    estudiante = await get_usuario_por_correo(correo)
+    data = await get_inscritas(estudiante.cedula)
+
+    await add_trazabilidad({
+        "accion": f"Obtener horario del estudiante con cédula: {estudiante.cedula}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "modulo": "Estudiantes",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": {"materias": data}})
+
+
 @est.route('/<cedula>')
 @jwt_required()
 async def one_student(cedula):
@@ -106,67 +161,14 @@ async def inscribir_materia(materia: str):
     correo = get_jwt_identity()
     claims = get_jwt()
 
-    estudiante = await get_usuario_por_correo(correo, rol="estudiante")
+    estudiante = await get_usuario_por_correo(correo)
     await add_materia(estudiante["cedula"], materia)
 
     await add_trazabilidad({
-        "accion": f"Añadir materia {materia} al estudiante con cédula: {estudiante['cedula']}",
+        "accion": f"Añadir materia {materia} al estudiante con cédula: {estudiante.cedula}",
         "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 2
     })
     return jsonify({"ok": True, "status": 200})
 
-@est.route("/materias", methods=["GET"])
-@jwt_required()
-async def listar_notas():
-    correo = get_jwt_identity()
-    claims = get_jwt()
-
-    await validar_pagos_estudiante(correo)
-
-    estudiante = await get_usuario_por_correo(correo, rol="estudiante")
-    data = await get_notas_estudiante(estudiante["cedula"])
-
-    await add_trazabilidad({
-        "accion": f"Obtener notas del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": estudiante,
-        "modulo": "Estudiantes",
-        "nivel_alerta": 1
-    })
-    return jsonify({"ok": True, "status": 200, "data": data})
-
-@est.route("/historico", methods=["GET"])
-@jwt_required()
-async def listar_historico():
-    correo = get_jwt_identity()
-    claims = get_jwt()
-
-    estudiante = await get_usuario_por_correo(correo, rol="estudiante")
-    data = await get_historico(estudiante["cedula"])
-
-    await add_trazabilidad({
-        "accion": f"Obtener histórico del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": await get_usuario_por_correo(claims.get('sub')),
-        "modulo": "Estudiantes",
-        "nivel_alerta": 1
-    })
-    return jsonify({"ok": True, "status": 200, "data": data})
-
-@est.route("/horario", methods=["GET"])
-@jwt_required()
-async def listar_horario():
-    correo = get_jwt_identity()
-    claims = get_jwt()
-    usuario = claims.get("nombre")
-
-    estudiante = await get_usuario_por_correo(correo, rol="estudiante")
-    data = await get_inscritas(estudiante["cedula"])
-
-    await add_trazabilidad({
-        "accion": f"Obtener horario del estudiante con cédula: {estudiante['cedula']}",
-        "usuario": await get_usuario_por_correo(claims.get('sub')),
-        "modulo": "Estudiantes",
-        "nivel_alerta": 1
-    })
-    return jsonify({"ok": True, "status": 200, "data": {"materias": data}})

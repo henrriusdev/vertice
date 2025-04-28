@@ -38,7 +38,7 @@ async def materias_validas(cedula_estudiante: str):
     try:
         materias = await get_materias_validas(cedula_estudiante)
         if not materias:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "No se pueden inscribir materias"}}), 404
+            return jsonify({"ok": False, "status": 401, "data": {"message": "No se pueden inscribir materias"}}), 401
         await add_trazabilidad({"accion": f"Materias válidas para inscripción de {cedula_estudiante}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
         return jsonify({"ok": True, "status": 200, "data": {"materias": materias}})
     except Exception as ex:

@@ -17,9 +17,7 @@
     "dev:front": "cd packages/front && pnpm run dev"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
-    "date-fns-tz": "^3.2.0",
-    "flowbite-svelte": "^0.48.6"
+    "concurrently": "^9.1.2"
   },
   "workspaces": [
     "packages/*"

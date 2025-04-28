@@ -112,19 +112,16 @@ async def get_materias_validas(cedula_estudiante: str):
         ciclo = (await Configuracion.get(id=1)).ciclo
         estudiante = await Estudiante.get(usuario__cedula=cedula_estudiante).prefetch_related("usuario", "carrera")
 
-        # Validar si ya tiene materias inscritas en el ciclo
         ya_inscrito = await Matricula.filter(cedula_estudiante=estudiante.id, ciclo=ciclo).exists()
         if ya_inscrito:
             raise Exception("Usted ya tiene inscrito su horario, no puede inscribir más materias o modificarlo")
 
         materias_validas = []
 
-        # Materias para nuevo ingreso
         if estudiante.usuario.rol_id == 4 or estudiante.semestre == 1:
             materias = await Materia.filter(
                 semestre=1,
                 id_carrera=estudiante.carrera_id,
-                ciclo=ciclo
             ).exclude(id_docente=None)
         else:
             materias = await Materia.filter(
@@ -133,7 +130,6 @@ async def get_materias_validas(cedula_estudiante: str):
             ).exclude(id_docente=None)
 
         for materia in materias:
-            # Validar prelación si aplica
             if estudiante.semestre > 1 and materia.prelacion:
                 aprobada = await Matricula.filter(
                     cod_materia__id=materia.prelacion,
@@ -144,25 +140,28 @@ async def get_materias_validas(cedula_estudiante: str):
                     continue
 
             horarios = materia.horarios or []
-
-            # Si por error se guardó como string
             if isinstance(horarios, str):
                 try:
                     horarios = json.loads(horarios)
                 except json.JSONDecodeError:
                     horarios = []
 
-            materia.dia = horarios[0]["dia"] if len(horarios) > 0 else None
-            materia.hora_inicio = horarios[0]["hora_inicio"] if len(horarios) > 0 else None
-            materia.hora_fin = horarios[0]["hora_fin"] if len(horarios) > 0 else None
-            materia.dia2 = horarios[1]["dia"] if len(horarios) > 1 else None
-            materia.hora_inicio2 = horarios[1]["hora_inicio"] if len(horarios) > 1 else None
-            materia.hora_fin2 = horarios[1]["hora_fin"] if len(horarios) > 1 else None
-
             count = await Matricula.filter(cod_materia=materia, ciclo=ciclo).count()
-            materia.cantidad_estudiantes = count
-
-            materias_validas.append(materia)
+            materias_validas.append({
+                "id": materia.id,
+                "nombre": materia.nombre,
+                "prelacion": materia.prelacion,
+                "unidad_credito": materia.unidad_credito,
+                "hp": materia.hp,
+                "ht": materia.ht,
+                "semestre": materia.semestre,
+                "id_carrera": materia.id_carrera_id,
+                "id_docente": materia.id_docente_id,
+                "modalidad": materia.modalidad,
+                "maximo": materia.maximo,
+                "horarios": horarios,
+                "cantidad_estudiantes": count
+            })
 
         return materias_validas
 
@@ -255,7 +254,6 @@ async def listar_materias_asignadas():
     try:
         ciclo = (await Configuracion.get(id=1)).ciclo
 
-        # Obtener IDs de materias con matrícula en ese ciclo
         materias_ids = await Matricula.filter(ciclo=ciclo).distinct().values_list("cod_materia_id", flat=True)
 
         materias = await Materia.filter(
@@ -266,12 +264,11 @@ async def listar_materias_asignadas():
 
         for m in materias:
             horarios = m.horarios or []
-            dia = horarios[0]["dia"] if len(horarios) > 0 else None
-            hora_inicio = horarios[0]["hora_inicio"] if len(horarios) > 0 else None
-            hora_fin = horarios[0]["hora_fin"] if len(horarios) > 0 else None
-            dia2 = horarios[1]["dia"] if len(horarios) > 1 else None
-            hora_inicio2 = horarios[1]["hora_inicio"] if len(horarios) > 1 else None
-            hora_fin2 = horarios[1]["hora_fin"] if len(horarios) > 1 else None
+            if isinstance(horarios, str):
+                try:
+                    horarios = json.loads(horarios)
+                except json.JSONDecodeError:
+                    horarios = []
 
             docente = m.id_docente
             usuario = docente.usuario
@@ -286,12 +283,7 @@ async def listar_materias_asignadas():
                 "semestre": m.semestre,
                 "id_carrera": m.id_carrera_id,
                 "id_docente": m.id_docente_id,
-                "dia": dia,
-                "hora_inicio": hora_inicio,
-                "hora_fin": hora_fin,
-                "dia2": dia2,
-                "hora_inicio2": hora_inicio2,
-                "hora_fin2": hora_fin2,
+                "horarios": horarios,
                 "maximo": m.maximo,
                 "modalidad": m.modalidad,
                 "carrera": m.id_carrera.nombre if m.id_carrera else None,
@@ -309,3 +301,4 @@ async def listar_materias_asignadas():
 
     except Exception as ex:
         raise Exception(ex)
+
