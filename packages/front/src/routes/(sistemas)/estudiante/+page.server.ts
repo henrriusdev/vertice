@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({fetch, locals:{usuario}}) => {
 		const historicoMaterias = await obtenerHistoricoMaterias(fetch);
 		const materiasDisponibles = await obtenerMateriasDisponibles(fetch, usuario?.cedula ?? '');
 
-    console.log(materiasInscritas);
+    console.log(materiasDisponibles);
     console.log(historicoMaterias);
 
 

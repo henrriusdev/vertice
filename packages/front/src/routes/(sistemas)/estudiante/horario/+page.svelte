@@ -56,16 +56,17 @@
 		const top = ((inicioMinutos - horaInicioHorario) / 60) * 4; // 4rem por hora
 		const duracionHoras = (finMinutos - inicioMinutos) / 60;
 		const height = duracionHoras * 4; // 4rem por hora
+
 		const diaIndex = dias.indexOf(materia.dia);
-		const colWidth = 100 / 7;
-		const leftOffset = colWidth;
-		const left = leftOffset + diaIndex * colWidth;
+
+		const colWidth = 97 / 6; // ← Cada día ocupa 1/6 (lunes a sábado)
+		const left = diaIndex * colWidth;
 
 		return {
 			top: `${top}rem`,
 			height: `${height}rem`,
-			left: `${left}%`,
-			width: `${colWidth}%`
+			left: `calc(${left}% + 60px)`,
+			width: `${colWidth}%` // usar 100%/6
 		};
 	}
 
@@ -146,7 +147,8 @@
 			});
 		});
 		for (let i = 0; i < materias.length; i++) {
-			materias[i].color = materias[0].color;
+			let m = materias.find(mat => mat.id === materias[i].id)
+			materias[i].color = m?.color
 		}
 		verificarConflictos();
 	}
@@ -184,17 +186,17 @@
 
 	<div class="overflow-x-auto mb-6">
 		<div class="min-w-[768px] relative">
-			<div class="grid grid-cols-7 border-b">
-				<div class="p-2 font-semibold text-center border-r w-16"></div>
+			<div class="grid custom-cols border-b">
+				<div class="p-2 font-semib<old text-center border-r w-16">Hora</div>
 				<!-- Fijamos w-16 -->
-				{#each dias as dia, index}
-					<div class="p-2 font-semibold text-center border-r {index === 0 ? 'text-left' : ''}">{dia}</div>
+				{#each dias as dia}
+					<div class="p-2 font-semibold text-center border-r">{dia}</div>
 				{/each}
 			</div>
 
 			<div class="relative">
 				{#each horas as hora}
-					<div class="grid grid-cols-7 border-b">
+					<div class="grid custom-cols border-b">
 						<div class="p-2 text-sm text-center border-r w-16">{hora}</div>
 						<!-- También w-16 -->
 						{#each dias as dia}
@@ -224,7 +226,7 @@
 								><CloseOutline class="w-6 h-6" /></Button
 							>
 							<div class="flex flex-col h-full justify-between">
-								<h5 class="text-sm font-bold tracking-tight text-gray-900 truncate">
+								<h5 class="text-sm font-bold tracking-tight text-gray-900 text-wrap">
 									{materia.nombre}
 								</h5>
 								<div class="flex items-center text-xs mt-1">
@@ -309,3 +311,9 @@
 		</Toast>
 	{/if}
 </div>
+
+<style>
+	.custom-cols {
+		grid-template-columns: 4rem repeat(6, 1fr);
+	}
+</style>

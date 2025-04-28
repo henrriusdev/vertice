@@ -117,11 +117,6 @@
 	});
 	let chart: any;
 
-	// Función para redirigir a la página de inscripción
-	const irAInscripcion = () => {
-		goto('/estudiante/inscripcion');
-	};
-
 	onMount(async () => {
 		if (browser) {
 			const module = await import('svelte-apexcharts');
@@ -208,17 +203,17 @@
 
 				{#if data.inscripcionAbierta}
 					<div class="mt-6">
-						<Button color="primary" on:click={irAInscripcion}>Ir a inscripción de materias</Button>
+						<Button color="primary" href="/estudiante/horario">Ir a inscripción de materias</Button>
 					</div>
 				{/if}
 			</Card>
 		</div>
 
 		<!-- Histórico de materias -->
-		<Card padding="xl" size="none">
-			<Heading tag="h3" class="mb-4">Histórico de Materias</Heading>
+		{#if data.historicoMaterias.length > 0}
+			<Card padding="xl" size="none">
+				<Heading tag="h3" class="mb-4">Histórico de Materias</Heading>
 
-			{#if data.historicoMaterias.length > 0}
 				<Table striped={true} hoverable={true}>
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
@@ -249,13 +244,11 @@
 						{/each}
 					</TableBody>
 				</Table>
-			{:else}
-				<Alert color="info">No tienes histórico de materias</Alert>
-			{/if}
-		</Card>
+			</Card>
+		{/if}
 
 		<!-- Materias disponibles -->
-		<Card padding="xl" size="none">
+		<Card padding="xl" size="none" class={data.historicoMaterias.length === 0 ? 'col-span-2' : ''}>
 			<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
 
 			{#if data.materiasDisponibles.length > 0}
@@ -263,16 +256,16 @@
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
 						<TableHeadCell>Código</TableHeadCell>
-						<TableHeadCell>Créditos</TableHeadCell>
-						<TableHeadCell>Prelaci��n</TableHeadCell>
+						<TableHeadCell>U. C.</TableHeadCell>
+						<TableHeadCell>Prelación</TableHeadCell>
 						<TableHeadCell>Carrera</TableHeadCell>
 					</TableHead>
 					<TableBody>
 						{#each data.materiasDisponibles as materia}
 							<TableBodyRow>
 								<TableBodyCell>{materia.nombre}</TableBodyCell>
-								<TableBodyCell>{materia.codigo}</TableBodyCell>
-								<TableBodyCell>{materia.creditos}</TableBodyCell>
+								<TableBodyCell>{materia.id}</TableBodyCell>
+								<TableBodyCell>{materia.unidad_credito}</TableBodyCell>
 								<TableBodyCell>{materia.prelacion || 'Ninguna'}</TableBodyCell>
 								<TableBodyCell>{materia.carrera.nombre}</TableBodyCell>
 							</TableBodyRow>

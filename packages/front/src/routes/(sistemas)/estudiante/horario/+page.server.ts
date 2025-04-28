@@ -19,7 +19,6 @@ export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
     // if (isAfter(new Date(), fin)) {
     // }
     const materiasDisponibles = await obtenerMateriasDisponibles(fetch, usuario?.cedula ?? '');
-    console.log(materiasDisponibles);
 
 	return {
 		materiasDisponibles

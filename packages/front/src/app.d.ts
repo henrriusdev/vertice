@@ -171,7 +171,7 @@ export type MateriaDisponible = {
 	id: string;
 	nombre: string;
 	codigo: string;
-	creditos: number;
+	unidad_credito: number;
 	prelacion: string | null;
 	carrera: {
 		id: string;
