@@ -122,12 +122,12 @@ async def get_materias_validas(cedula_estudiante: str):
             materias = await Materia.filter(
                 semestre=1,
                 id_carrera=estudiante.carrera_id,
-            ).exclude(id_docente=None)
+            ).exclude(id_docente=None).prefetch_related("id_carrera", "id_docente", "id_docente__usuario")
         else:
             materias = await Materia.filter(
                 id_carrera=estudiante.carrera_id,
-                ciclo=ciclo
-            ).exclude(id_docente=None)
+                semestre__lte=estudiante.semestre
+            ).exclude(id_docente=None).prefetch_related("id_carrera", "id_docente", "id_docente__usuario")
 
         for materia in materias:
             if estudiante.semestre > 1 and materia.prelacion:
@@ -160,7 +160,15 @@ async def get_materias_validas(cedula_estudiante: str):
                 "modalidad": materia.modalidad,
                 "maximo": materia.maximo,
                 "horarios": horarios,
-                "cantidad_estudiantes": count
+                "cantidad_estudiantes": count,
+                "carrera": {
+                    "id": materia.id_carrera.id,
+                    "nombre": materia.id_carrera.nombre
+                },
+                "docente": {
+                    "id": materia.id_docente.id,
+                    "nombre": materia.id_docente.usuario.nombre,
+                }
             })
 
         return materias_validas

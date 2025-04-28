@@ -34,13 +34,13 @@ async def obtener_materia(id: str):
 @mat.route('/inscribir/<cedula_estudiante>', methods=['GET'])
 @jwt_required()
 async def materias_validas(cedula_estudiante: str):
-    usuario = get_jwt().get('nombre')
+    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     try:
         materias = await get_materias_validas(cedula_estudiante)
         if not materias:
             return jsonify({"ok": False, "status": 401, "data": {"message": "No se pueden inscribir materias"}}), 401
         await add_trazabilidad({"accion": f"Materias válidas para inscripción de {cedula_estudiante}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
-        return jsonify({"ok": True, "status": 200, "data": {"materias": materias}})
+        return jsonify({"ok": True, "status": 200, "data": materias})
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
