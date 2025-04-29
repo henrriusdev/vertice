@@ -43,7 +43,7 @@ async def get_pago_by_id(pago_id: int):
         },
         "estudiante": {
             "id": pago.cedula_estudiante.id,
-            "fullname": pago.cedula_estudiante.usuario.fullname,
+            "nombre": pago.cedula_estudiante.usuario.nombre,
             "correo": pago.cedula_estudiante.usuario.correo
         },
         "metodo": {

@@ -117,7 +117,9 @@
 	});
 	let chart: any;
 
+
 	onMount(async () => {
+		console.log(data.materiasInscritas)
 		if (browser) {
 			const module = await import('svelte-apexcharts');
 			chart = module.default;
@@ -130,9 +132,9 @@
 		Hola de nuevo, {data.estudiante.nombre}!
 	</h2>
 
-	<div class="grid md:grid-cols-3 gap-6 mb-6">
+	<div class="grid md:grid-cols-6 gap-6 mb-6">
 		<!-- Resumen estadístico -->
-		<Card padding="xl" size="none">
+		<Card padding="xl" size="none" class="col-span-2">
 			<Heading tag="h3" class="mb-4">Resumen Académico</Heading>
 
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -154,14 +156,14 @@
 		</Card>
 
 		<!-- Gráfico de promedio por semestre -->
-		<Card padding="xl" size="none" class="col-span-2">
+		<Card padding="xl" size="none" class="col-span-4">
 			<Heading tag="h3" class="mb-4">Evolución del Promedio</Heading>
 
 			{#if browser && chart}
 				<div class="h-64" use:chart={options}></div>
 			{/if}
 		</Card>
-		<div class="flex flex-col justify-center items-start mb-6">
+		<div class={(!data.inscripcionAbierta ? 'col-span-3' : '') + " flex flex-col justify-center items-start mb-6 col-span-half"}>
 			<h3 class="text-lg font-semibold mr-3">Estado de inscripción:</h3>
 			{#if data.inscripcionAbierta}
 				<Badge color="green">Abierta</Badge>
@@ -211,13 +213,12 @@
 
 		<!-- Histórico de materias -->
 		{#if data.historicoMaterias.length > 0}
-			<Card padding="xl" size="none">
+			<Card padding="xl" size="none" class={!data.inscripcionAbierta ? 'col-span-3' : 'col-span-2'}>
 				<Heading tag="h3" class="mb-4">Histórico de Materias</Heading>
 
 				<Table striped={true} hoverable={true}>
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
-						<TableHeadCell>Código</TableHeadCell>
 						<TableHeadCell>Ciclo</TableHeadCell>
 						<TableHeadCell>Docente</TableHeadCell>
 						<TableHeadCell>Nota</TableHeadCell>
@@ -226,11 +227,10 @@
 					<TableBody>
 						{#each data.historicoMaterias as materia}
 							<TableBodyRow>
-								<TableBodyCell>{materia.nombre}</TableBodyCell>
-								<TableBodyCell>{materia.codigo}</TableBodyCell>
+								<TableBodyCell>{materia.id}</TableBodyCell>
 								<TableBodyCell>{materia.ciclo}</TableBodyCell>
 								<TableBodyCell>{materia.docente}</TableBodyCell>
-								<TableBodyCell>{materia.nota_final}</TableBodyCell>
+								<TableBodyCell>{materia.promedio}</TableBodyCell>
 								<TableBodyCell>
 									{#if materia.estatus === 'Aprobada'}
 										<Badge color="green">{materia.estatus}</Badge>
@@ -248,10 +248,10 @@
 		{/if}
 
 		<!-- Materias disponibles -->
+		{#if data.materiasDisponibles.length > 0}
 		<Card padding="xl" size="none" class={data.historicoMaterias.length === 0 ? 'col-span-2' : ''}>
 			<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
 
-			{#if data.materiasDisponibles.length > 0}
 				<Table striped={true} hoverable={true}>
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
@@ -272,9 +272,8 @@
 						{/each}
 					</TableBody>
 				</Table>
-			{:else}
-				<Alert color="info">No hay materias disponibles para inscripción</Alert>
+			</Card>
 			{/if}
-		</Card>
 	</div>
 </div>
+

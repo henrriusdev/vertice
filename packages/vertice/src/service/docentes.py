@@ -112,7 +112,7 @@ async def get_peticiones_por_docente(docente_cedula: str):
                 "campo": p.campo,
                 "estudiante": {
                     "cedula": estudiante.cedula,
-                    "nombre": estudiante.fullname
+                    "nombre": estudiante.nombre
                 },
                 "materia": {
                     "id": materia.id,

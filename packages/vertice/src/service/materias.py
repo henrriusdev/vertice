@@ -206,7 +206,7 @@ async def get_materia(id: str):
 
             join["materia"]["estudiantes"].append({
                 "cedula": usuario.cedula,
-                "nombre": usuario.fullname,
+                "nombre": usuario.nombre,
                 "nota1": notas[0],
                 "nota2": notas[1],
                 "nota3": notas[2],
@@ -297,7 +297,7 @@ async def listar_materias_asignadas():
                 "carrera": m.id_carrera.nombre if m.id_carrera else None,
                 "docente": {
                     "cedula": usuario.cedula,
-                    "nombre": usuario.fullname,
+                    "nombre": usuario.nombre,
                     "titulo": docente.titulo,
                     "especialidad": docente.especialidad,
                     "dedicacion": docente.dedicacion,

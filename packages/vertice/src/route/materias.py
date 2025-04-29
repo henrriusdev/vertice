@@ -42,8 +42,7 @@ async def materias_validas(cedula_estudiante: str):
         await add_trazabilidad({"accion": f"Materias válidas para inscripción de {cedula_estudiante}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
         return jsonify({"ok": True, "status": 200, "data": materias})
     except Exception as ex:
-        traceback.print_exc()
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 204
 
 @mat.route('/add', methods=['POST'])
 @jwt_required()

@@ -40,7 +40,7 @@ async def get_student(cedula: str):
         estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario", "carrera")
         return {
             "cedula": estudiante.usuario.cedula,
-            "fullname": estudiante.usuario.fullname,
+            "nombre": estudiante.usuario.nombre,
             "correo": estudiante.usuario.correo,
             "telefono": estudiante.usuario.telefono,
             "semestre": estudiante.semestre,
@@ -104,18 +104,19 @@ async def delete_student(cedula: str):
         raise Exception(ex)
 
 
-async def add_materia(cedula: str, id_materia: str):
+async def add_materia(cedula: str, id_materias: list[str]):
     try:
         estudiante = await Estudiante.get(usuario__cedula=cedula)
-        ciclo = (await Configuracion.get(id=1)).ciclo
-
-        await Matricula.create(
-            cod_materia_id=id_materia,
-            cedula_estudiante=estudiante,
-            notas=[0, 0, 0],
-            uc=0,
-            ciclo=ciclo
-        )
+        config = (await Configuracion.get(id=1))
+        notas = [0 for _ in range(config.num_porcentaje)]
+        for id_materia in id_materias:
+            await Matricula.create(
+                cod_materia_id=id_materia,
+                cedula_estudiante=estudiante,
+                notas=notas,
+                uc=0,
+                ciclo=config.ciclo
+            )
         return 1
     except Exception as ex:
         raise Exception(ex)
@@ -151,17 +152,20 @@ async def get_notas_estudiante(cedula_estudiante: str):
 async def get_historico(cedula_estudiante: str):
     try:
         estudiante = await Estudiante.get(usuario__cedula=cedula_estudiante)
-        matriculas = await Matricula.filter(cedula_estudiante=estudiante).prefetch_related("cod_materia")
+        matriculas = await Matricula.filter(cedula_estudiante=estudiante).prefetch_related("cod_materia", "cod_materia__id_docente__usuario")
 
         historico = []
         for m in matriculas:
             historico.append({
-                "materia": m.cod_materia.nombre,
+                "nombre": m.cod_materia.nombre,
                 "id": m.cod_materia.id,
                 "ciclo": m.ciclo,
+                "unidad_credito": m.uc,
                 "semestre": m.cod_materia.semestre,
                 "notas": m.notas or [],
-                "promedio": round(sum(m.notas) / len(m.notas), 2) if m.notas else 0
+                "prelacion": m.cod_materia.prelacion,
+                "promedio": round(sum(m.notas) / len(m.notas), 2) if m.notas else 0,
+                "docente": m.cod_materia.id_docente.usuario.nombre
             })
 
         return {
@@ -214,11 +218,9 @@ async def get_inscritas(cedula: str):
                 "nombre": materia.nombre,
                 "hp": materia.hp,
                 "ht": materia.ht,
-                "dia": ", ".join([h["dia"] for h in horarios]),
-                "hora_inicio": ", ".join([h["hora_inicio"] for h in horarios]),
-                "hora_fin": ", ".join([h["hora_fin"] for h in horarios]),
+                "horarios": horarios,
                 "unidad_credito": materia.unidad_credito,
-                "id_docente": docente.fullname if docente else None
+                "id_docente": docente.nombre if docente else None
             })
 
         return resultado

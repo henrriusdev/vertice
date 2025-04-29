@@ -8,7 +8,7 @@ name = "vertice"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Henrry Bourgeot",email = "85085805+henrriusdev@users.noreply.github.com"}
+    {name = "Elibeth Curalli",email = "85085805+henrriusdev@users.noreply.github.com"}
 ]
 license = {text = "MIT"}
 readme = "README.md"

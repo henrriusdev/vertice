@@ -58,3 +58,17 @@ export const obtenerHistoricoMaterias = async (fetch: typeof window.fetch) => {
 	const materias = await res.json();
 	return materias.data.notas as MateriaHistorico[];
 };
+
+export const inscribirMaterias = async (
+	fetch: typeof window.fetch,
+	payload: { materias: string[] }
+) => {
+	const res = await fetch(`${API}/add-materia`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload)
+	});
+
+	const response = await res.json();
+	return response;
+};

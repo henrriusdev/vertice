@@ -16,4 +16,4 @@ class MetodoPago(Model):
   class Meta:
     table = "metodos_pago"
     table_description = "Metodo de pago"
-  
+

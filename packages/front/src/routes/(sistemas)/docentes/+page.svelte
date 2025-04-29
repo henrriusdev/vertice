@@ -193,7 +193,7 @@
 				<input type="hidden" name="id_docente" value={docenteActual!.id} />
 				<input type="hidden" name="id" value={docenteActual!?.usuario} />
 			{/if}
-q
+
 			<div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
 				<div class="md:col-span-2">
 					<Label for="cedula" class="mb-2">Cédula</Label>

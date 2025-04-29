@@ -12,6 +12,7 @@
 	import type { PageData } from './$types';
 	import type { MateriaDisponible } from '../../../../app';
 	import { slide } from 'svelte/transition';
+	import { enhance } from '$app/forms';
 
 	// Tipos
 	type HorarioMateria = {
@@ -30,7 +31,7 @@
 	let { data }: { data: PageData } = $props();
 
 	let materiasDisponibles = $state<MateriaDisponible[]>(data.materiasDisponibles);
-	let materias: HorarioMateria[] = $state([]);
+	let materias: (HorarioMateria & { editable: boolean })[] = $state([]);
 
 	let openModal = $state(false);
 
@@ -40,8 +41,13 @@
 
 	const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 	const horas = Array.from({ length: 14 }, (_, i) => {
-		const hora = i + 7;
-		return hora < 10 ? `0${hora}:00` : `${hora}:00`;
+		let hora = i + 7;
+		let sufijo = 'AM';
+		if (i >= 12){
+			sufijo = 'PM'
+			hora = hora > 12 ? hora - 12 : hora
+		}
+		return hora < 10 ? `0${hora}:00 ${sufijo}` : `${hora}:00 ${sufijo}`;
 	});
 
 	function horaAMinutos(hora: string): number {
@@ -143,15 +149,42 @@
 				conflicto: false,
 				unidad_credito: materia.creditos,
 				prelacion: materia.prelacion,
-				carrera: materia.carrera.nombre
+				carrera: materia.carrera.nombre,
+				editable: true
 			});
 		});
-		for (let i = 0; i < materias.length; i++) {
-			let m = materias.find(mat => mat.id === materias[i].id)
-			materias[i].color = m?.color
-		}
+		replaceMateriaColor()
 		verificarConflictos();
 	}
+
+	function replaceMateriaColor(){
+		for (let i = 0; i < materias.length; i++) {
+			let m = materias.find((mat) => mat.id === materias[i].id);
+			materias[i].color = m?.color;
+		}
+	}
+
+	$effect(() => {
+		if (data.materiasInscritas.length > 0 && materias.length === 0) {
+			data.materiasInscritas.forEach((materia) => {
+				const horarios = materia.horarios || [];
+				horarios.forEach((horario: any) => {
+					materias.push({
+						id: materia.id,
+						nombre: materia.nombre,
+						dia: horario.dia,
+						hora_inicio: horario.hora_inicio,
+						hora_fin: horario.hora_fin,
+						color: getRandomColor(),
+						conflicto: false,
+						editable: false
+					});
+				});
+			});
+			replaceMateriaColor();
+			verificarConflictos();
+		}
+	});
 
 	function quitarMateriaPorID(materiaId: string) {
 		materias = materias.filter((m) => m.id !== materiaId);
@@ -187,7 +220,7 @@
 	<div class="overflow-x-auto mb-6">
 		<div class="min-w-[768px] relative">
 			<div class="grid custom-cols border-b">
-				<div class="p-2 font-semib<old text-center border-r w-16">Hora</div>
+				<div class="p-2 font-semib<old text-center border-r w-20">Hora</div>
 				<!-- Fijamos w-16 -->
 				{#each dias as dia}
 					<div class="p-2 font-semibold text-center border-r">{dia}</div>
@@ -197,7 +230,7 @@
 			<div class="relative">
 				{#each horas as hora}
 					<div class="grid custom-cols border-b">
-						<div class="p-2 text-sm text-center border-r w-16">{hora}</div>
+						<div class="p-2 text-sm text-center grid place-content-start border-r w-20">{hora}</div>
 						<!-- También w-16 -->
 						{#each dias as dia}
 							<div class="h-16 border-r"></div>
@@ -218,13 +251,15 @@
 								materia.conflicto
 							)} h-full overflow-hidden relative"
 						>
-							<Button
-								color="none"
-								class="absolute -top-0 right-0 p-1!"
-								pill
-								on:click={() => quitarMateriaPorID(materia.id)}
-								><CloseOutline class="w-6 h-6" /></Button
-							>
+							{#if materia.editable}
+								<Button
+									color="none"
+									class="absolute -top-0 right-0 p-1!"
+									pill
+									on:click={() => quitarMateriaPorID(materia.id)}
+									><CloseOutline class="w-6 h-6" /></Button
+								>
+							{/if}
 							<div class="flex flex-col h-full justify-between">
 								<h5 class="text-sm font-bold tracking-tight text-gray-900 text-wrap">
 									{materia.nombre}
@@ -246,14 +281,23 @@
 
 	<!-- Botones -->
 	<div class="flex flex-wrap justify-center gap-4 mt-6">
-		<Button color="blue" on:click={() => (openModal = true)}>
+		<Button color="blue" on:click={() => (openModal = true)} disabled={!data.inscripcionAbierta}>
 			<CalendarWeekOutline class="mr-2 h-5 w-5" />
 			Seleccionar Materias
 		</Button>
-		<Button color="green" disabled={materias.some((m) => m.conflicto)}>
-			<CalendarWeekOutline class="mr-2 h-5 w-5" />
-			Registrar Horario
-		</Button>
+		<form use:enhance method="post">
+			{#each materias as materia}
+				<input type="hidden" name="materias" value={materia.id} />
+			{/each}
+			<Button
+				type="submit"
+				color="green"
+				disabled={materias.some((m) => m.conflicto) || !data.inscripcionAbierta}
+			>
+				<CalendarWeekOutline class="mr-2 h-5 w-5" />
+				Registrar Horario
+			</Button>
+		</form>
 	</div>
 
 	<!-- Modal Seleccionar Materias -->

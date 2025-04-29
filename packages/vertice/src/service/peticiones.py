@@ -24,11 +24,11 @@ async def get_peticiones():
             result.append({
                 "estudiante": {
                     "cedula": p.id_estudiante.cedula,
-                    "nombre": p.id_estudiante.fullname
+                    "nombre": p.id_estudiante.nombre
                 },
                 "docente": {
                     "cedula": p.id_docente.cedula,
-                    "nombre": p.id_docente.fullname
+                    "nombre": p.id_docente.nombre
                 },
                 "materia": {
                     "id": p.id_materia.id,

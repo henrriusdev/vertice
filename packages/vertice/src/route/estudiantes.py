@@ -155,17 +155,20 @@ async def remove_student(cedula):
     })
     return jsonify({"ok": True, "status": 200})
 
-@est.route("/add-materia/<materia>", methods=["POST"])
+@est.route("/add-materia", methods=["POST"])
 @jwt_required()
-async def inscribir_materia(materia: str):
+async def inscribir_materia():
     correo = get_jwt_identity()
     claims = get_jwt()
+    
+    materias = request.json["materias"]
+    print(materias)
 
     estudiante = await get_usuario_por_correo(correo)
-    await add_materia(estudiante["cedula"], materia)
+    await add_materia(estudiante.cedula, materias)
 
     await add_trazabilidad({
-        "accion": f"Añadir materia {materia} al estudiante con cédula: {estudiante.cedula}",
+        "accion": f"Añadir materias {materias} al estudiante con cédula: {estudiante.cedula}",
         "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 2

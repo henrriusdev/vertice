@@ -150,7 +150,7 @@ export type MateriaInscrita = {
 	codigo: string;
 	ciclo: string;
 	docente: string;
-	horario: {
+	horarios: {
 		dia: string;
 		hora_inicio: string;
 		hora_fin: string;
@@ -160,17 +160,15 @@ export type MateriaInscrita = {
 export type MateriaHistorico = {
 	id: string;
 	nombre: string;
-	codigo: string;
 	ciclo: string;
 	docente: string;
-	nota_final: number;
+	promedio: number;
 	estatus: 'Aprobada' | 'Reprobada' | 'Cursando';
 };
 
 export type MateriaDisponible = {
 	id: string;
 	nombre: string;
-	codigo: string;
 	unidad_credito: number;
 	prelacion: string | null;
 	carrera: {
