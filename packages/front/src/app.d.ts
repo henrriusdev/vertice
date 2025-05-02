@@ -177,6 +177,16 @@ export type MateriaDisponible = {
 	};
 };
 
+export type MateriaDocente = {
+	id: string;
+	nombre: string;
+	dia: string;
+	hora_inicio: string;
+	hora_fin: string;
+	color: null;
+	conflicto: false,
+};
+
 declare global {
 	namespace App {
 		interface Locals {

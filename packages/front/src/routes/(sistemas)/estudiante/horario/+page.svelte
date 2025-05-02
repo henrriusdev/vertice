@@ -1,18 +1,17 @@
 <script lang="ts">
-	import { Card, Button, Modal, Popover, Toast } from 'flowbite-svelte';
+	import { enhance } from '$app/forms';
+	import { Button, Card, Modal, Popover, Toast } from 'flowbite-svelte';
 	import {
 		CalendarWeekOutline,
 		ClockOutline,
 		CloseOutline,
-		PlusOutline,
-		XSolid
+		PlusOutline
 	} from 'flowbite-svelte-icons';
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import type { PageData } from './$types';
-	import type { MateriaDisponible } from '../../../../app';
 	import { slide } from 'svelte/transition';
-	import { enhance } from '$app/forms';
+	import type { MateriaDisponible } from '../../../../app';
+	import type { PageData } from './$types';
+	import {GrillaHorario} from '$lib';
+
 
 	// Tipos
 	type HorarioMateria = {
@@ -217,67 +216,7 @@
 <div class="container mx-auto p-4 bg-white">
 	<h1 class="text-2xl font-bold text-center mb-6">Horario de clases</h1>
 
-	<div class="overflow-x-auto mb-6">
-		<div class="min-w-[768px] relative">
-			<div class="grid custom-cols border-b">
-				<div class="p-2 font-semib<old text-center border-r w-20">Hora</div>
-				<!-- Fijamos w-16 -->
-				{#each dias as dia}
-					<div class="p-2 font-semibold text-center border-r">{dia}</div>
-				{/each}
-			</div>
-
-			<div class="relative">
-				{#each horas as hora}
-					<div class="grid custom-cols border-b">
-						<div class="p-2 text-sm text-center grid place-content-start border-r w-20">{hora}</div>
-						<!-- También w-16 -->
-						{#each dias as dia}
-							<div class="h-16 border-r"></div>
-						{/each}
-					</div>
-				{/each}
-
-				{#each materias as materia}
-					{@const posicion = calcularPosicionMateria(materia)}
-					<div
-						class="absolute px-1 py-1"
-						style="top: {posicion.top}; height: {posicion.height}; left: {posicion.left}; width: {posicion.width};"
-					>
-						<Card
-							padding="sm"
-							class="{getColorClass(
-								materia.color,
-								materia.conflicto
-							)} h-full overflow-hidden relative"
-						>
-							{#if materia.editable}
-								<Button
-									color="none"
-									class="absolute -top-0 right-0 p-1!"
-									pill
-									on:click={() => quitarMateriaPorID(materia.id)}
-									><CloseOutline class="w-6 h-6" /></Button
-								>
-							{/if}
-							<div class="flex flex-col h-full justify-between">
-								<h5 class="text-sm font-bold tracking-tight text-gray-900 text-wrap">
-									{materia.nombre}
-								</h5>
-								<div class="flex items-center text-xs mt-1">
-									<ClockOutline class="w-3 h-3 mr-1" />
-									<span>{formatearHorario(materia.hora_inicio, materia.hora_fin)}</span>
-								</div>
-								{#if materia.conflicto}
-									<div class="text-xs text-red-600 font-semibold mt-1">¡Conflicto!</div>
-								{/if}
-							</div>
-						</Card>
-					</div>
-				{/each}
-			</div>
-		</div>
-	</div>
+	<GrillaHorario {materias} />
 
 	<!-- Botones -->
 	<div class="flex flex-wrap justify-center gap-4 mt-6">

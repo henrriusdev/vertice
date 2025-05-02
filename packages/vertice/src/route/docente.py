@@ -1,3 +1,4 @@
+import traceback
 from flask import Blueprint, jsonify, request
 from src.service.usuarios import get_usuario_por_correo
 from src.service.docentes import (
@@ -5,6 +6,7 @@ from src.service.docentes import (
     get_docente,
     get_peticiones_por_docente,
     add_docente,
+    obtener_materias_por_email_docente,
     update_docente,
     delete_docente,
 )
@@ -125,3 +127,15 @@ async def actualizar_nota_estudiante():
         "nivel_alerta": 2
     })
     return jsonify({"ok": True, "status": 200})
+
+
+@doc.route("/materias", methods=["GET"])
+@jwt_required()
+async def materias_por_docente():
+    try:
+        email = get_jwt().get('sub')
+        materias = await obtener_materias_por_email_docente(email)
+        return jsonify({"data": materias, "ok": True, "status": 200}), 200
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"message": str(ex)}), 500

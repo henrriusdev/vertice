@@ -1,4 +1,5 @@
 from src.utils.fecha import format_fecha, parse_fecha
+from src.model.materia import Materia
 from src.model.docente import Docente
 from src.model.peticion import Peticion
 from src.model.usuario import Usuario
@@ -122,5 +123,30 @@ async def get_peticiones_por_docente(docente_cedula: str):
 
         return resultado
 
+    except Exception as ex:
+        raise Exception(ex)
+    
+
+async def obtener_materias_por_email_docente(email: str):
+    try:
+        usuario = await Usuario.get(correo=email).prefetch_related("docente")
+        docente = await usuario.docente
+        materias = await Materia.filter(id_docente=docente.id).prefetch_related("id_carrera")
+
+        resultado = []
+        for materia in materias:
+            horarios = materia.horarios or []
+            for horario in horarios:
+                resultado.append({
+                    "id": materia.id,
+                    "nombre": materia.nombre,
+                    "dia": horario.get("dia"),
+                    "hora_inicio": horario.get("hora_inicio"),
+                    "hora_fin": horario.get("hora_fin"),
+                    "color": None,
+                    "conflicto": False
+                })
+            
+        return resultado
     except Exception as ex:
         raise Exception(ex)
