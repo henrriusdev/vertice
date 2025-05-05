@@ -55,17 +55,19 @@
 			>
 				<PenOutline class="w-5 h-5" />
 			</Button>
-			<Button
-				type="button"
-				onclick={() => handlePeticion(row)}
-				pill
-				color="light"
-				outline
-				class="p-1!"
-				size="sm"
-			>
-				<ReceiptOutline class="w-5 h-5" />
-			</Button>
+			{#if data.rol.toLowerCase() === 'docente'}
+				<Button
+					type="button"
+					onclick={() => handlePeticion(row)}
+					pill
+					color="light"
+					outline
+					class="p-1!"
+					size="sm"
+				>
+					<ReceiptOutline class="w-5 h-5" />
+				</Button>
+			{/if}
 		</div>
 	{/snippet}
 
@@ -85,7 +87,9 @@
 				items={esPeticion
 					? []
 					: data.materia.materia.estudiantes[0].notas
-							.filter((nota) => (esPeticion ? nota !== 0 : true))
+							.filter((nota) =>
+								esPeticion ? nota !== 0 : data.rol.toLowerCase() === 'docente' ? nota === 0 : true
+							)
 							.map((_, i) => ({
 								value: i + 1,
 								name: 'Nota ' + (i + 1)

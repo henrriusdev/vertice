@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import DataTable from '$lib/componentes/DataTable.svelte';
-	import { Button, Modal, Input, Select, Label, MultiSelect, Tooltip } from 'flowbite-svelte';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { Button, Input, Label, Modal, MultiSelect, Select } from 'flowbite-svelte';
 	import {
 		EyeOutline,
 		InfoCircleOutline,
 		PenOutline,
 		PlusOutline,
-		TrashBinOutline
+		TrashBinOutline,
+
+		UsersGroupOutline
 	} from 'flowbite-svelte-icons';
-	import type { PageData } from './$types';
 	import type { Horario, Materia } from '../../../app';
-	import type { SubmitFunction } from '@sveltejs/kit';
+	import type { PageData } from './$types';
 
 	interface Form {
 		id: string;
@@ -212,11 +215,9 @@
 
 {#snippet action(row: Materia)}
 	<div class="flex justify-between items-center">
+		{#if data.rol.toLowerCase() === 'coordinador'}
 		<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
 			<PenOutline class="w-5 h-5" />
-		</Button>
-		<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
-			<EyeOutline class="w-5 h-5" />
 		</Button>
 		<form action="?/delete" method="POST">
 			<input type="hidden" name="id" value={row.id} />
@@ -224,6 +225,14 @@
 				<TrashBinOutline class="w-5 h-5" />
 			</Button>
 		</form>
+		{:else if ['control','superusuario','superusuario'].includes(data.rol.toLowerCase())}
+			<Button pill class="p-1.5!" size="xs" color="primary" onclick={() => goto(`/materias/${row.id}`)}>
+			<UsersGroupOutline class="w-5 h-5" />
+		</Button>
+		{/if}
+		<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
+			<EyeOutline class="w-5 h-5" />
+		</Button>
 	</div>
 {/snippet}
 
