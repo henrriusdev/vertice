@@ -207,9 +207,7 @@ async def get_materia(id: str):
             join["materia"]["estudiantes"].append({
                 "cedula": usuario.cedula,
                 "nombre": usuario.nombre,
-                "nota1": notas[0],
-                "nota2": notas[1],
-                "nota3": notas[2],
+                "notas": notas,
                 "promedio": round(promedio, 2)
             })
 

@@ -187,6 +187,25 @@ export type MateriaDocente = {
 	conflicto: false,
 };
 
+export interface MateriaCiclo {
+	ciclo: string;
+	materia: MateriaNota;
+}
+
+export interface MateriaNota {
+	carrera: string;
+	estudiantes: Nota[];
+	id: string;
+	nombre: string;
+}
+
+export interface Nota {
+	cedula: string;
+	nombre: string;
+	notas: number[];
+	promedio: number;
+}
+
 declare global {
 	namespace App {
 		interface Locals {

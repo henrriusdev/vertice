@@ -12,7 +12,7 @@ import type { MateriaReq } from '$lib/types';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const { rol } = await parent();
-	if (!['caja', 'superusuario', 'coordinador'].includes(rol)) {
+	if (!['control', 'superusuario', 'coordinador'].includes(rol)) {
 		redirect(302, '/' + rol);
 	}
 

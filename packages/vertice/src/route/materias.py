@@ -24,7 +24,7 @@ async def listar_materias():
 @mat.route('/<id>')
 @jwt_required()
 async def obtener_materia(id: str):
-    usuario = get_jwt().get('nombre')
+    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = await get_materia(id)
     if data:
         await add_trazabilidad({"accion": f"Obtener Materia con id: {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})

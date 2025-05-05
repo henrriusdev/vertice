@@ -42,7 +42,7 @@
 		Object.keys(data[0] || {})
 			.filter(
 				(k) =>
-					!['usuario', 'activo', 'ruta_foto', 'ultima_sesion', 'billetes', 'horarios'].includes(k)
+					!['usuario', 'activo', 'ruta_foto', 'ultima_sesion', 'billetes', 'horarios','notas'].includes(k)
 			)
 			// place ID first, nombre second, and then the rest
 			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : a === 'nombre' ? -1 : b === 'nombre' ? 1 : 0))

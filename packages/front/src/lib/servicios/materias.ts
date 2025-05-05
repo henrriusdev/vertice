@@ -1,5 +1,5 @@
 import type { MateriaReq } from '$lib/types';
-import type { Materia, MateriaDisponible } from '../../app';
+import type { Materia, MateriaCiclo, MateriaDisponible } from '../../app';
 
 const API = 'http://127.0.0.1:8000/api/materias';
 
@@ -12,7 +12,7 @@ export const obtenerMaterias = async (fetch: typeof window.fetch) => {
 export const obtenerMateria = async (fetch: typeof window.fetch, id: string) => {
 	const res = await fetch(`${API}/${id}`);
 	const materia = await res.json();
-	return materia.data as Materia;
+	return materia.data as MateriaCiclo;
 };
 
 export const crearMateria = async (fetch: typeof window.fetch, materia: MateriaReq) => {

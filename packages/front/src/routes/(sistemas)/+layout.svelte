@@ -19,6 +19,7 @@
 		BookOpenOutline,
 		BuildingOutline,
 		CalendarMonthOutline,
+		ChalkboardUserOutline,
 		ChevronLeftOutline,
 		ChevronRightOutline,
 		CogOutline,
@@ -134,7 +135,7 @@
 			titulo: 'Configuración',
 			icono: CogOutline,
 			href: '/configuracion',
-			roles: ['superusuario','coordinador']
+			roles: ['superusuario', 'coordinador']
 		},
 		{
 			titulo: 'Horario',
@@ -148,6 +149,12 @@
 			href: '/estudiante/notas',
 			roles: ['estudiante']
 		},
+		{
+			titulo: 'Peticiones',
+			icono: ChalkboardUserOutline,
+			href: '/peticiones',
+			roles: ['docente', 'control']	
+		}
 	];
 
 	// Función para generar las migas de pan basadas en la URL
