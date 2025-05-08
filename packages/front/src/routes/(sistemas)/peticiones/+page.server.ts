@@ -1,15 +1,8 @@
-import type { Peticion } from '../../../app';
+import { obtenerPeticiones } from '$lib/servicios/peticiones';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({locals:{usuario}}) => {
-  const peticiones: Peticion[] = [{
-    id: 1,
-    id_estudiante: 2,
-    id_docente: usuario?.id ?? 3,
-    id_materia: 3,
-    estado: 'pendiente',
-    descripcion: 'hola',
-    campo: '1'
-  }]
-    return {peticiones};
+export const load = (async ({ fetch, }) => {
+	const peticiones = await obtenerPeticiones(fetch);
+	console.log(peticiones);
+	return { peticiones };
 }) satisfies PageServerLoad;

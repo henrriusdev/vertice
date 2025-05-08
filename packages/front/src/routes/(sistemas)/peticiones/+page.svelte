@@ -7,20 +7,35 @@
 	let { data } = $props();
 
 	let peticiones = $derived(data.peticiones);
+
+	const buscarValores = (key: string, value: any) => {
+		switch (key) {
+			case 'docente':
+				return value.nombre;
+			case 'estudiante':
+				return value.nombre;
+			case 'materia':
+				return value.nombre;
+			default:
+				return `${(value as Peticion).descripcion}; corte: ${(value as Peticion).campo}, nota: ${(value as Peticion).valor}`;
+		}
+	};
 </script>
 
 <div class="container mx-auto p-4">
 	<h2 class="md:text-2xl text-xl font-bold mb-4">Peticiones de cambio de notas</h2>
 	{#snippet actions(row: Peticion)}
-		<div class="flex gap-2">
-			<Button type="button" pill color="green" outline class="p-1!" size="sm">
-				<CheckOutline class="w-5 h-5" />
-			</Button>
-			<Button type="button" pill color="red" outline class="p-1!" size="sm">
-				<CloseOutline class="w-5 h-5" />
-			</Button>
-		</div>
+		{#if ['control', 'superusuario'].includes(data.rol)}
+			<div class="flex gap-2">
+				<Button type="button" pill color="green" outline class="p-1!" size="sm">
+					<CheckOutline class="w-5 h-5" />
+				</Button>
+				<Button type="button" pill color="red" outline class="p-1!" size="sm">
+					<CloseOutline class="w-5 h-5" />
+				</Button>
+			</div>
+		{/if}
 	{/snippet}
 
-	<DataTable data={peticiones} {actions} onSearch={(key: string, value: string) => 'hola'} />
+	<DataTable data={peticiones} {actions} onSearch={buscarValores} />
 </div>

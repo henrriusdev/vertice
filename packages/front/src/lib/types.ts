@@ -65,3 +65,27 @@ export type MateriaReq = {
 	id_docente?: string;
 	horarios: { dia: string; inicio: string; fin: string }[];
 }
+
+export type Peticion = {
+  docente: {
+    cedula: string
+    nombre: string
+  }
+  estudiante: {
+    cedula: string
+    nombre: string
+  }
+  materia: {
+    id: string
+    nombre: string
+  }
+  peticion: {
+    campo: string
+    descripcion: string
+    estado: string
+    id: number
+    id_docente: number
+    id_estudiante: number
+    id_materia: string
+  }
+}

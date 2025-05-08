@@ -4,6 +4,8 @@
 	import { imask } from '@imask/svelte';
 	import { PenOutline, ReceiptOutline } from 'flowbite-svelte-icons';
 	import type { Nota } from '../../../../app';
+	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 
 	let { data } = $props();
 
@@ -16,7 +18,9 @@
 
 	let estudianteSeleccionado: Nota | null = $state(null);
 	let corte = $state('');
+	let form: HTMLFormElement | undefined = $state();
 	let nota = $state('');
+	let motivo = $state('');
 	let mostrarFormulario = $state(false);
 	let esPeticion = $state(false);
 
@@ -29,6 +33,20 @@
 		mostrarFormulario = true;
 		esPeticion = true;
 		console.log(row);
+	};
+
+	const enviarCambioNotas: SubmitFunction = ({ formData }) => {
+		formData.set('cedula_estudiante', estudianteSeleccionado?.cedula ?? '');
+		formData.set('nombre_campo', corte);
+		formData.set('valor', nota);
+		formData.set('materia', data.materia.materia.id);
+		formData.set('peticion', String(esPeticion));
+		formData.set('observacion', motivo);
+
+		return async ({ update }) => {
+			await update();
+			mostrarFormulario = false;
+		};
 	};
 
 	$effect(() => {
@@ -78,22 +96,30 @@
 			Asignación de Notas {esPeticion ? '(Petición)' : ''}
 		</h3>
 
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<form
+			bind:this={form}
+			use:enhance={enviarCambioNotas}
+			method="post"
+			class="grid grid-cols-1 md:grid-cols-3 gap-4"
+		>
 			<Input placeholder="Estudiante" value={estudianteSeleccionado?.cedula} disabled />
 
 			<Select
 				bind:value={corte}
 				placeholder="Corte"
-				items={esPeticion
-					? []
-					: data.materia.materia.estudiantes[0].notas
-							.filter((nota) =>
-								esPeticion ? nota !== 0 : data.rol.toLowerCase() === 'docente' ? nota === 0 : true
-							)
-							.map((_, i) => ({
+				items={data.materia.materia.estudiantes[0].notas
+							.map((n, i) => ({
 								value: i + 1,
+								nota: n,
 								name: 'Nota ' + (i + 1)
-							}))}
+							}))
+							.filter((nota) =>
+								esPeticion
+									? nota.nota !== 0
+									: data.rol.toLowerCase() === 'docente'
+										? nota.nota === 0
+										: true
+							)}
 			></Select>
 
 			<input
@@ -107,17 +133,16 @@
 				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 pl-10"
 			/>
 			{#if esPeticion}
-				<Textarea class="md:col-span-3" placeholder="Motivo de la petición" />
+				<Textarea class="md:col-span-3" placeholder="Motivo de la petición" bind:value={motivo} />
 			{/if}
-		</div>
+		</form>
 
 		<div class="w-full flex justify-end items-center gap-2" slot="footer">
 			<Button color="red" on:click={() => (mostrarFormulario = false)}>Cancelar</Button>
 			<Button
 				on:click={() => {
 					if (corte && nota !== '') {
-						estudianteSeleccionado.notas[corte] = Number(nota);
-						mostrarFormulario = false;
+						form?.requestSubmit();
 					}
 				}}>Editar</Button
 			>

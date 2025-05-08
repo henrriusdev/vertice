@@ -53,3 +53,22 @@ export const obtenerMateriasDisponibles = async (fetch: typeof window.fetch, ced
 	if (res.status === 401) return [];
 	return materias.data as MateriaDisponible[];
 };
+
+export const actualizarNota = async (
+	fetch: typeof window.fetch,
+	payload: {
+		cedula_estudiante: string;
+		nombre_campo: string;
+		valor: string | number;
+		materia: string;
+	}
+) => {
+	const res = await fetch(`${API}/upload`, {
+		method: 'PATCH',
+		body: JSON.stringify(payload),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+	return res;
+};

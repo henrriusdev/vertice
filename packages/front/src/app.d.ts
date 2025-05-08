@@ -110,9 +110,10 @@ export type Peticion = {
 	id_docente: number | object;
 	descripcion: string;
 	estado: string;
-	id_estudiante: number | object;
-	id_materia: number | object;
+	id_estudiante: number | string | object;
+	id_materia: string | object;
 	campo: string;
+	valor: number
 };
 
 export type SesionActiva = {

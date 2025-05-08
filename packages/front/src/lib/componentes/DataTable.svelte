@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { Peticion } from '$lib/types';
 	import {
 		Label,
 		Pagination,
@@ -42,10 +43,20 @@
 		Object.keys(data[0] || {})
 			.filter(
 				(k) =>
-					!['usuario', 'activo', 'ruta_foto', 'ultima_sesion', 'billetes', 'horarios','notas'].includes(k)
+					![
+						'usuario',
+						'activo',
+						'ruta_foto',
+						'ultima_sesion',
+						'billetes',
+						'horarios',
+						'notas'
+					].includes(k)
 			)
 			// place ID first, nombre second, and then the rest
-			.sort((a, b) => (a === 'id' ? -1 : b === 'id' ? 1 : a === 'nombre' ? -1 : b === 'nombre' ? 1 : 0))
+			.sort((a, b) =>
+				a === 'id' ? -1 : b === 'id' ? 1 : a === 'nombre' ? -1 : b === 'nombre' ? 1 : 0
+			)
 	);
 	let start = $derived((currentPage - 1) * perPage + 1);
 	let end = $derived(Math.min(start + perPage - 1, total));
@@ -68,18 +79,33 @@
 	function changePerPage() {
 		goto(`?page=1&perPage=${perPage}`, { replaceState: true });
 	}
+
+	function isPeticion(row: any): row is Peticion {
+		return (
+			row &&
+			typeof row === 'object' &&
+			'peticion' in row &&
+			typeof row.peticion === 'object' &&
+			'estado' in row.peticion
+		);
+	}
 </script>
 
 <div class="w-full">
 	<Table striped hoverable shadow>
 		<TableHead>
-			{#each headers as h}
-				{#if h.includes('id_')}
-					<TableHeadCell>{h.replace('id_', '')}</TableHeadCell>
-				{:else if h === 'maximo'}
-					<TableHeadCell>Máximo de Estudiantes</TableHeadCell>
-				{:else}
-					<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
+			{#each paginated as row}
+				{#each headers as h}
+					{#if h.includes('id_')}
+						<TableHeadCell>{h.replace('id_', '')}</TableHeadCell>
+					{:else if h === 'maximo'}
+						<TableHeadCell>Máximo de Estudiantes</TableHeadCell>
+					{:else}
+						<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
+					{/if}
+				{/each}
+				{#if isPeticion(row)}
+					<TableBodyCell class="capitalize">Estado</TableBodyCell>
 				{/if}
 			{/each}
 			{#if actions}
@@ -93,12 +119,15 @@
 					{#each headers.length ? headers : Object.keys(row) as h}
 						{#if h === 'rol'}
 							<TableBodyCell class="capitalize">{row[h].nombre}</TableBodyCell>
-						{:else if h.includes('id_') && row[h]}
+						{:else if (h.includes('id_') && row[h]) || typeof row[h] === 'object'}
 							<TableBodyCell>{onSearch(h, row[h])}</TableBodyCell>
 						{:else}
 							<TableBodyCell>{row[h]}</TableBodyCell>
 						{/if}
 					{/each}
+					{#if isPeticion(row)}
+						<TableBodyCell class="capitalize">{row.peticion.estado}</TableBodyCell>
+					{/if}
 					{#if actions}
 						<TableBodyCell>
 							{@render actions(row)}
