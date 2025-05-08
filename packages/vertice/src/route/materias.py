@@ -88,7 +88,7 @@ async def eliminar_materia(id):
 async def modificar_materia_estudiante_route():
     try:
         claims = get_jwt()
-        usuario = claims.get('nombre')
+        usuario = await get_usuario_por_correo(claims.get('sub'))
 
         cedula_estudiante = request.json.get('cedula_estudiante')
         nombre_campo = request.json.get('nombre_campo')
@@ -106,4 +106,5 @@ async def modificar_materia_estudiante_route():
 
         return jsonify({"ok": True, "status": 200, "data": None}), 200
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500

@@ -1,3 +1,4 @@
+from src.model.usuario import Usuario
 from src.model.peticion import Peticion
 
 async def get_peticiones():
@@ -18,7 +19,8 @@ async def get_peticiones():
                 "id_docente": p.id_docente_id,
                 "id_estudiante": p.id_estudiante_id,
                 "id_materia": p.id_materia_id,
-                "campo": p.campo
+                "campo": p.campo,
+                "valor": p.valor,
             }
 
             result.append({
@@ -52,7 +54,8 @@ async def get_peticion(id: int):
             "id_docente": p.id_docente_id,
             "id_estudiante": p.id_estudiante_id,
             "id_materia": p.id_materia_id,
-            "campo": p.campo
+            "campo": p.campo,
+            "valor": p.valor,
         }
     except Exception as ex:
         raise Exception(ex)
@@ -66,15 +69,18 @@ async def get_peticiones_pendientes():
         raise Exception(ex)
 
 
-async def add_peticion(peticion):
+async def add_peticion(peticion: dict):
     try:
+        estudiante = await Usuario.get(cedula=peticion["id_estudiante"])
+
         nueva = await Peticion.create(
-            id_docente_id=peticion.id_docente,
-            descripcion=peticion.descripcion,
-            estado=peticion.estado,
-            id_estudiante_id=peticion.id_estudiante,
-            id_materia_id=peticion.id_materia,
-            campo=peticion.campo
+            id_docente_id=peticion["id_docente"],
+            descripcion=peticion["descripcion"],
+            estado=peticion["estado"],
+            id_estudiante=estudiante,
+            id_materia_id=peticion["id_materia"],
+            valor=peticion["valor"],
+            campo=peticion["campo"]
         )
         return 1 if nueva else 0
     except Exception as ex:
@@ -83,19 +89,19 @@ async def add_peticion(peticion):
 
 async def update_peticion(peticion):
     try:
-        p = await Peticion.get(id=peticion.id)
-        if peticion.id_docente:
-            p.id_docente_id = peticion.id_docente
-        if peticion.descripcion:
-            p.descripcion = peticion.descripcion
-        if peticion.estado:
-            p.estado = peticion.estado
-        if peticion.id_estudiante:
-            p.id_estudiante_id = peticion.id_estudiante
-        if peticion.id_materia:
-            p.id_materia_id = peticion.id_materia
-        if peticion.campo:
-            p.campo = peticion.campo
+        p = await Peticion.get(id=peticion["id"])
+        if peticion["id_docente"]:
+            p.id_docente_id = peticion["id_docente"]
+        if peticion["descripcion"]:
+            p.descripcion = peticion["descripcion"]
+        if peticion["estado"]:
+            p.estado = peticion["estado"]
+        if peticion["id_estudiante"]:
+            p.id_estudiante_id = peticion["id_estudiante"]
+        if peticion["id_materia"]:
+            p.id_materia_id = peticion["id_materia"]
+        if peticion["campo"]:
+            p.campo = peticion["campo"]
 
         await p.save()
         return 1
@@ -105,7 +111,7 @@ async def update_peticion(peticion):
 
 async def delete_peticion(peticion):
     try:
-        eliminado = await Peticion.filter(id=peticion.id).delete()
+        eliminado = await Peticion.filter(id=peticion["id"]).delete()
         return eliminado[0]
     except Exception as ex:
         raise Exception(ex)

@@ -235,11 +235,8 @@ async def modificar_materia_estudiante(cod_materia, cedula_estudiante, nombre_ca
 
         # Actualizar el campo específico dentro de "notas"
         notas = matricula.notas or [0, 0, 0]
-        index = {"nota1": 0, "nota2": 1, "nota3": 2}.get(nombre_campo)
-        if index is None:
-            raise Exception("Campo no válido")
-
-        notas[index] = valor
+        nombre_campo = int(nombre_campo) - 1
+        notas[nombre_campo] = valor
         matricula.notas = notas
 
         # Recalcular el promedio

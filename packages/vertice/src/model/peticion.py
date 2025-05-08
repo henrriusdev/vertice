@@ -9,6 +9,7 @@ class Peticion(Model):
     id_estudiante = fields.ForeignKeyField("models.Usuario", related_name='peticiones_estudiante')
     id_materia = fields.ForeignKeyField("models.Materia", related_name='peticiones')
     campo = fields.CharField(max_length=10)
+    valor = fields.DecimalField(max_digits=4,decimal_places=2, null=True)
 
     class Meta:
         table = "peticiones"
