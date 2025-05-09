@@ -1,5 +1,5 @@
-import type { Peticion } from '../../app';
-import type { Peticion as PeticionGet } from '$lib/types';
+import type { Materia, Peticion } from '../../app';
+import type { MateriaReq, Peticion as PeticionGet } from '$lib/types';
 
 const API = 'http://127.0.0.1:8000/api/peticiones';
 
@@ -19,3 +19,17 @@ export const obtenerPeticiones = async (fetch: typeof window.fetch) => {
   const response = await res.json();
   return response.data as PeticionGet[]
 }
+
+export const actualizarPeticion = async (
+	fetch: typeof window.fetch,
+	id: number,
+	payload: any
+) => {
+	const res = await fetch(`${API}/update/${id}`, {
+		method: 'PATCH',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload)
+	});
+	const peticion = await res.json();
+	return peticion.data as Materia;
+};

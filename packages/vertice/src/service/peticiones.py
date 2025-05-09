@@ -1,5 +1,7 @@
 from src.model.usuario import Usuario
 from src.model.peticion import Peticion
+from src.service.materias import modificar_materia_estudiante
+
 
 async def get_peticiones():
     try:
@@ -87,23 +89,17 @@ async def add_peticion(peticion: dict):
         raise Exception(ex)
 
 
-async def update_peticion(peticion):
+async def update_peticion(peticion: dict):
     try:
-        p = await Peticion.get(id=peticion["id"])
-        if peticion["id_docente"]:
-            p.id_docente_id = peticion["id_docente"]
-        if peticion["descripcion"]:
-            p.descripcion = peticion["descripcion"]
+        p = await Peticion.get(id=peticion["id"]).prefetch_related("id_estudiante", "id_docente")
         if peticion["estado"]:
             p.estado = peticion["estado"]
-        if peticion["id_estudiante"]:
-            p.id_estudiante_id = peticion["id_estudiante"]
-        if peticion["id_materia"]:
-            p.id_materia_id = peticion["id_materia"]
-        if peticion["campo"]:
-            p.campo = peticion["campo"]
 
         await p.save()
+
+        if peticion["estado"] == "Aprobado":
+            await modificar_materia_estudiante(p.id_materia_id, p.id_estudiante.cedula, p.campo, p.valor)
+
         return 1
     except Exception as ex:
         raise Exception(ex)

@@ -14,6 +14,7 @@ from src.service.trazabilidad import add_trazabilidad
 
 ptc = Blueprint('peticion_blueprint', __name__)
 
+
 @ptc.route('/')
 @jwt_required()
 async def get_all_peticiones():
@@ -31,6 +32,7 @@ async def get_all_peticiones():
     except Exception:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "error": "Error al obtener las peticiones"}), 500
+
 
 @ptc.route('/<id>')
 @jwt_required()
@@ -52,6 +54,7 @@ async def get_one_peticion(id):
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "error": "Error al obtener la petición"}), 500
 
+
 @ptc.route('/pendientes')
 @jwt_required()
 async def get_pending_peticiones():
@@ -69,6 +72,7 @@ async def get_pending_peticiones():
     except Exception:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "error": "Error al obtener peticiones pendientes"}), 500
+
 
 @ptc.route('/add', methods=["POST"])
 @jwt_required()
@@ -95,6 +99,7 @@ async def create_peticion():
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "error": "Error al crear la petición"}), 500
 
+
 @ptc.route('/update/<id>', methods=["PATCH"])
 @jwt_required()
 async def patch_peticion(id):
@@ -105,11 +110,13 @@ async def patch_peticion(id):
         if not fields:
             return jsonify({"error": "No se proporcionaron campos válidos para actualizar"}), 400
 
-        await update_peticion(id, fields)
+        fields["id"] = id
+        await update_peticion(fields)
         return jsonify({"ok": True, "status": 200})
     except Exception:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "error": "Error al actualizar la petición"}), 500
+
 
 @ptc.route('/delete/<id>', methods=["DELETE"])
 @jwt_required()

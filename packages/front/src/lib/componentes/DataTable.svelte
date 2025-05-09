@@ -94,20 +94,18 @@
 <div class="w-full">
 	<Table striped hoverable shadow>
 		<TableHead>
-			{#each paginated as row}
-				{#each headers as h}
-					{#if h.includes('id_')}
-						<TableHeadCell>{h.replace('id_', '')}</TableHeadCell>
-					{:else if h === 'maximo'}
-						<TableHeadCell>Máximo de Estudiantes</TableHeadCell>
-					{:else}
-						<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
-					{/if}
-				{/each}
-				{#if isPeticion(row)}
-					<TableBodyCell class="capitalize">Estado</TableBodyCell>
+			{#each headers as h}
+				{#if h.includes('id_')}
+					<TableHeadCell>{h.replace('id_', '')}</TableHeadCell>
+				{:else if h === 'maximo'}
+					<TableHeadCell>Máximo de Estudiantes</TableHeadCell>
+				{:else}
+					<TableHeadCell>{h.replace(/_/g, ' ')}</TableHeadCell>
 				{/if}
 			{/each}
+			{#if paginated.some(isPeticion)}
+				<TableHeadCell>Estado</TableHeadCell>
+			{/if}
 			{#if actions}
 				<TableHeadCell>Acciones</TableHeadCell>
 			{/if}

@@ -236,14 +236,14 @@ async def modificar_materia_estudiante(cod_materia, cedula_estudiante, nombre_ca
         # Actualizar el campo específico dentro de "notas"
         notas = matricula.notas or [0, 0, 0]
         nombre_campo = int(nombre_campo) - 1
-        notas[nombre_campo] = valor
+        notas[nombre_campo] = float(valor)
         matricula.notas = notas
 
         # Recalcular el promedio
         config = await Configuracion.get(id=1)
         porcentajes = config.porcentajes or [0, 0, 0]
         promedio = sum([
-            notas[i] * (porcentajes[i] / 100) for i in range(min(len(notas), len(porcentajes)))
+            float(notas[i]) * (float(porcentajes[i]) / 100) for i in range(min(len(notas), len(porcentajes)))
         ])
         matricula.promedio = round(promedio, 2)
 
