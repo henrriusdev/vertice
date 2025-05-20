@@ -28,7 +28,7 @@
 - ✅ Ver materias asignadas
 - ✅ Ver estudiantes inscritos y cargar calificaciones por corte
 - 🔲 Descargar calificaciones
-- 🔲 Subir planificación (PDF)
+- ✅ Subir planificación (PDF)
 
 ### Web Coordinador
 - ✅ Configurar sistema (cortes, inscripciones, pagos)
@@ -47,7 +47,7 @@
 - ✅ Crear/editar carreras
 
 
-✅ Avance: (26 / 31) × 100 = ~83.87%
+✅ Avance: (27 / 31) × 100 = ~87.09%
 
 ---
 

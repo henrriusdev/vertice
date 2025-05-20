@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { DataTable, nota as notaMask } from '$lib';
-	import { Button, Input, Modal, Select, Textarea } from 'flowbite-svelte';
+	import { DataTable, Datepicker, nota as notaMask } from '$lib';
+	import { Button, Input, Label, Modal, Select, Textarea } from 'flowbite-svelte';
 	import { imask } from '@imask/svelte';
-	import { PenOutline, ReceiptOutline } from 'flowbite-svelte-icons';
+	import { FileLinesOutline, PenOutline, ReceiptOutline } from 'flowbite-svelte-icons';
 	import type { Nota } from '../../../../app';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
 
 	let { data } = $props();
 
@@ -23,6 +24,10 @@
 	let motivo = $state('');
 	let mostrarFormulario = $state(false);
 	let esPeticion = $state(false);
+	let formDrop: HTMLFormElement;
+	let archivosDrop: FileList | null = $state(null);
+	let dropVisible = $state(false);
+	let dragCounter = 0;
 
 	const handleEdit = (row: Nota) => {
 		mostrarFormulario = true;
@@ -49,17 +54,113 @@
 		};
 	};
 
+	const handleFileUpload: SubmitFunction = ({formData}) => {
+		formData.set("folder", data.materia.materia.id)
+		formData.set("ciclo", data.materia.ciclo)
+		formData.set("file", archivosDrop[0], archivosDrop[0].name)
+		return async ({ update }) => {
+			await update();
+			dropVisible = false;
+		};
+	};
+
+
 	$effect(() => {
 		if (estudiantes.length) {
 			estudianteSeleccionado = estudiantes[0];
 		}
 	});
+
+	onMount(() => {
+		const handleDragOver = (e: DragEvent) => {
+			if (!mostrarFormulario) {
+				e.preventDefault();
+			}
+		};
+
+		const handleDragEnter = (e: DragEvent) => {
+			if (!mostrarFormulario) {
+				e.preventDefault();
+				dragCounter++;
+				dropVisible = true;
+			}
+		};
+
+		const handleDragLeave = (e: DragEvent) => {
+			if (!mostrarFormulario) {
+				dragCounter--;
+				if (dragCounter === 0) {
+					dropVisible = false;
+				}
+			}
+		};
+
+		const handleDrop = (e: DragEvent) => {
+			if (!mostrarFormulario) {
+				e.preventDefault();
+				dragCounter = 0;
+				dropVisible = false;
+				const file = e.dataTransfer?.files?.[0];
+				if (file && formDrop) {
+					const dt = new DataTransfer();
+					dt.items.add(file);
+					archivosDrop = dt.files;
+					formDrop.requestSubmit();
+				}
+			}
+		};
+
+		window.addEventListener('dragenter', handleDragEnter);
+		window.addEventListener('dragleave', handleDragLeave);
+		window.addEventListener('dragover', handleDragOver);
+		window.addEventListener('drop', handleDrop);
+
+		return () => {
+			window.removeEventListener('dragenter', handleDragEnter);
+			window.removeEventListener('dragleave', handleDragLeave);
+			window.removeEventListener('dragover', handleDragOver);
+			window.removeEventListener('drop', handleDrop);
+		};
+	});
+
 </script>
 
 <div class="container mx-auto p-4">
-	<h2 class="md:text-2xl text-xl font-bold mb-4">
-		Notas de estudiantes en <span class="text-blue-600">{data.materia.materia.nombre}</span>
-	</h2>
+	<div class="flex justify-between items-center mb-4">
+		<h1 class="text-3xl font-bold">Notas de estudiantes en <span class="text-blue-600">{data.materia.materia.nombre}</span></h1>
+		<form
+			method="POST"
+			action="?/notas"
+			use:enhance={() => {
+					return async ({ result, update }) => {
+						const { base64 } = result.data;
+
+						const byteCharacters = atob(base64);
+						const byteArrays = [new Uint8Array(byteCharacters.length)];
+
+						for (let i = 0; i < byteCharacters.length; i++) {
+							byteArrays[0][i] = byteCharacters.charCodeAt(i);
+						}
+
+						const blob = new Blob(byteArrays, { type: 'application/pdf' });
+
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement('a');
+						a.href = url;
+						a.download = 'reporte.pdf';
+						a.click();
+						URL.revokeObjectURL(url);
+						await update();
+					};
+				}}
+			class="space-y-6"
+		>
+			<Button color="primary" size="lg" class="w-full" type="submit">
+				<FileLinesOutline class="mr-2 h-5 w-5" />
+				Descargar Reporte
+			</Button>
+		</form>
+	</div>
 	{#snippet actions(row: Nota)}
 		<div class="flex gap-2">
 			<Button
@@ -89,6 +190,21 @@
 		</div>
 	{/snippet}
 
+	<!-- FORMULARIO OCULTO PARA SUBIR ARCHIVO -->
+	<form
+		bind:this={formDrop}
+		use:enhance={handleFileUpload}
+		method="post"
+		enctype="multipart/form-data"
+		class="hidden"
+		action="?/subir"
+	>
+	</form>
+
+	<Modal bind:open={dropVisible} size="lg">
+		<h3 class="text-2xl font-bold py-60 text-center">ARRASTRA AQUÍ</h3>
+	</Modal>
+
 	<DataTable data={estudiantes} {actions} />
 
 	<Modal bind:open={mostrarFormulario} size="md">
@@ -100,6 +216,7 @@
 			bind:this={form}
 			use:enhance={enviarCambioNotas}
 			method="post"
+			action="?/editar"
 			class="grid grid-cols-1 md:grid-cols-3 gap-4"
 		>
 			<Input placeholder="Estudiante" value={estudianteSeleccionado?.cedula} disabled />

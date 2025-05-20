@@ -21,6 +21,7 @@ export type Configuracion = {
 	porcentajes: number[];
 };
 
+
 export type Coordinador = {
 	cedula: string;
 	nombre: string;

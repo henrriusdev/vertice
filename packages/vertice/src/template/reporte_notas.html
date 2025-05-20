@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporte de Calificaciones</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f9fafb;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: #4b5563;
+      margin-top: 0;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      font-size: 0.875rem;
+      text-align: left;
+      color: #374151;
+      border-collapse: collapse;
+    }
+
+    thead {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      background-color: #f3f4f6;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+    }
+
+    th {
+      font-weight: 600;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .font-medium {
+      font-weight: 500;
+    }
+
+    .font-semibold {
+      font-weight: 600;
+    }
+
+    .bg-gray-50 {
+      background-color: #f9fafb;
+    }
+
+    .promedio-col {
+      background-color: #f3f4f6;
+    }
+
+    .legend {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    @media print {
+      body {
+        background-color: white !important;
+        padding: 0 !important;
+      }
+
+      .card {
+        box-shadow: none !important;
+      }
+
+      tbody tr:hover {
+        background-color: transparent !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <!-- Encabezado -->
+      <div class="header">
+        <h2 class="title">{{ materia.nombre }}</h2>
+        <p class="subtitle">Prof. {{ docente.nombre }}</p>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th class="text-center">Nº</th>
+              <th>Nombre del estudiante</th>
+              <th>Cédula</th>
+              {% for i in range(1, num_cortes + 1) %}
+                <th class="text-center">Corte {{ i }}</th>
+              {% endfor %}
+              <th class="text-center promedio-col">Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for estudiante in estudiantes %}
+              <tr>
+                <td class="text-center">{{ loop.index }}</td>
+                <td class="font-medium">{{ estudiante.nombre }}</td>
+                <td>{{ estudiante.cedula }}</td>
+                {% for nota in estudiante.notas %}
+                  <td class="text-center" style="color: {{ 'red' if nota < 10 else 'black' }};">{{ nota }}</td>
+                {% endfor %}
+                <td class="text-center font-semibold bg-gray-50" style="color:{{ 'red' if nota < 10 else 'green' }}">{{ estudiante.promedio }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Leyenda -->
+      <div class="legend">
+        <p>Escala de calificación: 0-20 puntos. Aprobación: 10 puntos.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

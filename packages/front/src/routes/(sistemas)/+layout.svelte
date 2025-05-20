@@ -287,7 +287,7 @@
 							class="flex items-center w-full gap-2 text-sm "
 							on:click={toggleUserDropdown}
 						>
-							<Avatar src="/placeholder.svg?height=32&width=32" class="mr-3" />
+							<Avatar src={`https://unavatar.io/${data.correo}`} class="mr-3" />
 							{#if sidebarOpen}
 								<div class="flex-1 text-left">
 									<span class="font-medium truncate">{data.nombre}</span>

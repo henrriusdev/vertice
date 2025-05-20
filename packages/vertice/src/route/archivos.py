@@ -1,18 +1,19 @@
 from flask import Blueprint, request, jsonify, send_from_directory, send_file, render_template
 from flask_jwt_extended import jwt_required, get_jwt
-from os import getcwd, path, remove, makedirs
-from datetime import datetime, date
+from os import getcwd, path, remove, makedirs, listdir
+from datetime import date
 from io import BytesIO
 from weasyprint import HTML
 import traceback
 
+from src.model import Configuracion
 from src.service.trazabilidad import add_trazabilidad
-from src.service.estudiantes import get_student, get_materias_inscritas
-from src.service.carrera import get_carrera
-from src.service.materias import listar_materias_asignadas
+from src.service.materias import listar_materias_asignadas, get_materia_con_nombre_y_config, get_estudiantes_con_notas
+from src.service.usuarios import get_usuario_por_correo
 
 arc = Blueprint("archivo", __name__)
-PATH_FILES = getcwd() + "/planificacion/"
+PATH_FILES = path.abspath(path.join(getcwd(), "../../uploads/planificacion/"))
+
 
 def create_folder_if_not_exists(folder_path):
     if not path.exists(folder_path):
@@ -21,85 +22,85 @@ def create_folder_if_not_exists(folder_path):
 
 # ----------------------- ARCHIVOS -----------------------
 
-@arc.post("/upload")
+@arc.post("/planificacion")
 @jwt_required()
-def upload_file():
-    claims = get_jwt()
-    usuario = claims.get('nombre')
-    file = request.files['file']
-    ciclo = request.form.get('ciclo', '')
-    folder = request.form.get('folder', '')
+async def upload_file():
+    try:
+        claims = get_jwt()
+        usuario = await get_usuario_por_correo(claims.get('sub'))
 
-    ciclo_path = path.join(PATH_FILES, ciclo)
-    create_folder_if_not_exists(ciclo_path)
+        file = request.files['file']
+        ciclo = request.form.get('ciclo', '')
+        folder = request.form.get('folder', '')
 
-    folder_path = path.join(ciclo_path, folder)
-    create_folder_if_not_exists(folder_path)
+        ciclo_path = path.join(PATH_FILES, ciclo)
+        create_folder_if_not_exists(ciclo_path)
 
-    file.save(path.join(folder_path, file.filename))
+        folder_path = path.join(ciclo_path, folder)
+        create_folder_if_not_exists(folder_path)
 
-    # Trazabilidad
-    add_trazabilidad({
-        "accion": f"Subir archivo: {file.filename} a carpeta: {folder}, ciclo: {ciclo}",
-        "usuario": usuario,
-        "modulo": "Archivos",
-        "nivel_alerta": 2
-    })
+        file.save(path.join(folder_path, file.filename))
 
-    return jsonify({"ok": True, "status": 200})
+        # Trazabilidad
+        await add_trazabilidad({
+            "accion": f"Subir archivo: {file.filename} a carpeta: {folder}, ciclo: {ciclo}",
+            "usuario": usuario,
+            "modulo": "Archivos",
+            "nivel_alerta": 2
+        })
+
+        return jsonify({"ok": True, "status": 200})
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "message": str(ex)}), 500
 
 
-@arc.get("/file/<string:name_file>")
+@arc.get("/download/<folder>")
 @jwt_required()
-def get_file(name_file):
-    claims = get_jwt()
-    usuario = claims.get('nombre')
-    folder = request.args.get("folder", "")
-    ciclo = request.args.get("ciclo", "")
-    file_path = path.join(PATH_FILES + ciclo, folder, name_file)
+async def download_file(folder: str):
+    try:
+        claims = get_jwt()
+        usuario = await get_usuario_por_correo(claims.get('sub'))
+        ciclo = (await Configuracion.get(id=1)).ciclo
 
-    if not path.isfile(file_path):
-        return jsonify({"ok": False, "status": 404, "data": {"message": "Archivo no encontrado"}}), 404
+        folder_path = path.join(PATH_FILES, ciclo, folder)
 
-    # Trazabilidad
-    add_trazabilidad({
-        "accion": f"Obtener archivo: {name_file} del folder: {folder}, ciclo: {ciclo}",
-        "usuario": usuario,
-        "modulo": "Archivos",
-        "nivel_alerta": 1
-    })
+        if not path.exists(folder_path):
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Carpeta no encontrada"}}), 404
 
-    return send_from_directory(path.join(PATH_FILES, ciclo, folder), path=name_file, as_attachment=False)
+        # Obtener único archivo dentro de la carpeta
+        archivos = [f for f in listdir(folder_path) if path.isfile(path.join(folder_path, f))]
 
+        if not archivos:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "No hay archivos en la carpeta"}}), 404
 
-@arc.get("/download/<string:name_file>")
-@jwt_required()
-def download_file(name_file):
-    claims = get_jwt()
-    usuario = claims.get('nombre')
-    folder = request.args.get("folder", "")
-    ciclo = request.args.get("ciclo", "")
-    file_path = path.join(PATH_FILES + ciclo, folder, name_file)
+        if len(archivos) > 1:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "Hay más de un archivo en la carpeta"}}), 400
 
-    if not path.isfile(file_path):
-        return jsonify({"ok": False, "status": 404, "data": {"message": "Archivo no encontrado"}}), 404
+        archivo = archivos[0]
+        file_path = path.join(folder_path, archivo)
+        print("Descargando:", file_path)
 
-    # Trazabilidad
-    add_trazabilidad({
-        "accion": f"Descargar archivo: {name_file} de carpeta: {folder}, ciclo: {ciclo}",
-        "usuario": usuario,
-        "modulo": "Archivos",
-        "nivel_alerta": 1
-    })
+        # Trazabilidad
+        await add_trazabilidad({
+            "accion": f"Descargar archivo: {archivo} de carpeta: {folder}, ciclo: {ciclo}",
+            "usuario": usuario,
+            "modulo": "Archivos",
+            "nivel_alerta": 1
+        })
 
-    return send_from_directory(path.join(PATH_FILES, ciclo, folder), path=name_file, as_attachment=True)
+        return send_file(file_path, download_name=archivo, as_attachment=True)
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 
 @arc.delete('/delete')
 @jwt_required()
-def delete_file():
+async def delete_file():
     claims = get_jwt()
-    usuario = claims.get('nombre')
+    usuario = await get_usuario_por_correo(claims.get('sub'))
     filename = request.json.get('filename', '')
     folder = request.json.get('folder', '')
     ciclo = request.json.get('ciclo', '')
@@ -113,7 +114,7 @@ def delete_file():
         remove(file_path)
 
         # Trazabilidad
-        add_trazabilidad({
+        await add_trazabilidad({
             "accion": f"Eliminar archivo: {filename} de carpeta: {folder}, ciclo: {ciclo}",
             "usuario": usuario,
             "modulo": "Archivos",
@@ -127,28 +128,6 @@ def delete_file():
 
 # ----------------------- PDF -----------------------
 
-@arc.get('/estudiante/<cedula>')
-@jwt_required()
-def generar_ficha_estudiantil(cedula):
-    try:
-        estudiante = get_student(cedula)
-        if not estudiante:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
-
-        materias = get_materias_inscritas(cedula)
-        carrera = get_carrera(estudiante["carrera"])
-
-        estudiante["carrera"] = carrera["nombre"]
-        fecha_actual = date.today().strftime("%d/%m/%Y")
-
-        html = render_template("fichaEstudiantes.html", student=estudiante, materias=materias["contenido"], fecha_actual=fecha_actual)
-        pdf = HTML(string=html).write_pdf()
-        return send_file(BytesIO(pdf), download_name="ficha_estudiantil.pdf", as_attachment=True)
-    except Exception as ex:
-        traceback.print_exc()
-        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
-
-
 @arc.get('/materias_asignadas')
 @jwt_required()
 def materias_asignadas():
@@ -161,6 +140,44 @@ def materias_asignadas():
         html = render_template("docenteria.html", materias=data, fecha_actual=fecha_actual)
         pdf = HTML(string=html).write_pdf()
         return send_file(BytesIO(pdf), download_name="docentes_materias.pdf", as_attachment=True)
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@arc.get('/notas/<string:materia_id>/reporte')
+@jwt_required()
+async def reporte_notas_pdf(materia_id):
+    try:
+        claims = get_jwt()
+        correo = claims.get("sub")
+        nombre_docente = claims.get("nombre")
+
+        # 1. Obtener datos necesarios
+        materia = await get_materia_con_nombre_y_config(materia_id, correo)
+        estudiantes = await get_estudiantes_con_notas(materia_id)
+
+        if not materia or not estudiantes:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Datos no encontrados"}}), 404
+
+        num_cortes = materia["num_cortes"]
+
+        # 2. Renderizar HTML
+        html = render_template(
+            "reporte_notas.html",
+            materia=materia,
+            docente={"nombre": nombre_docente},
+            estudiantes=estudiantes,
+            num_cortes=num_cortes
+        )
+
+        # 3. Convertir a PDF
+        pdf = HTML(string=html).write_pdf()
+
+        # 4. Enviar como blob
+        filename = f"reporte_calificaciones_{materia['id']}.pdf"
+        return send_file(BytesIO(pdf), download_name=filename, as_attachment=True)
+
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500

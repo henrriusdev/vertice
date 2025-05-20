@@ -4,8 +4,9 @@ import {
 	obtenerMateriasInscritas
 } from '$lib';
 import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import type { MateriaDisponible } from '../../../app';
+import { obtenerPlanificacion } from '$lib/servicios/archivos';
 
 export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 	try {
@@ -36,3 +37,18 @@ export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 		throw error(500, 'Error cargando datos del estudiante');
 	}
 };
+
+export const actions: Actions = {
+	default: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const materia = formData.get('materia') as string;
+
+		try {
+			const { base64, type } = await obtenerPlanificacion(fetch, materia);
+			return {base64, type}
+		} catch (error) {
+			console.error(error);
+			return { success: false, error: 'Error al inscribir materias' };
+		}
+	}
+}

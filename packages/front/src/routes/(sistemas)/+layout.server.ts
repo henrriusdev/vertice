@@ -8,6 +8,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 	return {
 		nombre: locals.usuario.nombre,
-		rol: locals.usuario.rol.nombre
+		rol: locals.usuario.rol.nombre,
+		correo: locals.usuario.correo
 	}
 };

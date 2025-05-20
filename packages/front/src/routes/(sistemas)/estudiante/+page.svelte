@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
 	import {
 		Table,
 		TableBody,
@@ -13,10 +12,12 @@
 		Alert,
 		Badge,
 		Heading,
-		P
+		P, Tooltip
 	} from 'flowbite-svelte';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
+	import { FileLinesOutline } from 'flowbite-svelte-icons';
+	import {enhance} from '$app/forms';
 
 	let { data }: { data: PageData } = $props();
 
@@ -35,7 +36,7 @@
 		data.historicoMaterias
 			?.filter((materia) => materia.estatus === 'Aprobada')
 			?.reduce((sum, materia) => sum + materia.nota_final, 0) /
-			data.historicoMaterias.filter((materia) => materia.estatus === 'Aprobada').length || 0
+		data.historicoMaterias.filter((materia) => materia.estatus === 'Aprobada').length || 0
 	);
 
 	// Preparar datos para el gráfico
@@ -55,7 +56,7 @@
 			const promedio =
 				materiasSemestre.length > 0
 					? materiasSemestre.reduce((sum, materia) => sum + materia.nota_final, 0) /
-						materiasSemestre.length
+					materiasSemestre.length
 					: 0;
 
 			return parseFloat(promedio.toFixed(2));
@@ -119,7 +120,6 @@
 
 
 	onMount(async () => {
-		console.log(data.materiasInscritas)
 		if (browser) {
 			const module = await import('svelte-apexcharts');
 			chart = module.default;
@@ -163,7 +163,8 @@
 				<div class="h-64" use:chart={options}></div>
 			{/if}
 		</Card>
-		<div class={(!data.inscripcionAbierta ? 'col-span-3' : '') + " flex flex-col justify-center items-start mb-6 col-span-half"}>
+		<div
+			class={(!data.inscripcionAbierta ? 'col-span-3' : '') + " flex flex-col justify-center items-start mb-6 col-span-half"}>
 			<h3 class="text-lg font-semibold mr-3">Estado de inscripción:</h3>
 			{#if data.inscripcionAbierta}
 				<Badge color="green">Abierta</Badge>
@@ -181,19 +182,50 @@
 							<TableHeadCell>Código</TableHeadCell>
 							<TableHeadCell>Docente</TableHeadCell>
 							<TableHeadCell>Créditos</TableHeadCell>
-							<TableHeadCell>Horario</TableHeadCell>
+							<TableHeadCell>Acciones</TableHeadCell>
 						</TableHead>
 						<TableBody>
 							{#each data.materiasInscritas as materia}
 								<TableBodyRow>
 									<TableBodyCell>{materia.nombre}</TableBodyCell>
-									<TableBodyCell>{materia.codigo}</TableBodyCell>
+									<TableBodyCell>{materia.id}</TableBodyCell>
 									<TableBodyCell>{materia.docente}</TableBodyCell>
-									<TableBodyCell>{materia.creditos}</TableBodyCell>
+									<TableBodyCell>{materia.unidad_credito}</TableBodyCell>
 									<TableBodyCell>
-										{#each materia.horario as horario}
-											<div>{horario.dia}: {horario.hora_inicio} - {horario.hora_fin}</div>
-										{/each}
+										<form
+											method="POST"
+											use:enhance={({formData}) => {
+												formData.set("materia", materia.id)
+												return async ({ result, update }) => {
+													const { base64, type } = result.data;
+
+													const byteCharacters = atob(base64);
+													const byteArrays = [new Uint8Array(byteCharacters.length)];
+
+													for (let i = 0; i < byteCharacters.length; i++) {
+														byteArrays[0][i] = byteCharacters.charCodeAt(i);
+													}
+
+													console.log(type)
+													const blob = new Blob(byteArrays, { type });
+													const extension = type.split("/")[1] || "bin";
+
+													const url = URL.createObjectURL(blob);
+													const a = document.createElement('a');
+													a.href = url;
+													a.download = `planificacion.${extension}`;
+													a.click();
+													URL.revokeObjectURL(url);
+													await update();
+												};
+											}}
+											class="space-y-6"
+										>
+											<Button color="primary" class="p-2! grid place-content-center" pill type="submit">
+												<FileLinesOutline class="h-5 w-5" />
+											</Button>
+											<Tooltip>Descargar planificación</Tooltip>
+										</form>
 									</TableBodyCell>
 								</TableBodyRow>
 							{/each}
@@ -249,8 +281,8 @@
 
 		<!-- Materias disponibles -->
 		{#if data.materiasDisponibles.length > 0}
-		<Card padding="xl" size="none" class={data.historicoMaterias.length === 0 ? 'col-span-2' : ''}>
-			<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
+			<Card padding="xl" size="none" class={data.historicoMaterias.length === 0 ? 'col-span-2' : ''}>
+				<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
 
 				<Table striped={true} hoverable={true}>
 					<TableHead>
@@ -273,7 +305,7 @@
 					</TableBody>
 				</Table>
 			</Card>
-			{/if}
+		{/if}
 	</div>
 </div>
 
