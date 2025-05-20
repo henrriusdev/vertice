@@ -220,7 +220,7 @@ async def get_inscritas(cedula: str):
                 "ht": materia.ht,
                 "horarios": horarios,
                 "unidad_credito": materia.unidad_credito,
-                "id_docente": docente.nombre if docente else None
+                "docente": docente.nombre if docente else None
             })
 
         return resultado

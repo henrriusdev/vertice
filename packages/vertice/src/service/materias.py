@@ -305,3 +305,48 @@ async def listar_materias_asignadas():
     except Exception as ex:
         raise Exception(ex)
 
+
+async def get_materia_con_nombre_y_config(materia_id: str, correo: str):
+    try:
+        materia = await Materia.get_or_none(id=materia_id, id_docente__usuario__correo=correo).prefetch_related("id_carrera")
+        if not materia:
+            return None
+
+        config = await Configuracion.get(id=1)
+        return {
+            "id": materia.id,
+            "nombre": materia.nombre,
+            "num_cortes": len(config.porcentajes or []),
+            "carrera": materia.id_carrera.nombre
+        }
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def get_estudiantes_con_notas(materia_id: str):
+    try:
+        config = await Configuracion.get(id=1)
+        porcentajes = config.porcentajes or []
+
+        matriculas = await Matricula.filter(cod_materia_id=materia_id).prefetch_related("cedula_estudiante__usuario")
+
+        estudiantes = []
+        for m in matriculas:
+            usuario = m.cedula_estudiante.usuario
+            notas = m.notas or [0] * len(porcentajes)
+
+            promedio = sum([
+                float(notas[i]) * (float(porcentajes[i]) / 100)
+                for i in range(min(len(notas), len(porcentajes)))
+            ])
+
+            estudiantes.append({
+                "nombre": usuario.nombre,
+                "cedula": usuario.cedula,
+                "notas": notas,
+                "promedio": round(promedio, 2)
+            })
+
+        return estudiantes
+    except Exception as ex:
+        raise Exception(ex)

@@ -78,7 +78,6 @@ async def listar_historico():
 async def listar_horario():
     correo = get_jwt_identity()
     claims = get_jwt()
-    usuario = claims.get("nombre")
 
     estudiante = await get_usuario_por_correo(correo)
     data = await get_inscritas(estudiante.cedula)
@@ -143,7 +142,6 @@ async def patch_student(id_estudiante):
 @jwt_required()
 async def remove_student(cedula):
     claims = get_jwt()
-    usuario = claims.get("nombre")
     eliminado = await delete_student(cedula)
     if not eliminado:
         return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
@@ -162,7 +160,6 @@ async def inscribir_materia():
     claims = get_jwt()
     
     materias = request.json["materias"]
-    print(materias)
 
     estudiante = await get_usuario_por_correo(correo)
     await add_materia(estudiante.cedula, materias)
