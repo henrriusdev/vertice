@@ -150,6 +150,12 @@
 			roles: ['estudiante']
 		},
 		{
+			titulo: 'Cursando',
+			icono: BookOpenOutline,
+			href: '/estudiante/materias',
+			roles: ['estudiante']
+		},
+		{
 			titulo: 'Peticiones',
 			icono: ChalkboardUserOutline,
 			href: '/peticiones',

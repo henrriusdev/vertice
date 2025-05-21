@@ -8,9 +8,9 @@ export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 	const config = await obtenerConfiguracion(fetch);
 	const { horario_inicio: inicio, horario_fin: fin }: { horario_inicio: Date; horario_fin: Date } =
 		config;
-	console.log(inicio, fin);
-	console.log(isAfter(inicio, new Date()));
 	const materiasInscritas = await obtenerMateriasInscritas(fetch);
+	console.log(fin)
+	console.log(isAfter(inicio, new Date()), isAfter(new Date(), fin), materiasInscritas.length > 0);
 	if (isAfter(inicio, new Date()) || isAfter(new Date(), fin)) {
 		return {
 			materiasDisponibles: [] as MateriaDisponible[],
@@ -30,7 +30,8 @@ export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 
 	return {
 		materiasDisponibles,
-		materiasInscritas
+		materiasInscritas,
+		inscripcionAbierta: true
 	};
 };
 

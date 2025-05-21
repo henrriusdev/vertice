@@ -1,6 +1,12 @@
 <script lang="ts">
-    import type { PageData } from './$types';
+	import { DataTable } from '$lib';
 
-    let { data }: { data: PageData } = $props();
+	let {data} = $props();
+	let historicoMaterias = $derived(data.historico);
 </script>
-<p>historico</p>
+
+<div class="container mx-auto p-4">
+	<h1 class="text-3xl font-bold mb-6">Histórico de notas por materia</h1>
+
+	<DataTable data={historicoMaterias} />
+</div>

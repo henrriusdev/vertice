@@ -39,40 +39,10 @@
 	let mensajeToast = $state('');
 
 	const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-	const horas = Array.from({ length: 14 }, (_, i) => {
-		let hora = i + 7;
-		let sufijo = 'AM';
-		if (i >= 12){
-			sufijo = 'PM'
-			hora = hora > 12 ? hora - 12 : hora
-		}
-		return hora < 10 ? `0${hora}:00 ${sufijo}` : `${hora}:00 ${sufijo}`;
-	});
 
 	function horaAMinutos(hora: string): number {
 		const [horas, minutos] = hora.split(':').map(Number);
 		return horas * 60 + minutos;
-	}
-
-	function calcularPosicionMateria(materia: HorarioMateria) {
-		const inicioMinutos = horaAMinutos(materia.hora_inicio);
-		const finMinutos = horaAMinutos(materia.hora_fin);
-		const horaInicioHorario = 7 * 60; // 7:00 AM
-		const top = ((inicioMinutos - horaInicioHorario) / 60) * 4; // 4rem por hora
-		const duracionHoras = (finMinutos - inicioMinutos) / 60;
-		const height = duracionHoras * 4; // 4rem por hora
-
-		const diaIndex = dias.indexOf(materia.dia);
-
-		const colWidth = 97 / 6; // ← Cada día ocupa 1/6 (lunes a sábado)
-		const left = diaIndex * colWidth;
-
-		return {
-			top: `${top}rem`,
-			height: `${height}rem`,
-			left: `calc(${left}% + 60px)`,
-			width: `${colWidth}%` // usar 100%/6
-		};
 	}
 
 	function verificarConflictos() {
@@ -105,33 +75,6 @@
 		if (conflictoDetectado) {
 			mensajeToast = 'Hay conflictos en tu horario. Corrige antes de registrar.';
 			mostrarToast = true;
-		}
-	}
-
-	function formatearHorario(inicio: string, fin: string): string {
-		return `${inicio} - ${fin}`;
-	}
-
-	function getColorClass(color: string, isConflict: boolean): string {
-		const baseClass = isConflict ? 'border-2 border-dashed ' : '';
-
-		switch (color) {
-			case 'blue':
-				return `${baseClass}bg-blue-100 ${isConflict ? 'border-red-500' : ''}`;
-			case 'green':
-				return `${baseClass}bg-green-100 ${isConflict ? 'border-red-500' : ''}`;
-			case 'purple':
-				return `${baseClass}bg-purple-100 ${isConflict ? 'border-red-500' : ''}`;
-			case 'yellow':
-				return `${baseClass}bg-yellow-100 ${isConflict ? 'border-red-500' : ''}`;
-			case 'red':
-				return `${baseClass}bg-red-100 ${isConflict ? 'border-red-500' : ''}`;
-			case 'pink':
-				return `${baseClass}bg-pink-100 ${isConflict ? 'border-red-500' : ''}`;
-			case 'indigo':
-				return `${baseClass}bg-indigo-100 ${isConflict ? 'border-red-500' : ''}`;
-			default:
-				return `${baseClass}bg-gray-100 ${isConflict ? 'border-red-500' : ''}`;
 		}
 	}
 
@@ -216,7 +159,7 @@
 <div class="container mx-auto p-4 bg-white">
 	<h1 class="text-2xl font-bold text-center mb-6">Horario de clases</h1>
 
-	<GrillaHorario {materias} />
+	<GrillaHorario {materias} docente={false}/>
 
 	<!-- Botones -->
 	<div class="flex flex-wrap justify-center gap-4 mt-6">

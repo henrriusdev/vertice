@@ -96,13 +96,13 @@
 			<div>
 				<Label>Fecha de inicio y cierre para realizar el Horario</Label>
 				<Datepicker bind:value={horario} dateRange />
-				{#if horario.length === 2 && horario[0].toString() !== 'Invalid Date'}
+				{#if horario.from && horario.to && horario.from.toString() !== 'Invalid Date' && horario.to.toString() !== 'Invalid Date'}
 					<input
 						type="hidden"
 						name="horario_inicio"
-						value={horario[0] && horario[0].toUTCString()}
+						value={horario.from && horario.from.toUTCString()}
 					/>
-					<input type="hidden" name="horario_fin" value={horario[1] && horario[1].toUTCString()} />
+					<input type="hidden" name="horario_fin" value={horario.to && horario.to.toUTCString()} />
 				{/if}
 			</div>
 		</div>
