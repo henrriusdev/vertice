@@ -1,6 +1,7 @@
 node_modules/
 packages/vertice/venv/
 packages/vertice/.vscode/
+uploads/
 node_modules
 
 # Output

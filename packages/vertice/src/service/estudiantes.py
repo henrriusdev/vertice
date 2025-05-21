@@ -292,3 +292,26 @@ async def validar_pagos_estudiante(usuario):
         raise Exception("El estudiante no está registrado")
     except Exception as e:
         raise e
+
+
+from src.model.estudiante import Estudiante
+from src.model.configuracion import Configuracion
+from tortoise.exceptions import DoesNotExist
+
+async def obtener_info_estudiante_para_constancia(cedula: str):
+    try:
+        estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario", "carrera")
+        config = await Configuracion.get(id=1)
+
+        return {
+            "nombre": estudiante.usuario.nombre,
+            "cedula": estudiante.usuario.cedula,
+            "carrera": estudiante.carrera.nombre,
+            "semestre": estudiante.semestre,
+            "ciclo": config.ciclo
+        }
+
+    except DoesNotExist:
+        return None
+    except Exception as ex:
+        raise Exception(ex)

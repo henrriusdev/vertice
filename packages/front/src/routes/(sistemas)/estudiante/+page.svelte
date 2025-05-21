@@ -12,12 +12,12 @@
 		Alert,
 		Badge,
 		Heading,
-		P, Tooltip
+		P, Tooltip, Spinner
 	} from 'flowbite-svelte';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { FileLinesOutline } from 'flowbite-svelte-icons';
-	import {enhance} from '$app/forms';
+	import { enhance } from '$app/forms';
 
 	let { data }: { data: PageData } = $props();
 
@@ -63,6 +63,8 @@
 		}) || []
 	);
 
+	let loadingConstancia = $state(false);
+	let loadingPlanificacion = $state(false);
 	// Configuración del gráfico
 	let options = $derived({
 		chart: {
@@ -116,8 +118,7 @@
 			}
 		}
 	});
-	let chart: any;
-
+	let chart: any = $state();
 
 	onMount(async () => {
 		if (browser) {
@@ -128,9 +129,48 @@
 </script>
 
 <div class="w-full p-4">
-	<h2 class="text-2xl font-bold mb-4">
-		Hola de nuevo, {data.estudiante.nombre}!
-	</h2>
+	<div class="flex justify-between items-center">
+		<h2 class="text-2xl font-bold mb-4">Hola de nuevo, {data.estudiante.nombre}!</h2>
+		<form
+			method="POST"
+			action="?/constancia"
+			use:enhance={() => {
+				loadingConstancia = true;
+				return async ({ result, update }) => {
+					const { base64 } = result.data;
+
+					const byteCharacters = atob(base64);
+					const byteArrays = [new Uint8Array(byteCharacters.length)];
+
+					for (let i = 0; i < byteCharacters.length; i++) {
+						byteArrays[0][i] = byteCharacters.charCodeAt(i);
+					}
+
+					const blob = new Blob(byteArrays, { type: "application/pdf" });
+
+					const url = URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					a.href = url;
+					a.download = `constancia.pdf`;
+					a.click();
+					URL.revokeObjectURL(url);
+					await update();
+					loadingConstancia = false;
+				};
+			}}
+			class="space-y-6"
+		>
+			<Button color="primary" class="flex justify-center gap-x-3" type="submit" disabled={loadingConstancia}>
+				{#if loadingConstancia}
+					<Spinner class="me-3" size="4" color="gray" />
+					Cargando ...
+				{:else}
+					<FileLinesOutline class="h-5 w-5" />
+					Generar constancia
+				{/if}
+			</Button>
+		</form>
+	</div>
 
 	<div class="grid md:grid-cols-6 gap-6 mb-6">
 		<!-- Resumen estadístico -->
@@ -164,7 +204,7 @@
 			{/if}
 		</Card>
 		<div
-			class={(!data.inscripcionAbierta ? 'col-span-3' : '') + " flex flex-col justify-center items-start mb-6 col-span-half"}>
+			class={(!data.inscripcionAbierta ? 'col-span-3' : '') + " flex flex-col justify-center items-start mb-6 space-y-3 col-span-half"}>
 			<h3 class="text-lg font-semibold mr-3">Estado de inscripción:</h3>
 			{#if data.inscripcionAbierta}
 				<Badge color="green">Abierta</Badge>
@@ -194,8 +234,10 @@
 									<TableBodyCell>
 										<form
 											method="POST"
+											action="?/planificacion"
 											use:enhance={({formData}) => {
 												formData.set("materia", materia.id)
+												loadingPlanificacion = true
 												return async ({ result, update }) => {
 													const { base64, type } = result.data;
 
@@ -217,14 +259,26 @@
 													a.click();
 													URL.revokeObjectURL(url);
 													await update();
+													loadingPlanificacion = false
 												};
 											}}
 											class="space-y-6"
 										>
-											<Button color="primary" class="p-2! grid place-content-center" pill type="submit">
-												<FileLinesOutline class="h-5 w-5" />
+											<Button color="primary" class="p-2! grid place-content-center" pill type="submit"
+															disabled={loadingPlanificacion}>
+												{#if loadingPlanificacion}
+													<Spinner class="me-3" size="4" color="gray" />
+												{:else}
+													<FileLinesOutline class="h-5 w-5" />
+												{/if}
 											</Button>
-											<Tooltip>Descargar planificación</Tooltip>
+											<Tooltip>
+												{#if loadingPlanificacion}
+													Cargando...
+												{:else}
+													Descargar planificación
+												{/if}
+											</Tooltip>
 										</form>
 									</TableBodyCell>
 								</TableBodyRow>

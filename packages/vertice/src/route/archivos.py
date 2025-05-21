@@ -7,9 +7,11 @@ from weasyprint import HTML
 import traceback
 
 from src.model import Configuracion
+from src.service.estudiantes import obtener_info_estudiante_para_constancia
 from src.service.trazabilidad import add_trazabilidad
 from src.service.materias import listar_materias_asignadas, get_materia_con_nombre_y_config, get_estudiantes_con_notas
 from src.service.usuarios import get_usuario_por_correo
+from src.utils.fecha import generar_fecha_larga
 
 arc = Blueprint("archivo", __name__)
 PATH_FILES = path.abspath(path.join(getcwd(), "../../uploads/planificacion/"))
@@ -177,6 +179,34 @@ async def reporte_notas_pdf(materia_id):
         # 4. Enviar como blob
         filename = f"reporte_calificaciones_{materia['id']}.pdf"
         return send_file(BytesIO(pdf), download_name=filename, as_attachment=True)
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@arc.get('/estudiantes/<string:cedula>/constancia')
+@jwt_required()
+async def constancia_estudios(cedula):
+    try:
+        estudiante = await obtener_info_estudiante_para_constancia(cedula)  # ← tú defines este servicio
+        if not estudiante:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
+
+        fecha_larga = generar_fecha_larga(fecha=date.today())
+
+        html = render_template(
+            "constancia_estudios.html",
+            nombre=estudiante["nombre"],
+            cedula=estudiante["cedula"],
+            carrera=estudiante["carrera"],
+            semestre=estudiante["semestre"],
+            ciclo=estudiante["ciclo"],
+            fecha_larga=fecha_larga
+        )
+
+        pdf = HTML(string=html).write_pdf()
+        return send_file(BytesIO(pdf), download_name="constancia_estudios.pdf", as_attachment=True)
 
     except Exception as ex:
         traceback.print_exc()

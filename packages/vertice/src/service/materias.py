@@ -112,7 +112,7 @@ async def get_materias_validas(cedula_estudiante: str):
         ciclo = (await Configuracion.get(id=1)).ciclo
         estudiante = await Estudiante.get(usuario__cedula=cedula_estudiante).prefetch_related("usuario", "carrera")
 
-        ya_inscrito = await Matricula.filter(cedula_estudiante=estudiante.id, ciclo=ciclo).exists()
+        ya_inscrito = await Matricula.filter(cedula_estudiante=estudiante, ciclo=ciclo).exists()
         if ya_inscrito:
             raise Exception("Usted ya tiene inscrito su horario, no puede inscribir más materias o modificarlo")
 
@@ -130,15 +130,22 @@ async def get_materias_validas(cedula_estudiante: str):
             ).exclude(id_docente=None).prefetch_related("id_carrera", "id_docente", "id_docente__usuario")
 
         for materia in materias:
+            # Evitar mostrar materias ya aprobadas
+            matriculas = await Matricula.filter(cod_materia=materia, cedula_estudiante=estudiante.id)
+            aprobada = any(sum(m.notas) > 9.5 for m in matriculas)
+            if aprobada:
+                continue
+
+            # Verificar prelación si aplica
             if estudiante.semestre > 1 and materia.prelacion:
-                aprobada = await Matricula.filter(
+                prelaciones = await Matricula.filter(
                     cod_materia__id=materia.prelacion,
                     cedula_estudiante=estudiante.id
-                ).filter(notas__0__gte=50).exists()
-
-                if not aprobada:
+                )
+                if not any(sum(m.notas) > 9.5 for m in prelaciones):
                     continue
 
+            # Procesar horarios
             horarios = materia.horarios or []
             if isinstance(horarios, str):
                 try:
@@ -147,6 +154,7 @@ async def get_materias_validas(cedula_estudiante: str):
                     horarios = []
 
             count = await Matricula.filter(cod_materia=materia, ciclo=ciclo).count()
+
             materias_validas.append({
                 "id": materia.id,
                 "nombre": materia.nombre,
@@ -175,7 +183,6 @@ async def get_materias_validas(cedula_estudiante: str):
 
     except Exception as ex:
         raise Exception(ex)
-
 
 async def get_materia(id: str):
     try:

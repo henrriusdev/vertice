@@ -43,3 +43,18 @@ export const obtenerPlanificacion = async (
 		type: contentType
 	};
 }
+
+export const obtenerConstancia = async (
+	fetch: typeof window.fetch,
+	cedula: string
+) => {
+	const res = await fetch(`${API}/estudiantes/${cedula}/constancia`);
+	if (!res.ok) throw new Error('Error al obtener la planificación');
+
+	const arrayBuffer = await res.arrayBuffer();
+	const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+	return {
+		base64,
+	};
+}

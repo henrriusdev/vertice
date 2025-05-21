@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constancia de Estudios</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #475569;
+            --accent-color: #3b82f6;
+            --light-color: #f8fafc;
+            --dark-color: #0f172a;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--dark-color);
+            line-height: 1.6;
+            background-color: var(--light-color);
+            padding: 0;
+            margin: 0;
+        }
+
+        .certificate-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 40px;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .certificate-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .certificate-body {
+            text-align: justify;
+            font-size: 14px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .certificate-body strong {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .signature-section {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .signature-section > p {
+            margin-bottom: 80px;
+        }
+
+        .signature-line {
+            width: 240px;
+            margin: 0 auto;
+            border-top: 1px solid var(--dark-color);
+            padding-top: 10px;
+        }
+
+        .signature-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .signature-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .certificate-footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 10px;
+            color: var(--secondary-color);
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .footer-info {
+            margin-bottom: 5px;
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 100px;
+            opacity: 0.03;
+            color: var(--primary-color);
+            font-weight: 700;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            .certificate-container {
+                box-shadow: none;
+                margin: 0;
+                padding: 20px;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="certificate-container">
+    <div class="watermark">INSTITUTO VERTICE</div>
+
+    <div class="certificate-header">
+        <h1 class="certificate-title">Constancia de Estudios</h1>
+    </div>
+
+    <div class="certificate-body">
+        <p>
+            Quien suscribe <strong>Ing. Elibeth Leonela Curalli Jaimes</strong>, venezolana, mayor de edad, titular de
+            Cédula de Identidad <strong>Nº V-29.890.437</strong>, actuando en mi carácter de Director del <strong>INSTITUTO
+            VERTICE</strong>, por medio de la presente se hace <strong>constar</strong> que el bachiller
+            <strong>{{ nombre }}</strong>, titular de la cédula de identidad Nº <strong>{{ cedula }}</strong>, es alumno
+            regular de la institución, registrado bajo el número <strong>Rif.J-00000000-0</strong> para cursar el
+            <strong>{{ semestre }} semestre</strong> en el lapso académico <strong>{{ CICcicloLO }}</strong> en la
+            especialidad de <strong>{{ carrera }}</strong>.
+        </p>
+
+        <p style="margin-top: 30px;">
+            Constancia que se expide a solicitud de la parte interesada, en Saltadilla
+            <strong>{{ fecha_larga }}</strong>.
+        </p>
+    </div>
+
+    <div class="signature-section">
+        <p>Atentamente,</p>
+        <div class="signature-line">
+            <p class="signature-name">Ing. Elibeth Leonela Curalli Jaimes</p>
+            <p class="signature-title">Director</p>
+        </div>
+    </div>
+
+    <div class="certificate-footer">
+        <p class="footer-info"><strong>Gaceta Oficial Nº 36.104 / Decreto Presidencial Nº 1608 / RIF:
+            J-0000000-0</strong></p>
+        <p class="footer-info">Calle Utonio, Sector X. Edificio Bombón. Saltadilla 0000, Estado Belo.</p>
+        <p class="footer-info">Correo: email@email.com</p>
+    </div>
+</div>
+</body>
+</html>
