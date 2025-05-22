@@ -5,7 +5,6 @@ import type { Actions, PageServerLoad } from "./$types";
 export const load: PageServerLoad = async ({ fetch }) => {
   try {
     const res = await obtenerCarreras(fetch);
-    console.log('carreras', res);
     return { carreras: res };
   } catch (error) {
     console.error('Error al obtener carreras:', error);
@@ -23,12 +22,18 @@ export const actions: Actions = {
     };
 
     try {
-      const res = await crearCarrera(fetch, carrera);
-      console.log('carrera creada', res);
-      return { exito: true };
-    } catch (error) {
+      await crearCarrera(fetch, carrera);
+      return {
+        type: 'success',
+        message: 'Carrera creada exitosamente',
+        invalidate: true
+      };
+    } catch (error: any) {
       console.error('Error al crear carrera:', error);
-      return { errores: {nombre: 'Error al crear la carrera'} };
+      return {
+        type: 'failure',
+        message: error.message
+      };
     }
   },
 
@@ -40,12 +45,18 @@ export const actions: Actions = {
     };
 
     try {
-      const res = await actualizarCarrera(fetch, carrera.id, carrera);
-      console.log('carrera actualizada', res);
-      return { exito: true };
-    } catch (error) {
+      await actualizarCarrera(fetch, carrera.id, carrera);
+      return {
+        type: 'success',
+        message: 'Carrera actualizada exitosamente',
+        invalidate: true
+      };
+    } catch (error: any) {
       console.error('Error al actualizar carrera:', error);
-      return { errores: {nombre: 'Error al actualizar la carrera' } };
+      return {
+        type: 'failure',
+        message: error.message
+      };
     }
   },
 
@@ -54,12 +65,18 @@ export const actions: Actions = {
     const id = parseInt(formData.get('id')?.toString() || '0');
 
     try {
-      const res = await eliminarCarrera(fetch, id);
-      console.log('carrera eliminada', res);
-      return { exito: true };
-    } catch (error) {
+      await eliminarCarrera(fetch, id);
+      return {
+        type: 'success',
+        message: 'Carrera eliminada exitosamente',
+        invalidate: true
+      };
+    } catch (error: any) {
       console.error('Error al eliminar carrera:', error);
-      return { errores: { nombre: 'Error al eliminar la carrera' } };
+      return {
+        type: 'failure',
+        message: error.message
+      };
     }
   }
 };

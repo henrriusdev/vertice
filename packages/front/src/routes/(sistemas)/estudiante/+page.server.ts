@@ -7,13 +7,13 @@ import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import type { MateriaDisponible } from '../../../app';
 import { obtenerConstancia, obtenerPlanificacion } from '$lib/servicios/archivos';
+import { addToast } from '$lib';
 
 export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 	try {
 		// Obtener datos
 		const materiasInscritas = await obtenerMateriasInscritas(fetch);
 		const historicoMaterias = await obtenerHistoricoMaterias(fetch);
-		console.log(historicoMaterias)
 		if (materiasInscritas.length > 2) {
 			return {
 				estudiante: usuario,
@@ -25,7 +25,6 @@ export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 		}
 
 		const materiasDisponibles = await obtenerMateriasDisponibles(fetch, usuario?.cedula ?? '');
-		console.log(historicoMaterias)
 		return {
 			estudiante: usuario,
 			materiasInscritas,
@@ -46,21 +45,37 @@ export const actions: Actions = {
 
 		try {
 			const { base64, type } = await obtenerPlanificacion(fetch, materia);
-			return { base64, type }
-		} catch (error) {
-			console.error(error);
-			return { success: false, error: 'Error al inscribir materias' };
+			return {
+				base64,
+				type,
+				message: 'Planificación obtenida exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al obtener planificación:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	},
 
-	constancia: async ({ locals: {usuario}, fetch }) => {
+	constancia: async ({ locals: { usuario }, fetch }) => {
 		const cedula = usuario?.cedula ?? '';
 		try {
-			const { base64 } = await obtenerConstancia(fetch, cedula);
-			return { base64 }
-		} catch (error) {
-			console.error(error);
-			return { success: false, error: 'Error al inscribir materias' };
+			const { base64, type } = await obtenerConstancia(fetch, cedula);
+			return {
+				type: type,
+				base64,
+				message: 'Constancia obtenida exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al obtener constancia:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	}
-}
+};

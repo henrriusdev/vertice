@@ -19,11 +19,13 @@ export const obtenerReporteNotas = async (
 ) => {
 	const res = await fetch(`${API}/notas/${id_materia}/reporte`);
 	if (!res.ok) throw new Error('Error al obtener el reporte de notas');
+	const contentType = res.headers.get('Content-Type') || 'application/octet-stream';
 	const arrayBuffer = await res.arrayBuffer();
 	const base64 = Buffer.from(arrayBuffer).toString('base64');
 
 	return {
-		base64
+		base64,
+		type: contentType,
 	};
 }
 
@@ -51,10 +53,12 @@ export const obtenerConstancia = async (
 	const res = await fetch(`${API}/estudiantes/${cedula}/constancia`);
 	if (!res.ok) throw new Error('Error al obtener la planificación');
 
+	const contentType = res.headers.get('Content-Type') || 'application/octet-stream';
 	const arrayBuffer = await res.arrayBuffer();
 	const base64 = Buffer.from(arrayBuffer).toString('base64');
 
 	return {
 		base64,
+		type: contentType,
 	};
 }

@@ -1,4 +1,4 @@
-import { actualizarNota, obtenerMateria } from '$lib';
+import { actualizarNota, addToast, obtenerMateria } from '$lib';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { crearPeticion } from '$lib/servicios/peticiones';
@@ -16,7 +16,7 @@ export const load = (async ({ fetch, parent, params }) => {
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	editar: async ({ fetch, request, locals:{usuario} }) => {
+	editar: async ({ fetch, request, locals: { usuario } }) => {
 		const form = await request.formData();
 
 		let payload = Object.fromEntries(form) as unknown as {
@@ -27,8 +27,6 @@ export const actions: Actions = {
 			peticion?: string;
 			observacion?: string;
 		};
-		console.log(payload)
-
 		const { peticion, observacion } = payload;
 
 		payload = {
@@ -48,31 +46,72 @@ export const actions: Actions = {
 				id_materia: payload.materia,
 			};
 
-			const res = await crearPeticion(fetch, body as Omit<Peticion, "id">);
-			console.log(res);
-			return { success: true };
+			try {
+				await crearPeticion(fetch, body as Omit<Peticion, "id">);
+				return {
+					type: 'success',
+					message: 'Petición creada exitosamente',
+					invalidate: true
+				};
+			} catch (error: any) {
+				console.error('Error al crear petición:', error);
+				return {
+					type: 'failure',
+					message: error.message
+				};
+			}
 		}
 
-		const res = await actualizarNota(fetch, payload);
-		return { success: true };
+		try {
+			await actualizarNota(fetch, payload);
+			return {
+				type: 'success',
+				message: 'Nota actualizada exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al actualizar nota:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
+		}
 	},
 
-	subir: async ({ fetch, request, locals: { usuario } }) => {
+	subir: async ({ fetch, request }) => {
 		const formData = await request.formData();
 
-		// Puedes acceder a cada campo si necesitas:
-		const file = formData.get('file') as File;
-		const ciclo = formData.get('ciclo') as string;
-		const folder = formData.get('folder') as string;
-
-		// Aquí puedes guardar el archivo o reenviarlo a tu API interna
-		console.log({ file, ciclo, folder, usuario });
-
-		const res = subirPlanificacion(fetch, formData);
-		return { success: true };
+		try {
+			await subirPlanificacion(fetch, formData);
+			return {
+				type: 'success',
+				message: 'Planificación subida exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al subir planificación:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
+		}
 	},
+
 	notas: async ({ fetch, params }) => {
-		const {base64} = await obtenerReporteNotas(fetch, params.materia);
-		return {base64};
+		try {
+			const { base64, type } = await obtenerReporteNotas(fetch, params.materia);
+			return {
+				type,
+				base64,
+				message: 'Reporte de notas obtenido exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al obtener reporte de notas:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
+		}
 	}
 };

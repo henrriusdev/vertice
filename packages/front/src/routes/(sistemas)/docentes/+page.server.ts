@@ -48,9 +48,11 @@ export const actions: Actions = {
 			Usuario;
 		
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, false);
-		console.log(errores);
 		if (Object.keys(errores).length > 0) {
-			return { errores };
+			return {
+				type: 'failure',
+				message: 'Errores en los datos del formulario'
+			};
 		}
 		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
 			id: 0,
@@ -65,9 +67,12 @@ export const actions: Actions = {
 		try {
 			const { data }: { data: Usuario } = await crearUsuario(fetch, usuario);
 			usuario.id = data.id;
-		} catch (error) {
-			console.error('Error al crear carrera:', error);
-			return { errores: { form: 'Error al crear el usuario' } as ErroresDocente };
+		} catch (error: any) {
+			console.error('Error al crear usuario:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 
 		const docente: DocenteReq = {
@@ -82,10 +87,17 @@ export const actions: Actions = {
 
 		try {
 			await crearDocente(fetch, docente);
-			return { docente: usuario.nombre };
-		} catch (e) {
-			console.error(e);
-			return { errores: { form: 'Error al crear el docente' } as ErroresDocente };
+			return {
+				type: 'success',
+				message: `Docente ${usuario.nombre} creado exitosamente`,
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al crear docente:', e);
+			return {
+				type: 'failure',
+				message: e.message
+			};
 		}
 	},
 
@@ -93,12 +105,13 @@ export const actions: Actions = {
 		const payload = Object.fromEntries(await request.formData()) as unknown as DocenteReq &
 			Usuario & { id_docente: number };
 		
-		console.log(payload);
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, true);
 		if (Object.keys(errores).length > 0) {
-			return { errores };
+			return {
+				type: 'failure',
+				message: 'Errores en los datos del formulario'
+			};
 		}
-		console.log(errores);
 
 		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
 			cedula: payload.cedula,
@@ -110,9 +123,12 @@ export const actions: Actions = {
 
 		try {
 			await actualizarUsuario(fetch, payload.id, usuario);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error al editar usuario:', error);
-			return { errores: { form: 'Error al editar el usuario' } as ErroresDocente };
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 
 		const docente: DocenteReq = {
@@ -128,10 +144,17 @@ export const actions: Actions = {
 
 		try {
 			await actualizarDocente(fetch, payload.id_docente, docente);
-			return { docente: usuario.nombre };
-		} catch (e) {
-			console.error(e);
-			return { errores: { form: 'Error al editar el docente' } as ErroresDocente };
+			return {
+				type: 'success',
+				message: `Docente ${usuario.nombre} actualizado exitosamente`,
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al actualizar docente:', e);
+			return {
+				type: 'failure',
+				message: e.message
+			};
 		}
 	},
 
@@ -140,12 +163,18 @@ export const actions: Actions = {
 		const cedula = formData.get('cedula')?.toString() || '';
 
 		try {
-			const res = await eliminarDocente(fetch, cedula);
-			console.log('carrera eliminada', res);
-			return { exito: true };
-		} catch (error) {
-			console.error('Error al eliminar carrera:', error);
-			return { errores: { form: 'Error al eliminar la carrera' } as ErroresDocente };
+			await eliminarDocente(fetch, cedula);
+			return {
+				type: 'success',
+				message: 'Docente eliminado exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al eliminar docente:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	}
 };

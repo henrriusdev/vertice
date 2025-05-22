@@ -1,4 +1,4 @@
-import { actualizarUsuario, crearUsuario, eliminarUsuario, obtenerUsuarios } from '$lib';
+import { actualizarUsuario, addToast, crearUsuario, eliminarUsuario, obtenerUsuarios } from '$lib';
 import type { Usuario } from '../../../../app';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -29,10 +29,17 @@ export const actions: Actions = {
 
 		try {
 			const { data }: { data: Usuario } = await crearUsuario(fetch, usuario);
-			return { usuario: data.nombre };
-		} catch (error) {
-			console.error('Error al crear carrera:', error);
-			return { errores: { form: 'Error al crear el usuario' } };
+			return {
+				type: 'success',
+				message: `Usuario ${data.nombre} creado exitosamente`,
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al crear usuario:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	},
 
@@ -44,7 +51,6 @@ export const actions: Actions = {
 			rol: number;
 		};
 
-
 		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
 			cedula: payload.cedula,
 			correo: payload.correo,
@@ -55,10 +61,17 @@ export const actions: Actions = {
 
 		try {
 			await actualizarUsuario(fetch, payload.id, usuario);
-			return { usuario: usuario.nombre };
-		} catch (error) {
+			return {
+				type: 'success',
+				message: `Usuario ${usuario.nombre} actualizado exitosamente`,
+				invalidate: true
+			};
+		} catch (error: any) {
 			console.error('Error al editar usuario:', error);
-			return { errores: { form: 'Error al editar el usuario' } };
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	},
 
@@ -67,12 +80,18 @@ export const actions: Actions = {
 		const cedula = formData.get('cedula')?.toString() || '';
 
 		try {
-			const res = await eliminarUsuario(fetch, cedula);
-			console.log('carrera eliminada', res);
-			return { exito: true };
-		} catch (error) {
-			console.error('Error al eliminar carrera:', error);
-			return { errores: { form: 'Error al eliminar la carrera' } };
+			await eliminarUsuario(fetch, cedula);
+			return {
+				type: 'success',
+				message: 'Usuario eliminado exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al eliminar usuario:', error);
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	}
 };

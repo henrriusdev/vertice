@@ -1,23 +1,25 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { enhance } from '$app/forms';
 	import {
+		Alert,
+		Badge,
+		Button,
+		Card,
+		Chart,
+		Heading,
+		P,
+		Spinner,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Card,
-		Button,
-		Alert,
-		Badge,
-		Heading,
-		P, Tooltip, Spinner
+		Tooltip
 	} from 'flowbite-svelte';
-	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
 	import { FileLinesOutline } from 'flowbite-svelte-icons';
-	import { enhance } from '$app/forms';
+	import type { PageData } from './$types';
+	import type { MateriaHistorico } from '../../../app';
 
 	let { data }: { data: PageData } = $props();
 
@@ -36,27 +38,24 @@
 		data.historicoMaterias
 			?.filter((materia) => materia.estatus === 'Aprobada')
 			?.reduce((sum, materia) => sum + materia.nota_final, 0) /
-		data.historicoMaterias.filter((materia) => materia.estatus === 'Aprobada').length || 0
+			data.historicoMaterias.filter((materia) => materia.estatus === 'Aprobada').length || 0
 	);
 
 	// Preparar datos para el gráfico
-	let semestreLabels = $derived(
-		Array.from(new Set(data.historicoMaterias?.map((materia) => materia.semestre)))
-			.sort((a, b) => a - b)
-			.map((semestre) => `Semestre ${semestre}`) || []
+	let cicloLabels = $derived(
+		Array.from(new Set(data.historicoMaterias?.map((materia) => materia.ciclo)))
 	);
 
 	let promedioData = $derived(
-		semestreLabels?.map((semestreLabel) => {
-			const semestre = parseInt(semestreLabel.split(' ')[1]);
+		cicloLabels?.map((cicloLabel) => {
 			const materiasSemestre = data.historicoMaterias.filter(
-				(materia) => materia.semestre === semestre && materia.estatus === 'Aprobada'
+				(materia) => materia.ciclo === cicloLabel && materia.promedio >= 9.5
 			);
 
 			const promedio =
 				materiasSemestre.length > 0
-					? materiasSemestre.reduce((sum, materia) => sum + materia.nota_final, 0) /
-					materiasSemestre.length
+					? materiasSemestre.reduce((sum, materia) => sum + materia.promedio, 0) /
+						materiasSemestre.length
 					: 0;
 
 			return parseFloat(promedio.toFixed(2));
@@ -66,7 +65,7 @@
 	let loadingConstancia = $state(false);
 	let loadingPlanificacion = $state(false);
 	// Configuración del gráfico
-	let options = $derived({
+	let options: ApexCharts.ApexOptions = $derived({
 		chart: {
 			type: 'line',
 			height: 350,
@@ -92,7 +91,7 @@
 			strokeColors: '#fff'
 		},
 		xaxis: {
-			categories: semestreLabels,
+			categories: cicloLabels,
 			title: {
 				text: 'Semestre'
 			}
@@ -108,22 +107,6 @@
 			y: {
 				formatter: (value: number) => value.toFixed(2)
 			}
-		},
-		title: {
-			text: 'Evolución del Promedio por Semestre',
-			align: 'left',
-			style: {
-				fontSize: '16px',
-				fontWeight: 'bold'
-			}
-		}
-	});
-	let chart: any = $state();
-
-	onMount(async () => {
-		if (browser) {
-			const module = await import('svelte-apexcharts');
-			chart = module.default;
 		}
 	});
 </script>
@@ -146,7 +129,7 @@
 						byteArrays[0][i] = byteCharacters.charCodeAt(i);
 					}
 
-					const blob = new Blob(byteArrays, { type: "application/pdf" });
+					const blob = new Blob(byteArrays, { type: 'application/pdf' });
 
 					const url = URL.createObjectURL(blob);
 					const a = document.createElement('a');
@@ -160,7 +143,12 @@
 			}}
 			class="space-y-6"
 		>
-			<Button color="primary" class="flex justify-center gap-x-3" type="submit" disabled={loadingConstancia}>
+			<Button
+				color="primary"
+				class="flex justify-center gap-x-3"
+				type="submit"
+				disabled={loadingConstancia}
+			>
 				{#if loadingConstancia}
 					<Spinner class="me-3" size="4" color="gray" />
 					Cargando ...
@@ -172,9 +160,9 @@
 		</form>
 	</div>
 
-	<div class="grid md:grid-cols-6 gap-6 mb-6">
+	<div class="grid md:grid-cols-6 gap-4 mb-6">
 		<!-- Resumen estadístico -->
-		<Card padding="xl" size="none" class="col-span-2">
+		<Card class="col-span-2 p-4 max-w-full">
 			<Heading tag="h3" class="mb-4">Resumen Académico</Heading>
 
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -193,113 +181,112 @@
 					<P size="sm">Promedio General</P>
 				</div>
 			</div>
+			<h3 class="text-lg font-semibold mr-3">Estado de inscripción:</h3>
+			{#if data.inscripcionAbierta}
+				<Badge color="green" class="w-fit">Abierta</Badge>
+			{:else}
+				<Badge color="red" class="w-fit">Cerrada</Badge>
+			{/if}
 		</Card>
 
 		<!-- Gráfico de promedio por semestre -->
-		<Card padding="xl" size="none" class="col-span-4">
+		<Card class="col-span-4 p-4 max-w-full">
 			<Heading tag="h3" class="mb-4">Evolución del Promedio</Heading>
+			<Chart {options} />
+		</Card>
+		<!-- Materias inscritas -->
+		<Card class="mb-6 p-4 max-w-full col-span-2">
+			<Heading tag="h3" class="mb-4">Materias Inscritas</Heading>
 
-			{#if browser && chart}
-				<div class="h-64" use:chart={options}></div>
+			{#if data.materiasInscritas.length > 0}
+				<Table striped={true}>
+					<TableHead>
+						<TableHeadCell>Materia</TableHeadCell>
+						<TableHeadCell>Código</TableHeadCell>
+						<TableHeadCell>Docente</TableHeadCell>
+						<TableHeadCell>Créditos</TableHeadCell>
+						<TableHeadCell>Acciones</TableHeadCell>
+					</TableHead>
+					<TableBody>
+						{#each data.materiasInscritas as materia}
+							<TableBodyRow>
+								<TableBodyCell>{materia.nombre}</TableBodyCell>
+								<TableBodyCell>{materia.id}</TableBodyCell>
+								<TableBodyCell>{materia.docente}</TableBodyCell>
+								<TableBodyCell>{materia.unidad_credito}</TableBodyCell>
+								<TableBodyCell>
+									<form
+										method="POST"
+										action="?/planificacion"
+										use:enhance={({ formData }) => {
+											formData.set('materia', materia.id);
+											loadingPlanificacion = true;
+											return async ({ result, update }) => {
+												const { base64, type } = result.data;
+
+												const byteCharacters = atob(base64);
+												const byteArrays = [new Uint8Array(byteCharacters.length)];
+
+												for (let i = 0; i < byteCharacters.length; i++) {
+													byteArrays[0][i] = byteCharacters.charCodeAt(i);
+												}
+
+												console.log(type);
+												const blob = new Blob(byteArrays, { type });
+												const extension = type.split('/')[1] || 'bin';
+
+												const url = URL.createObjectURL(blob);
+												const a = document.createElement('a');
+												a.href = url;
+												a.download = `planificacion.${extension}`;
+												a.click();
+												URL.revokeObjectURL(url);
+												await update();
+												loadingPlanificacion = false;
+											};
+										}}
+										class="space-y-6"
+									>
+										<Button
+											color="primary"
+											class="p-2! grid place-content-center"
+											pill
+											type="submit"
+											disabled={loadingPlanificacion}
+										>
+											{#if loadingPlanificacion}
+												<Spinner class="me-3" size="4" color="gray" />
+											{:else}
+												<FileLinesOutline class="h-5 w-5" />
+											{/if}
+										</Button>
+										<Tooltip>
+											{#if loadingPlanificacion}
+												Cargando...
+											{:else}
+												Descargar planificación
+											{/if}
+										</Tooltip>
+									</form>
+								</TableBodyCell>
+							</TableBodyRow>
+						{/each}
+					</TableBody>
+				</Table>
+			{:else}
+				<Alert color="primary">No tienes materias inscritas actualmente</Alert>
+			{/if}
+
+			{#if data.inscripcionAbierta}
+				<div class="mt-6">
+					<Button color="primary" href="/estudiante/horario">Ir a inscripción de materias</Button>
+				</div>
 			{/if}
 		</Card>
-		<div
-			class={(!data.inscripcionAbierta ? 'col-span-3' : '') + " flex flex-col justify-center items-start mb-6 space-y-3 col-span-half"}>
-			<h3 class="text-lg font-semibold mr-3">Estado de inscripción:</h3>
-			{#if data.inscripcionAbierta}
-				<Badge color="green">Abierta</Badge>
-			{:else}
-				<Badge color="red">Cerrada</Badge>
-			{/if}
-			<!-- Materias inscritas -->
-			<Card padding="xl" class="mb-6" size="none">
-				<Heading tag="h3" class="mb-4">Materias Inscritas</Heading>
-
-				{#if data.materiasInscritas.length > 0}
-					<Table striped={true} hoverable={true}>
-						<TableHead>
-							<TableHeadCell>Materia</TableHeadCell>
-							<TableHeadCell>Código</TableHeadCell>
-							<TableHeadCell>Docente</TableHeadCell>
-							<TableHeadCell>Créditos</TableHeadCell>
-							<TableHeadCell>Acciones</TableHeadCell>
-						</TableHead>
-						<TableBody>
-							{#each data.materiasInscritas as materia}
-								<TableBodyRow>
-									<TableBodyCell>{materia.nombre}</TableBodyCell>
-									<TableBodyCell>{materia.id}</TableBodyCell>
-									<TableBodyCell>{materia.docente}</TableBodyCell>
-									<TableBodyCell>{materia.unidad_credito}</TableBodyCell>
-									<TableBodyCell>
-										<form
-											method="POST"
-											action="?/planificacion"
-											use:enhance={({formData}) => {
-												formData.set("materia", materia.id)
-												loadingPlanificacion = true
-												return async ({ result, update }) => {
-													const { base64, type } = result.data;
-
-													const byteCharacters = atob(base64);
-													const byteArrays = [new Uint8Array(byteCharacters.length)];
-
-													for (let i = 0; i < byteCharacters.length; i++) {
-														byteArrays[0][i] = byteCharacters.charCodeAt(i);
-													}
-
-													console.log(type)
-													const blob = new Blob(byteArrays, { type });
-													const extension = type.split("/")[1] || "bin";
-
-													const url = URL.createObjectURL(blob);
-													const a = document.createElement('a');
-													a.href = url;
-													a.download = `planificacion.${extension}`;
-													a.click();
-													URL.revokeObjectURL(url);
-													await update();
-													loadingPlanificacion = false
-												};
-											}}
-											class="space-y-6"
-										>
-											<Button color="primary" class="p-2! grid place-content-center" pill type="submit"
-															disabled={loadingPlanificacion}>
-												{#if loadingPlanificacion}
-													<Spinner class="me-3" size="4" color="gray" />
-												{:else}
-													<FileLinesOutline class="h-5 w-5" />
-												{/if}
-											</Button>
-											<Tooltip>
-												{#if loadingPlanificacion}
-													Cargando...
-												{:else}
-													Descargar planificación
-												{/if}
-											</Tooltip>
-										</form>
-									</TableBodyCell>
-								</TableBodyRow>
-							{/each}
-						</TableBody>
-					</Table>
-				{:else}
-					<Alert color="info">No tienes materias inscritas actualmente</Alert>
-				{/if}
-
-				{#if data.inscripcionAbierta}
-					<div class="mt-6">
-						<Button color="primary" href="/estudiante/horario">Ir a inscripción de materias</Button>
-					</div>
-				{/if}
-			</Card>
-		</div>
 
 		<!-- Histórico de materias -->
 		{#if data.historicoMaterias.length > 0}
-			<Card padding="xl" size="none" class={!data.inscripcionAbierta ? 'col-span-3' : 'col-span-2'}>
+			<Card class="col-span-2 max-w-full p-4">
 				<Heading tag="h3" class="mb-4">Histórico de Materias</Heading>
 
 				<Table striped={true} hoverable={true}>
@@ -334,10 +321,10 @@
 		{/if}
 
 		<!-- Materias disponibles -->
-		{#if data.materiasDisponibles.length > 0}
-			<Card padding="xl" size="none" class={data.historicoMaterias.length === 0 ? 'col-span-2' : ''}>
-				<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
-
+		<Card class="col-span-2 max-w-full p-4">
+			<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
+			
+			{#if data.materiasDisponibles.length > 0}
 				<Table striped={true} hoverable={true}>
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
@@ -358,8 +345,9 @@
 						{/each}
 					</TableBody>
 				</Table>
+			{:else}
+			<p class="text-gray-500">No hay materias disponibles actualmente</p>
+				{/if}
 			</Card>
-		{/if}
 	</div>
 </div>
-

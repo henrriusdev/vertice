@@ -1,6 +1,6 @@
 // src/routes/+page.server.ts
 import { login } from '$lib';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 export const load = async ({ locals }) => {
 	if (locals.usuario) {
@@ -25,14 +25,19 @@ export const actions = {
 				secure: false, // true en producción
 				maxAge: 60 * 60 * 2 // 2h
 			});
-			console.log('logueado', usuario);
 
 			destino = `/${usuario.rol.nombre.toLowerCase()}`;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			return {
+				type: 'success',
+				message: 'Inicio de sesión exitoso',
+				invalidate: destino
+			};
 		} catch (e: any) {
-			console.error("A", e);
-			return fail(401, { mensaje: e.message });
+			console.error('Error en inicio de sesión:', e);
+			return {
+				type: 'failure',
+				message: e.message
+			};
 		}
-		throw redirect(302, destino);
 	}
 };

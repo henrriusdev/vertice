@@ -1,15 +1,14 @@
 import { actualizarConfiguracion, crearConfiguracion, obtenerConfiguracion } from '$lib';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import { format } from 'date-fns';
 import type { Configuracion } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
-import { format } from 'date-fns';
 
 export const load = (async ({ fetch, locals: { usuario } }) => {
 	if (!['superusuario', 'coordinador'].includes(usuario!.rol.nombre)) {
 		throw redirect(302, '/' + usuario!.rol.nombre);
 	}
 	const configuracion = await obtenerConfiguracion(fetch);
-	console.log(configuracion);
 	return { configuracion };
 }) satisfies PageServerLoad;
 
@@ -40,8 +39,6 @@ export const actions: Actions = {
 			horario_fin: format(horario_fin, 'dd/MM/yyyy')
 		};
 		
-		console.log(payload);
-
 		// Verificamos si ya existe config para decidir acción
 		const configActual = await obtenerConfiguracion(fetch);
 		try {
@@ -50,9 +47,17 @@ export const actions: Actions = {
 			} else {
 				await crearConfiguracion(fetch, payload);
 			}
-		} catch (e) {
-			console.error(e);
-			return fail(500, { message: 'No se pudo guardar la configuración.' });
+			return {
+				type: 'success',
+				message: 'Configuración actualizada exitosamente',
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al actualizar configuración:', e);
+			return {
+				type: 'failure',
+				message: e.message
+			};
 		}
 	}
 };

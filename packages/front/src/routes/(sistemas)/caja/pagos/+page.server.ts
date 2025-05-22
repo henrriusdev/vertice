@@ -1,5 +1,4 @@
 import { crearPago, generarReporte, obtenerEstudiantes } from '$lib';
-import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
@@ -19,9 +18,11 @@ export const actions: Actions = {
 		const referencia = formData.get('referencia_transferencia') as string | null;
 		const billetesRaw = formData.getAll('billetes');
 
-		console.log(student, concept, method, amount, fecha_pago);
 		if (!student || !concept || !method || !amount || !fecha_pago) {
-			return fail(400, { error: 'Faltan campos requeridos' });
+			return {
+				type: 'failure',
+				message: 'Por favor completa todos los campos'
+			};
 		}
 
 		let billetes = undefined;
@@ -29,7 +30,10 @@ export const actions: Actions = {
 			try {
 				billetes = billetesRaw.map((b) => JSON.parse(b as string));
 			} catch {
-				return fail(400, { error: 'Error procesando billetes' });
+				return {
+					type: 'failure',
+					message: 'Error al procesar los billetes'
+				};
 			}
 		}
 
@@ -44,11 +48,18 @@ export const actions: Actions = {
 		};
 
 		try {
-			const pago = await crearPago(fetch, payload);
-			return { success: true, pago };
-		} catch (e) {
-			console.error('Error al registrar el pago', e);
-			return fail(500, { error: 'No se pudo registrar el pago' });
+			await crearPago(fetch, payload);
+			return {
+				type: 'success',
+				message: 'Pago registrado exitosamente',
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al registrar el pago:', e);
+			return {
+				type: 'failure',
+				message: e.message
+			};
 		}
 	},
 	generarReporte: async ({ fetch, request }) => {
@@ -69,10 +80,20 @@ export const actions: Actions = {
 			params.set('ff', ff.toString());
 		}
 
-		const { base64 } = await generarReporte(fetch, params.toString());
-
-		return {
-			base64
-		};
+		try {
+			const { base64 } = await generarReporte(fetch, params.toString());
+			return {
+				base64,
+				type: 'application/pdf',
+				message: 'Reporte generado exitosamente',
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al generar reporte:', e);
+			return {
+				type: 'failure',
+				message: e.message
+			};
+		}
 	}
 };

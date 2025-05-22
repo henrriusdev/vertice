@@ -42,7 +42,7 @@
 		"eslint-plugin-svelte": "^3.0.0",
 		"flatpickr": "^4.6.13",
 		"flowbite": "^3.1.2",
-		"flowbite-svelte": "^0.48.6",
+		"flowbite-svelte": "^1.4.3",
 		"flowbite-svelte-icons": "^2.1.0",
 		"globals": "^16.0.0",
 		"imask": "^7.6.1",

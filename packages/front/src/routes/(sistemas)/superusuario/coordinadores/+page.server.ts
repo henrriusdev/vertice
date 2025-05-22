@@ -1,6 +1,7 @@
 import {
 	actualizarCoordinador,
 	actualizarUsuario,
+	addToast,
 	crearCoordinador,
 	crearUsuario,
 	eliminarCoordinador,
@@ -15,7 +16,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	try {
 		const carreras = await obtenerCarreras(fetch);
 		const res = await obtenerCoordinadores(fetch);
-		console.log('coordinadores', res);
 		return { coordinadores: res, carreras };
 	} catch (error) {
 		console.error('Error al obtener carreras:', error);
@@ -42,9 +42,12 @@ export const actions: Actions = {
 		try {
 			const { data }: { data: Usuario } = await crearUsuario(fetch, usuario);
 			usuario.id = data.id;
-		} catch (error) {
-			console.error('Error al crear carrera:', error);
-			return { errores: { form: 'Error al crear el usuario' } };
+		} catch (error: any) {
+			console.error('Error al crear usuario:', error);
+			return {
+				type: 'failure',
+				message: 'Error al crear el usuario'
+			};
 		}
 
 		const coordinador: CoordinadorReq = {
@@ -55,10 +58,17 @@ export const actions: Actions = {
 
 		try {
 			await crearCoordinador(fetch, coordinador);
-			return { coordinador: usuario.nombre };
-		} catch (e) {
-			console.error(e);
-			return { errores: { form: 'Error al crear el coordinador' } };
+			return {
+				type: 'success',
+				message: 'Coordinador creado exitosamente',
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al crear coordinador:', e);
+			return {
+				type: 'failure',
+				message: 'Error al crear el coordinador'
+			};
 		}
 	},
 
@@ -76,9 +86,12 @@ export const actions: Actions = {
 
 		try {
 			await actualizarUsuario(fetch, payload.id, usuario);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error al editar usuario:', error);
-			return { errores: { form: 'Error al editar el usuario' } };
+			return {
+				type: 'failure',
+				message: 'Error al editar el usuario'
+			};
 		}
 
 		const coordinador: CoordinadorReq = {
@@ -88,10 +101,17 @@ export const actions: Actions = {
 
 		try {
 			await actualizarCoordinador(fetch, payload.id_coordinador, coordinador);
-			return { coordinador: usuario.nombre };
-		} catch (e) {
-			console.error(e);
-			return { errores: { form: 'Error al editar el coordinador' } };
+			return {
+				type: 'success',
+				message: 'Coordinador actualizado exitosamente',
+				invalidate: true
+			};
+		} catch (e: any) {
+			console.error('Error al actualizar coordinador:', e);
+			return {
+				type: 'failure',
+				message: 'Error al actualizar el coordinador'
+			};
 		}
 	},
 
@@ -100,12 +120,18 @@ export const actions: Actions = {
 		const cedula = formData.get('cedula')?.toString() || '';
 
 		try {
-			const res = await eliminarCoordinador(fetch, cedula);
-			console.log('carrera eliminada', res);
-			return { exito: true };
-		} catch (error) {
-			console.error('Error al eliminar carrera:', error);
-			return { errores: { form: 'Error al eliminar la carrera' } };
+			await eliminarCoordinador(fetch, cedula);
+			return {
+				type: 'success',
+				message: 'Coordinador eliminado exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al eliminar coordinador:', error);
+			return {
+				type: 'failure',
+				message: 'Error al eliminar el coordinador'
+			};
 		}
 	}
 };

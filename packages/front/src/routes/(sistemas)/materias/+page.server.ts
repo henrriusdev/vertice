@@ -4,7 +4,8 @@ import {
 	eliminarMateria,
 	obtenerMaterias,
 	obtenerCarreras,
-	obtenerDocentes
+	obtenerDocentes,
+	addToast
 } from '$lib';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -31,12 +32,15 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 export const actions: Actions = {
 	// Acción para crear una materia
 	create: async ({ request, fetch }) => {
-		const form = await request.formData()
+		const form = await request.formData();
 		const payload = Object.fromEntries(form) as unknown as MateriaReq;
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
-			return { errores };
+			return {
+				type: 'failure',
+				message: 'Errores en los datos del formulario'
+			};
 		}
 
 		const horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
@@ -45,15 +49,22 @@ export const actions: Actions = {
 			fin: string;
 		}[];
 
-		payload.horarios = horarios
-		payload.prelacion = payload?.prelacion ?? ''
+		payload.horarios = horarios;
+		payload.prelacion = payload?.prelacion ?? '';
 
 		try {
 			await crearMateria(fetch, payload);
-			return { materia: payload.nombre };
-		} catch (error) {
+			return {
+				type: 'success',
+				message: 'Materia creada exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
 			console.error('Error al crear materia:', error);
-			return { errores: { form: 'Error al crear la materia' } };
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	},
 
@@ -66,7 +77,10 @@ export const actions: Actions = {
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
-			return { errores };
+			return {
+				type: 'failure',
+				message: 'Errores en los datos del formulario'
+			};
 		}
 
 		const horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
@@ -75,17 +89,22 @@ export const actions: Actions = {
 			fin: string;
 		}[];
 
-		console.log('horarios', horarios);
-
 		payload.horarios = horarios;
 		payload.prelacion = payload?.prelacion ?? '';
 
 		try {
 			await actualizarMateria(fetch, payload.id, payload);
-			return { materia: payload.nombre };
-		} catch (error) {
+			return {
+				type: 'success',
+				message: 'Materia actualizada exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
 			console.error('Error al editar materia:', error);
-			return { errores: { form: 'Error al editar la materia' } };
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	},
 
@@ -96,11 +115,17 @@ export const actions: Actions = {
 
 		try {
 			await eliminarMateria(fetch, id);
-			console.log('Materia eliminada', id);
-			return { exito: true };
-		} catch (error) {
+			return {
+				type: 'success',
+				message: 'Materia eliminada exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
 			console.error('Error al eliminar materia:', error);
-			return { errores: { form: 'Error al eliminar la materia' } };
+			return {
+				type: 'failure',
+				message: error.message
+			};
 		}
 	}
 };

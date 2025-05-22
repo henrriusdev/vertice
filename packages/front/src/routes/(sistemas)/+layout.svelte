@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { addToast, toasts } from '$lib';
 	import {
-		Alert,
 		Avatar,
 		Breadcrumb,
 		BreadcrumbItem,
@@ -13,7 +14,8 @@
 		Sidebar,
 		SidebarGroup,
 		SidebarItem,
-		SidebarWrapper
+		SidebarWrapper,
+		Toast
 	} from 'flowbite-svelte';
 	import {
 		BookOpenOutline,
@@ -32,8 +34,8 @@
 		UsersGroupOutline,
 		UsersOutline
 	} from 'flowbite-svelte-icons';
+	import { fly } from 'svelte/transition';
 	import type { LayoutData } from './$types';
-	import { page } from '$app/state';
 
 	// Obtener los datos del usuario desde los datos proporcionados por +layout.server.ts
 	let { data, children } = $props<{ data: LayoutData }>();
@@ -42,28 +44,6 @@
 	let sidebarOpen = $state(true);
 
 	// Estado para mostrar alertas
-	let showAlert = $state(false);
-	let alertMessage = $state('');
-	let alertColor:
-		| 'red'
-		| 'form'
-		| 'none'
-		| 'gray'
-		| 'yellow'
-		| 'green'
-		| 'indigo'
-		| 'purple'
-		| 'pink'
-		| 'blue'
-		| 'light'
-		| 'dark'
-		| 'default'
-		| 'dropdown'
-		| 'navbar'
-		| 'navbarUl'
-		| 'primary'
-		| 'orange'
-		| undefined = $state('red');
 	let userDropdownOpen = $state(false);
 
 	// Función para alternar el estado del sidebar
@@ -75,7 +55,6 @@
 		userDropdownOpen = !userDropdownOpen;
 	}
 
-	// Elementos de navegación con roles permitidos
 	const elementosNav = [
 		{
 			titulo: 'Inicio',
@@ -159,7 +138,7 @@
 			titulo: 'Peticiones',
 			icono: ChalkboardUserOutline,
 			href: '/peticiones',
-			roles: ['docente', 'control']	
+			roles: ['docente', 'control']
 		}
 	];
 
@@ -220,9 +199,11 @@
 			const rutaEncontrada = elementosNav.find((item) => item.href === rutaActual);
 
 			if (rutaEncontrada && !hasAccess(rutaEncontrada.roles, data.rol)) {
-				showAlert = true;
-				alertMessage = 'No tienes permiso para acceder a esta página';
-				alertColor = 'red';
+				// mostrar toast de acceso denegado
+				addToast({
+					type: 'error',
+					message: 'Acceso denegado a esta sección.'
+				});
 
 				// Redirigir al inicio después de mostrar la alerta
 				setTimeout(() => {
@@ -236,6 +217,10 @@
 	function cerrarSesion() {
 		goto('/logout');
 	}
+
+$effect(() => {
+	console.log("toasts cambiaron", $toasts.length); // Esto fuerza que el layout reaccione
+});
 </script>
 
 <!-- Main layout container with fixed height and no overflow -->
@@ -291,7 +276,7 @@
 						<Button
 							color="alternative"
 							class="flex items-center w-full gap-2 text-sm "
-							on:click={toggleUserDropdown}
+							onclick={toggleUserDropdown}
 						>
 							<Avatar src={`https://unavatar.io/${data.correo}`} class="mr-3" />
 							{#if sidebarOpen}
@@ -303,9 +288,9 @@
 
 						<!-- Dropdown menu that appears as a popup -->
 						<Dropdown
-							open={userDropdownOpen}
+							bind:isOpen={userDropdownOpen}
 							class="z-50 {sidebarOpen ? 'left-0' : 'left-16'} bottom-14 w-56"
-							on:click={() => (userDropdownOpen = false)}
+							onclick={() => (userDropdownOpen = false)}
 						>
 							<div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
 								<div class="font-medium">{data.nombre}</div>
@@ -325,7 +310,7 @@
 								</div>
 							</DropdownItem>
 							<DropdownDivider />
-							<DropdownItem on:click={cerrarSesion}>
+							<DropdownItem onclick={cerrarSesion}>
 								<div class="flex items-center">
 									<ShieldCheckOutline class="w-5 h-5 mr-2" />
 									Cerrar Sesión
@@ -348,11 +333,11 @@
 	</Sidebar>
 
 	<!-- Content area - flex column with fixed height -->
-	<div class="flex flex-col flex-1 h-screen overflow-hidden">
+	<div class="flex flex-col flex-1 h-screen overflow-hidden relative">
 		<!-- Navbar - fixed at top -->
 		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
 			<div class="flex items-center justify-start">
-				<Button color="light" class="mr-2 md:mr-4 !p-2" size="xs" on:click={toggleSidebar}>
+				<Button color="light" class="mr-2 md:mr-4 !p-2" size="xs" onclick={toggleSidebar}>
 					{#if sidebarOpen}
 						<ChevronLeftOutline class="w-5 h-5" />
 					{:else}
@@ -369,15 +354,16 @@
 			</div>
 		</Navbar>
 
-		<!-- Alerts - fixed position below navbar -->
-		{#if showAlert}
-			<Alert color={alertColor} dismissable bind:open={showAlert} class="mt-2 mx-4">
-				{alertMessage}
-			</Alert>
-		{/if}
-
 		<!-- Main content - only this should scroll vertically -->
 		<main class="flex-1 overflow-y-auto p-6 w-full">
+			{@debug $toasts}
+			{#each $toasts as toast (toast.id)}
+				{@const color =
+					toast.type === 'error' ? 'red' : toast.type === 'success' ? 'green' : 'primary'}
+				<Toast position="top-right" transition={fly} {color} params={{ duration: 300, x: 150 }}
+					>{toast.message}</Toast
+				>
+			{/each}
 			{@render children()}
 		</main>
 	</div>
