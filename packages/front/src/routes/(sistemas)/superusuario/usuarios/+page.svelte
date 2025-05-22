@@ -24,6 +24,9 @@
 	} from 'flowbite-svelte-icons';
 	import type { Usuario } from '../../../../app';
 	import type { ActionData, PageData } from './$types';
+	import { resolver } from '$lib/utilidades/resolver';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
 
 	// Datos de la página
 	let { data, form }: { data: PageData; form: ActionData } = $props<{
@@ -118,12 +121,16 @@
 		isEditing = false;
 		modalVisible = true;
 	}
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver();
+	};
 </script>
 
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Usuarios</h1>
-		<Button color="blue" on:click={crearUsuario}>
+		<Button color="blue" onclick={crearUsuario}>
 			<PlusOutline class="mr-2 h-5 w-5" />
 			Registrar
 		</Button>
@@ -156,7 +163,7 @@
 		<div class="w-max min-w-full">
 			{#snippet actions(row: Usuario)}
 				<div class="flex gap-2">
-					<Button size="xs" color="light" on:click={() => editarUsuario(row)}>
+					<Button size="xs" color="light" onclick={() => editarUsuario(row)}>
 						<PenOutline class="w-4 h-4" />
 					</Button>
 					<form action="?/delete" method="POST">
@@ -176,7 +183,7 @@
 		bind:open={modalVisible}
 		size="md"
 	>
-		<form action={isEditing ? '?/edit' : '?/create'} method="POST" bind:this={formEl}>
+		<form action={isEditing ? '?/edit' : '?/create'} method="POST" use:enhance={handleSubmit} bind:this={formEl}>
 			{#if isEditing}
 				<input type="hidden" name="id" value={usuarioActual!.id} />
 			{/if}
@@ -248,7 +255,7 @@
 								outline
 								size="xs"
 								class="!p-2"
-								on:click={() => (passwordVisible = !passwordVisible)}
+								onclick={() => (passwordVisible = !passwordVisible)}
 							>
 								{#if passwordVisible}
 									<EyeSlashSolid />
@@ -278,7 +285,7 @@
 								outline
 								size="xs"
 								class="!p-2"
-								on:click={() => (confirmPVisible = !confirmPVisible)}
+								onclick={() => (confirmPVisible = !confirmPVisible)}
 							>
 								{#if confirmPVisible}
 									<EyeSlashSolid />
@@ -295,10 +302,10 @@
 			</div>
 		</form>
 		<svelte:fragment slot="footer">
-			<Button color="blue" type="button" on:click={() => isConfirmed && formEl?.requestSubmit()}>
+			<Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
 				{isEditing ? 'Actualizar' : 'Guardar'}
 			</Button>
-			<Button color="light" on:click={() => (modalVisible = false)}>Cancelar</Button>
+			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
 		</svelte:fragment>
 	</Modal>
 </div>

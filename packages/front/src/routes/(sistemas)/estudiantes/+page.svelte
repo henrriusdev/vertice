@@ -23,8 +23,11 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import type { Estudiante } from '../../../../app';
+	import type { Estudiante } from '../../../app';
 	import type { ActionData, PageData } from './$types';
+	import { resolver } from '$lib/utilidades/resolver';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
 
 	// Datos de la página
 	let { data, form }: { data: PageData; form: ActionData } = $props<{
@@ -167,13 +170,17 @@
 
 	// Actualizar edad cuando cambia la fecha de nacimiento
 	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac as string));
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver();
+	};
 </script>
 
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Estudiantes</h1>
 		{#if data.rol !== 'coordinador'}
-		<Button color="blue" on:click={crearEstudiante}>
+		<Button color="blue" onclick={crearEstudiante}>
 			<PlusOutline class="mr-2 h-5 w-5" />
 			Registrar
 		</Button>
@@ -208,7 +215,7 @@
 			{#snippet actions(row: Estudiante)}
 				<div class="flex gap-2">
 		{#if data.rol !== 'coordinador'}
-					<Button pill size="xs" class="p-1.5!" color="light" on:click={() => editarEstudiante(row)}>
+					<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
 						<PenOutline class="w-5 h-5" />
 					</Button>
 					<form action="?/delete" method="POST">
@@ -236,6 +243,7 @@
 		<form
 			action={isEditing ? '?/edit' : '?/create'}
 			method="POST"
+			use:enhance={handleSubmit}
 			bind:this={formEl}
 		>
 			{#if isEditing}
@@ -254,12 +262,7 @@
 						required
 						use:imask={cedulaMask as any}
 						class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-						color={form?.errores?.cedula ? 'red' : undefined}
 					/>
-
-					{#if form?.errores?.cedula}
-						<Helper class="mt-2" color="red">{form?.errores.cedula}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="nombre" class="mb-2">Nombre Completo</Label>
@@ -269,11 +272,7 @@
 						placeholder="Ingrese el nombre completo"
 						value={estudianteActual!.nombre}
 						required
-						color={form?.errores?.nombre ? 'red' : undefined}
 					/>
-					{#if form?.errores?.nombre}
-						<Helper class="mt-2" color="red">{form?.errores.nombre}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="fecha_nac" class="mb-2">Fecha de Nacimiento</Label>
@@ -283,9 +282,6 @@
 						bind:value={estudianteActual.fecha_nac}
 					/>
 					<input type="hidden" name="fecha_nac" value={estudianteActual?.fecha_nac} />
-					{#if form?.errores?.fecha_nac}
-						<Helper class="mt-2" color="red">{form?.errores.fecha_nac}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="correo" class="mb-2">Correo Electrónico</Label>
@@ -296,11 +292,7 @@
 						placeholder="correo@ejemplo.com"
 						value={estudianteActual?.correo}
 						required
-						color={form?.errores?.correo ? 'red' : undefined}
 					/>
-					{#if form?.errores?.correo}
-						<Helper class="mt-2" color="red">{form?.errores.correo}</Helper>
-					{/if}
 				</div>
 				{#if !isEditing}
 				<div class="md:col-span-2">
@@ -310,11 +302,6 @@
 						bind:value={password}
 						type={passwordVisible ? 'text' : 'password'}
 						name="password"
-						color={confirmPassword.length !== 0 && !isConfirmed
-							? 'red'
-							: confirmPassword.length === 0
-								? 'base'
-								: 'green'}
 						required
 					>
 						<Button
@@ -323,7 +310,7 @@
 							outline
 							size="xs"
 							class="!p-2"
-							on:click={() => (passwordVisible = !passwordVisible)}
+							onclick={() => (passwordVisible = !passwordVisible)}
 						>
 							{#if passwordVisible}
 								<EyeSlashSolid />
@@ -341,11 +328,6 @@
 						type={confirmPVisible ? 'text' : 'password'}
 						name=""
 						required
-						color={confirmPassword.length !== 0 && !isConfirmed
-							? 'red'
-							: confirmPassword.length === 0
-								? 'base'
-								: 'green'}
 					>
 						<Button
 							slot="right"
@@ -353,7 +335,7 @@
 							outline
 							size="xs"
 							class="!p-2"
-							on:click={() => (confirmPVisible = !confirmPVisible)}
+							onclick={() => (confirmPVisible = !confirmPVisible)}
 						>
 							{#if confirmPVisible}
 								<EyeSlashSolid />
@@ -374,15 +356,11 @@
 						name="carrera"
 						value={estudianteActual?.carrera}
 						required
-						color={form?.errores?.carrera ? 'red' : undefined}
 						items={data.carreras.map((carrera) => ({
 							value: carrera.id,
 							name: carrera.nombre
 						}))}
 					/>
-					{#if form?.errores?.carrera}
-						<Helper class="mt-2" color="red">{form?.errores.carrera}</Helper>
-					{/if}
 				</div>
 				<div>
 					<Label for="sexo" class="mb-2">Sexo</Label>
@@ -392,15 +370,11 @@
 						value={estudianteActual?.sexo}
 						placeholder=""
 						required
-						color={form?.errores?.sexo ? 'red' : undefined}
 						items={[
 							{ value: 'M', name: 'Masculino' },
 							{ value: 'F', name: 'Femenino' }
 						]}
 					/>
-					{#if form?.errores?.sexo}
-						<Helper class="mt-2" color="red">{form?.errores.sexo}</Helper>
-					{/if}
 				</div>
 				<div>
 					<Label for="semestre" class="mb-2">Semestre</Label>
@@ -410,14 +384,10 @@
 						value={estudianteActual?.semestre}
 						placeholder=""
 						required
-						color={form?.errores?.semestre ? 'red' : undefined}
 						items={Array(10)
 							.fill(null)
 							.map((_, i) => ({ value: i + 1, name: `${i + 1}° Semestre` }))}
 					/>
-					{#if form?.errores?.semestre}
-						<Helper class="mt-2" color="red">{form?.errores.semestre}</Helper>
-					{/if}
 				</div>
 				<div>
 					<Label for="promedio" class="mb-2">Promedio</Label>
@@ -429,11 +399,7 @@
 						use:imask={nota}
 						value={estudianteActual?.promedio}
 						required
-						color={form?.errores?.promedio ? 'red' : undefined}
 					/>
-					{#if form?.errores?.promedio}
-						<Helper class="mt-2" color="red">{form?.errores.promedio}</Helper>
-					{/if}
 				</div>
 				<div>
 					<Label for="edad" class="mb-2">Edad</Label>
@@ -447,11 +413,7 @@
 						placeholder="Ingrese la dirección completa"
 						value={estudianteActual?.direccion}
 						rows={3}
-						color={form?.errores?.direccion ? 'red' : undefined}
 					/>
-					{#if form?.errores?.direccion}
-						<Helper class="mt-2" color="red">{form?.errores.direccion}</Helper>
-					{/if}
 				</div>
 				{#if isEditing}
 					<div class="flex items-center">
@@ -462,10 +424,10 @@
 			</div>
 		</form>
 		<svelte:fragment slot="footer">
-			<Button color="blue" type="button" on:click={() => isConfirmed && formEl?.requestSubmit()}>
+			<Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
 				{isEditing ? 'Actualizar' : 'Guardar'}
 			</Button>
-			<Button color="light" on:click={() => (modalVisible = false)}>Cancelar</Button>
+			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
 		</svelte:fragment>
 	</Modal>
 </div>

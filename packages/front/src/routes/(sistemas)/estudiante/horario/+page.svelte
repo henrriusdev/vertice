@@ -11,6 +11,8 @@
 	import type { MateriaDisponible } from '../../../../app';
 	import type { PageData } from './$types';
 	import {GrillaHorario} from '$lib';
+	import { resolver } from '$lib/utilidades/resolver';
+	import type { SubmitFunction } from '@sveltejs/kit';
 
 
 	// Tipos
@@ -33,10 +35,7 @@
 	let materias: (HorarioMateria & { editable: boolean })[] = $state([]);
 
 	let openModal = $state(false);
-
-	// Toast
-	let mostrarToast = $state(false);
-	let mensajeToast = $state('');
+	let isLoading = $state(false);
 
 	const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -153,6 +152,10 @@
 		];
 		return colors[Math.floor(Math.random() * colors.length)];
 	}
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver(isLoading);
+	};
 </script>
 
 <!-- Vista -->
@@ -163,21 +166,26 @@
 
 	<!-- Botones -->
 	<div class="flex flex-wrap justify-center gap-4 mt-6">
-		<Button color="blue" on:click={() => (openModal = true)} disabled={!data.inscripcionAbierta}>
+		<Button color="blue" onclick={() => (openModal = true)} disabled={!data.inscripcionAbierta}>
 			<CalendarWeekOutline class="mr-2 h-5 w-5" />
 			Seleccionar Materias
 		</Button>
-		<form use:enhance method="post">
+		<form use:enhance={handleSubmit} method="post">
 			{#each materias as materia}
 				<input type="hidden" name="materias" value={materia.id} />
 			{/each}
 			<Button
 				type="submit"
 				color="green"
-				disabled={materias.some((m) => m.conflicto) || !data.inscripcionAbierta}
+				disabled={materias.some((m) => m.conflicto) || !data.inscripcionAbierta || materias.length === 0 || isLoading}
 			>
+			{#if isLoading}
+				<Spinner class="me-3" size="4" color="gray" />
+				Cargando ...
+				{:else}
 				<CalendarWeekOutline class="mr-2 h-5 w-5" />
 				Registrar Horario
+				{/if}
 			</Button>
 		</form>
 	</div>
@@ -209,14 +217,14 @@
 									size="xs"
 									class="mt-2"
 									type="button"
-									on:click={() => quitarMateriaPorID(materia.id)}>Quitar</Button
+									onclick={() => quitarMateriaPorID(materia.id)}>Quitar</Button
 								>
 							{:else}
 								<Button
 									size="xs"
 									class="mt-2"
 									type="button"
-									on:click={() => agregarMateria(materia)}>Agregar</Button
+									onclick={() => agregarMateria(materia)}>Agregar</Button
 								>
 							{/if}
 						</div>
@@ -226,16 +234,9 @@
 		</div>
 
 		<div slot="footer" class="flex justify-end p-4">
-			<Button color="alternative" on:click={() => (openModal = false)}>Cerrar</Button>
+			<Button color="alternative" onclick={() => (openModal = false)}>Cerrar</Button>
 		</div>
 	</Modal>
-
-	<!-- Toast Conflicto -->
-	{#if mostrarToast}
-		<Toast on:close={() => (mostrarToast = false)} color="primary" class="fixed bottom-4 right-4">
-			{mensajeToast}
-		</Toast>
-	{/if}
 </div>
 
 <style>

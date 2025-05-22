@@ -183,7 +183,7 @@
 
 <div class="w-full h-full flex items-center justify-around relative">
 	<div class="flex justify-end mb-6 absolute top-0 right-0">
-		<Button color="blue" size="lg" on:click={openPaymentModal}>
+		<Button color="blue" size="lg" onclick={openPaymentModal}>
 			<PlusOutline class="mr-2 h-5 w-5" />
 			Registrar Pago
 		</Button>
@@ -220,7 +220,7 @@
 					color="primary"
 					size="lg"
 					class="w-full"
-					on:click={viewPayment}
+					onclick={viewPayment}
 					disabled={!searchQuery}
 				>
 					Ver pago
@@ -371,7 +371,7 @@
 							color={paymentMethod === 'transfer' ? 'purple' : 'light'}
 							class="flex-1"
 							type="button"
-							on:click={() => selectPaymentMethod('transfer')}
+							onclick={() => selectPaymentMethod('transfer')}
 						>
 							Transferencia
 						</Button>
@@ -379,7 +379,7 @@
 							color={paymentMethod === 'cash' ? 'purple' : 'light'}
 							class="flex-1"
 							type="button"
-							on:click={() => selectPaymentMethod('cash')}
+							onclick={() => selectPaymentMethod('cash')}
 						>
 							Efectivo
 						</Button>
@@ -387,7 +387,7 @@
 							color={paymentMethod === 'point' ? 'purple' : 'light'}
 							class="flex-1"
 							type="button"
-							on:click={() => selectPaymentMethod('point')}
+							onclick={() => selectPaymentMethod('point')}
 						>
 							Punto
 						</Button>
@@ -455,7 +455,7 @@
 
 		<!-- Modal Footer -->
 		<svelte:fragment slot="footer">
-			<Button color="alternative" on:click={closePaymentModal}>Cancelar</Button>
+			<Button color="alternative" onclick={closePaymentModal}>Cancelar</Button>
 			<Button color="primary" onclick={() => form.requestSubmit()} disabled={!isFormValid}>
 				<CreditCardOutline class="mr-2 h-5 w-5" />
 				Realizar Pago

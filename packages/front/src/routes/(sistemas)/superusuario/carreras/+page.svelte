@@ -108,7 +108,7 @@
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Carreras</h1>
-		<Button color="blue" on:click={crearEstudiante}>
+		<Button color="blue" onclick={crearEstudiante}>
 			<PlusOutline class="mr-2 h-5 w-5" />
 			Crear carrera
 		</Button>
@@ -141,7 +141,7 @@
 		<div class="w-max min-w-full">
 			{#snippet actions(row: Carrera)}
 				<div class="flex gap-2">
-					<Button size="xs" color="light" on:click={() => editarEstudiante(row)}>
+					<Button size="xs" color="light" onclick={() => editarEstudiante(row)}>
 						<PenOutline class="w-4 h-4" />
 					</Button>
           <form action="?/delete" method="POST">

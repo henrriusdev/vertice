@@ -2,9 +2,15 @@
 	import { DataTable } from '$lib';
 	import { Button, Label, Select } from 'flowbite-svelte';
 	import { CheckOutline, CloseOutline, XSolid } from 'flowbite-svelte-icons';
-	import { enhance } from '$app/forms';
+	import { resolver } from '$lib/utilidades/resolver';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { Peticion } from '../../../app';
 	import type { Peticion as PeticionGet } from '$lib/types';
+	import { enhance } from '$app/forms';
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver();
+	};
 
 	let { data } = $props();
 
@@ -47,13 +53,13 @@
 	{#snippet actions(row: PeticionGet)}
 		{#if ['control', 'superusuario'].includes(data.rol) && row.peticion.estado === 'Pendiente'}
 			<div class="flex gap-2">
-				<form method="post" use:enhance action="?/aprobar">
+				<form method="post" use:enhance={handleSubmit} action="?/aprobar">
 					<input type="hidden" name="id" value={row.peticion.id} />
 					<Button type="submit" pill color="green" outline class="p-1!" size="sm">
 						<CheckOutline class="w-5 h-5" />
 					</Button>
 				</form>
-				<form method="post" use:enhance action="?/denegar">
+				<form method="post" use:enhance={handleSubmit} action="?/rechazar">
 					<input type="hidden" name="id" value={row.peticion.id} />
 					<Button type="submit" pill color="red" outline class="p-1!" size="sm">
 						<CloseOutline class="w-5 h-5" />

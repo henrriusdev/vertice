@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { addToast, toasts } from '$lib';
+	import { addToast } from '$lib';
 	import {
 		Avatar,
 		Breadcrumb,
@@ -14,8 +14,7 @@
 		Sidebar,
 		SidebarGroup,
 		SidebarItem,
-		SidebarWrapper,
-		Toast
+		SidebarWrapper
 	} from 'flowbite-svelte';
 	import {
 		BookOpenOutline,
@@ -34,7 +33,6 @@
 		UsersGroupOutline,
 		UsersOutline
 	} from 'flowbite-svelte-icons';
-	import { fly } from 'svelte/transition';
 	import type { LayoutData } from './$types';
 
 	// Obtener los datos del usuario desde los datos proporcionados por +layout.server.ts
@@ -217,10 +215,6 @@
 	function cerrarSesion() {
 		goto('/logout');
 	}
-
-$effect(() => {
-	console.log("toasts cambiaron", $toasts.length); // Esto fuerza que el layout reaccione
-});
 </script>
 
 <!-- Main layout container with fixed height and no overflow -->
@@ -232,8 +226,8 @@ $effect(() => {
 			? 'w-72 min-w-72'
 			: 'w-16 min-w-16'} border-r border-gray-200 dark:border-gray-700"
 	>
-		<SidebarWrapper class="h-full px-3 py-4 overflow-y-auto">
-			<div class="flex items-center mb-5 {sidebarOpen ? 'pl-2.5' : 'justify-center !pl-[-2px]'}">
+		<SidebarWrapper class="h-full py-4 overflow-y-auto">
+			<div class="flex items-center mb-5 pl-2.5 justify-start">
 				{#if sidebarOpen}
 					<span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
 						>Vertice</span
@@ -249,16 +243,16 @@ $effect(() => {
 						{#if hasAccess(item.roles, data.rol)}
 							{#if sidebarOpen}
 								<SidebarItem href={item.href} label={item.titulo}>
-									<svelte:fragment slot="icon">
+									{#snippet icon()}
 										<item.icono class="w-5 h-5" />
-									</svelte:fragment>
+									{/snippet}
 								</SidebarItem>
 							{:else}
 								<div class="mb-2">
-									<SidebarItem href={item.href} spanClass="!px-2 !py-1" title={item.titulo}>
-										<svelte:fragment slot="icon">
+									<SidebarItem href={item.href} title={item.titulo}>
+										{#snippet icon()}
 											<item.icono class="w-5 h-5" />
-										</svelte:fragment>
+										{/snippet}
 									</SidebarItem>
 								</div>
 							{/if}
@@ -333,7 +327,7 @@ $effect(() => {
 	</Sidebar>
 
 	<!-- Content area - flex column with fixed height -->
-	<div class="flex flex-col flex-1 h-screen overflow-hidden relative">
+	<div class="flex flex-col flex-1 h-screen overflow-hidden">
 		<!-- Navbar - fixed at top -->
 		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
 			<div class="flex items-center justify-start">
@@ -356,14 +350,6 @@ $effect(() => {
 
 		<!-- Main content - only this should scroll vertically -->
 		<main class="flex-1 overflow-y-auto p-6 w-full">
-			{@debug $toasts}
-			{#each $toasts as toast (toast.id)}
-				{@const color =
-					toast.type === 'error' ? 'red' : toast.type === 'success' ? 'green' : 'primary'}
-				<Toast position="top-right" transition={fly} {color} params={{ duration: 300, x: 150 }}
-					>{toast.message}</Toast
-				>
-			{/each}
 			{@render children()}
 		</main>
 	</div>

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { resolver } from '$lib/utilidades/resolver';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import {
 		Alert,
 		Badge,
@@ -19,7 +21,6 @@
 	} from 'flowbite-svelte';
 	import { FileLinesOutline } from 'flowbite-svelte-icons';
 	import type { PageData } from './$types';
-	import type { MateriaHistorico } from '../../../app';
 
 	let { data }: { data: PageData } = $props();
 
@@ -109,6 +110,10 @@
 			}
 		}
 	});
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver(loadingConstancia);
+	};
 </script>
 
 <div class="w-full p-4">
@@ -117,30 +122,7 @@
 		<form
 			method="POST"
 			action="?/constancia"
-			use:enhance={() => {
-				loadingConstancia = true;
-				return async ({ result, update }) => {
-					const { base64 } = result.data;
-
-					const byteCharacters = atob(base64);
-					const byteArrays = [new Uint8Array(byteCharacters.length)];
-
-					for (let i = 0; i < byteCharacters.length; i++) {
-						byteArrays[0][i] = byteCharacters.charCodeAt(i);
-					}
-
-					const blob = new Blob(byteArrays, { type: 'application/pdf' });
-
-					const url = URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.href = url;
-					a.download = `constancia.pdf`;
-					a.click();
-					URL.revokeObjectURL(url);
-					await update();
-					loadingConstancia = false;
-				};
-			}}
+			use:enhance={handleSubmit}
 			class="space-y-6"
 		>
 			<Button
@@ -218,32 +200,9 @@
 									<form
 										method="POST"
 										action="?/planificacion"
-										use:enhance={({ formData }) => {
+										use:enhance={({formData}) =>{
 											formData.set('materia', materia.id);
-											loadingPlanificacion = true;
-											return async ({ result, update }) => {
-												const { base64, type } = result.data;
-
-												const byteCharacters = atob(base64);
-												const byteArrays = [new Uint8Array(byteCharacters.length)];
-
-												for (let i = 0; i < byteCharacters.length; i++) {
-													byteArrays[0][i] = byteCharacters.charCodeAt(i);
-												}
-
-												console.log(type);
-												const blob = new Blob(byteArrays, { type });
-												const extension = type.split('/')[1] || 'bin';
-
-												const url = URL.createObjectURL(blob);
-												const a = document.createElement('a');
-												a.href = url;
-												a.download = `planificacion.${extension}`;
-												a.click();
-												URL.revokeObjectURL(url);
-												await update();
-												loadingPlanificacion = false;
-											};
+											return resolver(loadingPlanificacion);
 										}}
 										class="space-y-6"
 									>

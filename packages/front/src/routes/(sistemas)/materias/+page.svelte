@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import DataTable from '$lib/componentes/DataTable.svelte';
+	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Button, Input, Label, Modal, MultiSelect, Select } from 'flowbite-svelte';
 	import {
@@ -145,12 +146,7 @@
 	}
 
 	const handleSubmit: SubmitFunction = () => {
-		return async ({ result, update }) => {
-			if (result.type === 'success') {
-				await update();
-				showModal = false;
-			}
-		};
+		return resolver(showModal);
 	};
 </script>
 
@@ -205,7 +201,7 @@
 				title="Ayuda"
 				outline
 				class="p-1.5!"
-				on:click={() => (showAyuda = true)}
+				onclick={() => (showAyuda = true)}
 			>
 				<InfoCircleOutline class="w-7 h-7" />
 			</Button>
@@ -388,6 +384,6 @@
 		<li><code>nombre == 'mate'</code> → Nombre contiene "mate"</li>
 	</ul>
 	<div slot="footer">
-		<Button on:click={() => (showAyuda = false)}>Cerrar</Button>
+		<Button onclick={() => (showAyuda = false)}>Cerrar</Button>
 	</div>
 </Modal>

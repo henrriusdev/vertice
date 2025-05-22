@@ -139,7 +139,7 @@
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Docentes</h1>
-		<Button color="blue" on:click={crearDocente}>
+		<Button color="blue" onclick={crearDocente}>
 			<PlusOutline class="mr-2 h-5 w-5" />
 			Registrar
 		</Button>
@@ -172,7 +172,7 @@
 		<div class="w-max min-w-full">
 			{#snippet actions(row: Docente)}
 				<div class="flex gap-2">
-					<Button size="xs" color="light" on:click={() => editarDocente(row)}>
+					<Button size="xs" color="light" onclick={() => editarDocente(row)}>
 						<PenOutline class="w-4 h-4" />
 					</Button>
 					<form action="?/delete" method="POST">
@@ -262,7 +262,7 @@
 								outline
 								size="xs"
 								class="!p-2"
-								on:click={() => (passwordVisible = !passwordVisible)}
+								onclick={() => (passwordVisible = !passwordVisible)}
 							>
 								{#if passwordVisible}
 									<EyeSlashSolid />
@@ -292,7 +292,7 @@
 								outline
 								size="xs"
 								class="!p-2"
-								on:click={() => (confirmPVisible = !confirmPVisible)}
+								onclick={() => (confirmPVisible = !confirmPVisible)}
 							>
 								{#if confirmPVisible}
 									<EyeSlashSolid />
@@ -395,10 +395,10 @@
 			</div>
 		</form>
 		<svelte:fragment slot="footer">
-			<Button color="blue" type="button" on:click={() => isConfirmed && formEl.requestSubmit()}>
+			<Button color="blue" type="button" onclick={() => isConfirmed && formEl.requestSubmit()}>
 				{isEditing ? 'Actualizar' : 'Guardar'}
 			</Button>
-			<Button color="light" on:click={() => (modalVisible = false)}>Cancelar</Button>
+			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
 		</svelte:fragment>
 	</Modal>
 </div>

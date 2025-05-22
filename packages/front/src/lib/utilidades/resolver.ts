@@ -1,20 +1,22 @@
 // src/lib/utilidades/resolver.ts
-import { invalidate, invalidateAll, goto } from '$app/navigation';
-import { addToast } from '$lib/utilidades/toast.svelte';
+import { invalidate, invalidateAll } from '$app/navigation';
+import { addToast } from './toast';
 
 export const resolver = (action?: boolean) => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return async ({ result, update }: any) => {
-		const { data, type } = result || {};
+		const { data } = result || {};
 
+		console.log(result)
 		if (!data || typeof data.message !== 'string') {
 			addToast({ type: 'error', message: 'Respuesta malformada del servidor' });
 			console.warn('[resolver] return malformado:', result);
 			return;
 		}
 
-		if (type === 'failure') {
+		if (data.type === 'failure') {
 			addToast({ type: 'error', message: data.message });
+			console.log(data.type === 'failure')
 			return;
 		}
 

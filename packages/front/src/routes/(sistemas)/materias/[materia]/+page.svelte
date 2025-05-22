@@ -7,6 +7,7 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
+	import { resolver } from '$lib/utilidades/resolver';
 
 	let { data } = $props();
 
@@ -62,6 +63,10 @@
 			await update();
 			dropVisible = false;
 		};
+	};
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver();
 	};
 
 
@@ -131,28 +136,7 @@
 		<form
 			method="POST"
 			action="?/notas"
-			use:enhance={() => {
-					return async ({ result, update }) => {
-						const { base64 } = result.data;
-
-						const byteCharacters = atob(base64);
-						const byteArrays = [new Uint8Array(byteCharacters.length)];
-
-						for (let i = 0; i < byteCharacters.length; i++) {
-							byteArrays[0][i] = byteCharacters.charCodeAt(i);
-						}
-
-						const blob = new Blob(byteArrays, { type: 'application/pdf' });
-
-						const url = URL.createObjectURL(blob);
-						const a = document.createElement('a');
-						a.href = url;
-						a.download = 'reporte.pdf';
-						a.click();
-						URL.revokeObjectURL(url);
-						await update();
-					};
-				}}
+			use:enhance={handleSubmit}
 			class="space-y-6"
 		>
 			<Button color="primary" size="lg" class="w-full" type="submit">
@@ -255,9 +239,9 @@
 		</form>
 
 		<div class="w-full flex justify-end items-center gap-2" slot="footer">
-			<Button color="red" on:click={() => (mostrarFormulario = false)}>Cancelar</Button>
+			<Button color="red" onclick={() => (mostrarFormulario = false)}>Cancelar</Button>
 			<Button
-				on:click={() => {
+				onclick={() => {
 					if (corte && nota !== '') {
 						form?.requestSubmit();
 					}

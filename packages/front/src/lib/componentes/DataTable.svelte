@@ -161,7 +161,7 @@
 
 		<Pagination
 			{pages}
-			on:click={(e) => goTo(Number(e.detail))}
+			onclick={(e) => goTo(Number(e.detail))}
 			on:previous={() => goTo(Math.max(1, currentPage - 1))}
 			on:next={() => goTo(Math.min(totalPages, currentPage + 1))}
 		>
