@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/henrriusdev/vertice)
+
 # VÉRTICE - Sistema de Gestión Académica
 
 **Vértice** es un sistema web desarrollado como proyecto de tesis para gestionar información académica y administrativa de una institución educativa. Incluye funcionalidades para estudiantes, docentes, coordinadores, personal administrativo y superusuarios.
