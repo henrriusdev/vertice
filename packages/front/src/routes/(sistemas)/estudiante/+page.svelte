@@ -112,7 +112,7 @@
 	});
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(loadingConstancia);
+		return resolver(() => loadingConstancia = false);
 	};
 </script>
 

@@ -1,14 +1,14 @@
 // src/lib/utilidades/resolver.ts
-import { invalidate, invalidateAll } from '$app/navigation';
+import { goto, invalidate, invalidateAll } from '$app/navigation';
 import { addToast } from './toast';
 
-export const resolver = (action?: boolean) => {
+export const resolver = (setAction: () => void) => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return async ({ result, update }: any) => {
 		const { data } = result || {};
 
 		console.log(result)
-		if (!data || typeof data.message !== 'string') {
+		if (!data) {
 			addToast({ type: 'error', message: 'Respuesta malformada del servidor' });
 			console.warn('[resolver] return malformado:', result);
 			return;
@@ -16,8 +16,11 @@ export const resolver = (action?: boolean) => {
 
 		if (data.type === 'failure') {
 			addToast({ type: 'error', message: data.message });
-			console.log(data.type === 'failure')
 			return;
+		}
+
+		if (data.location) {
+			await goto(data.location, { replaceState: true });
 		}
 
 		// 🎯 Si incluye base64 → generar archivo
@@ -40,7 +43,9 @@ export const resolver = (action?: boolean) => {
 			URL.revokeObjectURL(url);
 		}
 
-		addToast({ type: 'success', message: data.message });
+		if (data.type === 'success' && !data.bypasstoast) {
+			addToast({ type: 'success', message: data.message });
+		}
 
 		if (data.invalidate === true) {
 			await invalidateAll();
@@ -50,8 +55,8 @@ export const resolver = (action?: boolean) => {
 
 		if (update) await update();
 
-		if (action) {
-			action = true
+		if (setAction) {
+			setAction()
 		}
 	};
 };

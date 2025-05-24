@@ -1,17 +1,26 @@
-from flask import Blueprint, request, jsonify, send_from_directory, send_file, render_template
+from flask import Blueprint, request, jsonify, send_file, render_template
 from flask_jwt_extended import jwt_required, get_jwt
 from os import getcwd, path, remove, makedirs, listdir
-from datetime import date
+from datetime import date, datetime
 from io import BytesIO
 from weasyprint import HTML
 import traceback
-
+from route.trazabilidad import superuser_required
+from service.trazabilidad import get_trazabilidad
 from src.model import Configuracion
 from src.service.estudiantes import obtener_info_estudiante_para_constancia
 from src.service.trazabilidad import add_trazabilidad
 from src.service.materias import listar_materias_asignadas, get_materia_con_nombre_y_config, get_estudiantes_con_notas
 from src.service.usuarios import get_usuario_por_correo
 from src.utils.fecha import generar_fecha_larga
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+import pandas as pd
+
+env = Environment(
+    loader=FileSystemLoader(path.join(path.dirname(__file__), "..", "template")),
+    autoescape=select_autoescape(['html', 'xml'])
+)
+
 
 arc = Blueprint("archivo", __name__)
 PATH_FILES = path.abspath(path.join(getcwd(), "../../uploads/planificacion/"))
@@ -211,3 +220,82 @@ async def constancia_estudios(cedula):
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+@arc.post('/trazabilidad/exportar')
+@jwt_required()
+@superuser_required()
+async def exportar_archivo_trazabilidad():
+    try:
+        data = request.json
+        formato = data.get("formato")
+        if formato not in {"pdf", "csv", "excel"}:
+            return jsonify({
+                "ok": False,
+                "status": 400,
+                "data": {"message": "Formato no soportado"}
+            }), 400
+
+        filtros = {
+            "busqueda": data.get("busqueda", "").strip(),
+            "fechaDesde": data.get("fechaDesde", "").strip(),
+            "fechaHasta": data.get("fechaHasta", "").strip(),
+            "rol": data.get("rol", "").strip()
+        }
+        print(filtros)
+
+        if filtros["fechaDesde"]:
+            filtros["fechaDesde"] = datetime.strptime(filtros["fechaDesde"], "%Y-%m-%d").date()
+        if filtros["fechaHasta"]:
+            filtros["fechaHasta"] = datetime.strptime(filtros["fechaHasta"], "%Y-%m-%d").date()
+
+        trazas = await get_trazabilidad(filtros)
+        contenido, nombre, tipo = await generar_archivo_trazabilidad(trazas, formato, filtros)
+
+        return send_file(
+            BytesIO(contenido),
+            mimetype=tipo,
+            as_attachment=True,
+            download_name=nombre
+        )
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({
+            "ok": False,
+            "status": 500,
+            "data": {"message": str(ex)}
+        }), 500
+
+
+async def generar_archivo_trazabilidad(data: list[dict], formato: str, filtros=None):
+    df = pd.DataFrame(data)
+    nombre = f"trazabilidad_export.{formato}"
+
+    if formato == "csv":
+        buffer = BytesIO()
+        df.to_csv(buffer, index=False)
+        return buffer.getvalue(), nombre, "text/csv"
+
+    if formato == "excel":
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False)
+        return buffer.getvalue(), nombre, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    if formato == "pdf":
+        template = env.get_template("reporte_trazabilidad.html")
+        html_render = template.render(
+            registros=data,
+            filtros={
+                "desde": filtros.get("fechaDesde"),
+                "hasta": filtros.get("fechaHasta"),
+                "rol": filtros.get("rol"),
+                "query": filtros.get("busqueda")
+            },
+            fecha_generacion=datetime.now().strftime("%d/%m/%Y %H:%M"),
+            logo_url=None  # o base64 o URL pública
+        )
+        pdf_bytes = HTML(string=html_render).write_pdf()
+        return pdf_bytes, nombre, "application/pdf"
+
+    raise ValueError("Formato no soportado")

@@ -13,7 +13,7 @@
 	const toggleVisibility = () => (visible = !visible);
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(loading);
+		return resolver(() => loading = false);
 	};
 </script>
 

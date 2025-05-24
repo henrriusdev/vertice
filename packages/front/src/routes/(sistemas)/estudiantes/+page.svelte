@@ -172,7 +172,7 @@
 	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac as string));
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver();
+		return resolver(() => modalVisible = false);
 	};
 </script>
 

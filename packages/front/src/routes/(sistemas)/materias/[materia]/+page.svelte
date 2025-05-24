@@ -66,7 +66,7 @@
 	};
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver();
+		return resolver(() => mostrarFormulario = false);
 	};
 
 

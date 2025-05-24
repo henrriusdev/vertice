@@ -45,7 +45,7 @@
 
 	// Payment form state
 	let student = $state('');
-	let paymentConcept = $state('pre-inscription');
+	let paymentConcept = $state('inscription');
 	let paymentDate = $state<Date | null>(null);
 	let paymentMethod = $state('cash');
 	let amount = $state('');

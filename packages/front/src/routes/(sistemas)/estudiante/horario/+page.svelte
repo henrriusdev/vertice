@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Button, Card, Modal, Popover, Toast } from 'flowbite-svelte';
+	import { Button, Card, Modal, Popover, Spinner, Toast } from 'flowbite-svelte';
 	import {
 		CalendarWeekOutline,
 		ClockOutline,
@@ -154,7 +154,7 @@
 	}
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(isLoading);
+		return resolver(() => isLoading = false);
 	};
 </script>
 

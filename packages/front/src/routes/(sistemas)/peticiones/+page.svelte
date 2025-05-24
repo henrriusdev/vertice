@@ -9,7 +9,7 @@
 	import { enhance } from '$app/forms';
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver();
+		return resolver(() => {});
 	};
 
 	let { data } = $props();

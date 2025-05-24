@@ -89,3 +89,19 @@ export type Peticion = {
     id_materia: string
   }
 }
+
+export type FiltroTrazabilidad = {
+	busqueda?: string
+	fechaDesde?: string
+	fechaHasta?: string
+	rol?: string
+}
+
+// Interfaz para los parámetros de exportación
+export interface ExportacionParams {
+	formato: string
+	busqueda?: string
+	fechaDesde?: string
+	fechaHasta?: string
+	rol?: string
+}

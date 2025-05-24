@@ -146,7 +146,7 @@
 	}
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(showModal);
+		return resolver(() => showModal = false);
 	};
 </script>
 

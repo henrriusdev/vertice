@@ -97,9 +97,9 @@
 			roles: ['superusuario']
 		},
 		{
-			titulo: 'Movimientos',
+			titulo: 'Trazabilidad',
 			icono: BookOpenOutline,
-			href: '/superusuario/movimientos',
+			href: '/superusuario/trazabilidad',
 			roles: ['superusuario']
 		},
 		{

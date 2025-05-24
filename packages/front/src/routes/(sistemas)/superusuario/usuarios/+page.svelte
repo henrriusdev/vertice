@@ -29,7 +29,7 @@
 	import { enhance } from '$app/forms';
 
 	// Datos de la página
-	let { data, form }: { data: PageData; form: ActionData } = $props<{
+	let { data }: { data: PageData; form: ActionData } = $props<{
 		data: PageData;
 		form: ActionData;
 	}>();
@@ -53,33 +53,8 @@
 		correo: '',
 		rol: { id: 0, nombre: '' }
 	});
-	let showAlert = $state(false);
-	let alertMessage = $state('');
 	let password = $state('');
 	let confirmPassword = $state('');
-	let alertType: 'success' | 'error' = $state('success');
-
-	// Función para mostrar alerta
-	function mostrarAlerta(mensaje: string, tipo: 'success' | 'error') {
-		alertMessage = mensaje;
-		alertType = tipo;
-		showAlert = true;
-		setTimeout(() => {
-			showAlert = false;
-		}, 5000);
-	}
-
-	// Procesar respuesta del formulario
-	$effect(() => {
-		if (form) {
-			console.log('form', form);
-			if ((form as any).success) {
-				modalVisible = false;
-				mostrarAlerta((form as any).message, 'success');
-			} else if (form.errores) {
-			}
-		}
-	});
 
 	$effect(() => {
 		if (!modalVisible) {
@@ -123,7 +98,7 @@
 	}
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver();
+		return resolver(() => modalVisible = false);
 	};
 </script>
 
@@ -135,25 +110,6 @@
 			Registrar
 		</Button>
 	</div>
-
-	<!-- Alertas -->
-	{#if showAlert}
-		<Alert
-			color={alertType === 'success' ? 'green' : 'red'}
-			dismissable
-			bind:open={showAlert}
-			class="mb-4"
-		>
-			<svelte:fragment slot="icon">
-				{#if alertType === 'success'}
-					<CheckCircleOutline class="h-5 w-5" />
-				{:else}
-					<ExclamationCircleOutline class="h-5 w-5" />
-				{/if}
-			</svelte:fragment>
-			{alertMessage}
-		</Alert>
-	{/if}
 
 	<div class="mb-4">
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
