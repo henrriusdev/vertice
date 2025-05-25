@@ -274,7 +274,7 @@ async def pagos_por_dia():
     hoy = datetime.now()
     conteo = {}
 
-    for i in range(dias, 0, -1):
+    for i in range(dias -1, -1, -1):
         fecha = hoy - timedelta(days=i)
         conteo[fecha.strftime("%Y-%m-%d")] = 0
 

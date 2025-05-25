@@ -15,6 +15,7 @@ from src.service.usuarios import get_usuario_por_correo
 from src.utils.fecha import generar_fecha_larga
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import pandas as pd
+from werkzeug.security import generate_password_hash
 
 env = Environment(
     loader=FileSystemLoader(path.join(path.dirname(__file__), "..", "template")),
@@ -24,7 +25,7 @@ env = Environment(
 
 arc = Blueprint("archivo", __name__)
 PATH_FILES = path.abspath(path.join(getcwd(), "../../uploads/planificacion/"))
-EXCEL_PATH = path.abspath(path.join(getcwd(), "../../uploads/excel/carga.xslm"))
+EXCEL_PATH = path.abspath(path.join(getcwd(), "../../uploads/excel/carga.xlsm"))
 
 
 def create_folder_if_not_exists(folder_path):
@@ -319,16 +320,25 @@ async def importar_usuarios():
         usuario = await get_usuario_por_correo(claims.get('sub'))
         file = request.files['file']
 
-        xls = pd.read_excel(file, sheet_name=None, header=3)
-        carreras_df = pd.read_excel(file, sheet_name="BD APOYO", header=None).iloc[14:, [5, 6]]
+        # Cargar hojas con headers apropiados
+        xls = {
+            "ENTRADA": pd.read_excel(file, sheet_name="ENTRADA", header=3),
+            "BD APOYO": pd.read_excel(file, sheet_name="BD APOYO", header=None),
+            "ESTUDIANTES": pd.read_excel(file, sheet_name="ESTUDIANTES", header=3),
+            "DOCENTES": pd.read_excel(file, sheet_name="DOCENTES", header=3),
+            "COORDINADORES": pd.read_excel(file, sheet_name="COORDINADORES", header=3),
+        }
+
+        # Cargar carreras desde hoja de apoyo
+        carreras_df = xls["BD APOYO"].iloc[14:, [5, 6]]
         carreras_df.columns = ["id", "nombre"]
         carreras_df = carreras_df.dropna()
-
         for _, row in carreras_df.iterrows():
             await Carrera.get_or_create(nombre=row["nombre"])
 
+        # Cargar usuarios desde hoja de entrada
         entrada = xls["ENTRADA"]
-        roles_df = pd.read_excel(file, sheet_name="BD APOYO", header=None).iloc[14:, [1, 2]]
+        roles_df = xls["BD APOYO"].iloc[14:, [1, 2]]
         roles_df.columns = ["id", "nombre"]
         roles_map = {r["nombre"].strip().lower(): r["id"] for _, r in roles_df.iterrows() if pd.notna(r["nombre"])}
 
@@ -344,11 +354,12 @@ async def importar_usuarios():
                 defaults={
                     "nombre": row["Nombre"],
                     "correo": row["Correo"],
-                    "password": row["Password"],
+                    "password": generate_password_hash(row['Password'], method="pbkdf2:sha256", salt_length=16),
                     "rol_id": rol.id
                 }
             )
 
+        # Asignar registros Estudiante / Docente / Coordinador
         hojas_roles = {
             "estudiante": ("ESTUDIANTES", Estudiante, "carrera_id"),
             "docente": ("DOCENTES", Docente, None),
@@ -360,18 +371,49 @@ async def importar_usuarios():
             if hoja is None:
                 continue
             for _, row in hoja.iterrows():
-                cedula = row.get("Cedula") or row.get("cedula")
+                cedula = row["Usuario"] if "Usuario" in row and pd.notna(row["Usuario"]) else None
                 if pd.isna(cedula):
                     continue
                 usuario = await Usuario.get_or_none(cedula=cedula)
                 if not usuario:
                     continue
-                datos = {"usuario_id": usuario.id}
-                if carrera_field and "Carrera" in row:
+
+                if rol == "estudiante":
+                    datos = {
+                        "usuario_id": usuario.id,
+                        "semestre": int(row["Semestre"]) if "Semestre" in row and pd.notna(row["Semestre"]) else 1,
+                        "direccion": row["Direccion"] if "Direccion" in row and pd.notna(row["Direccion"]) else "",
+                        "fecha_nac": row["Fecha nacimiento"] if "Fecha nacimiento" in row and pd.notna(row["Fecha nacimiento"]) else None,
+                        "edad": int(row["Edad"]) if "Edad" in row and pd.notna(row["Edad"]) else 0,
+                        "sexo": row["Sexo"] if "Sexo" in row and pd.notna(row["Sexo"]) else "",
+                        "promedio": float(row["Promedio"]) if "Promedio" in row and pd.notna(row["Promedio"]) else 0.0
+                    }
+                elif rol == "docente":
+                    datos = {
+                        "usuario_id": usuario.id,
+                        "titulo": row["Titulo"] if "Titulo" in row and pd.notna(row["Titulo"]) else "",
+                        "dedicacion": row["Dedicacion"] if "Dedicacion" in row and pd.notna(row["Dedicacion"]) else "",
+                        "especialidad": row["Especialidad"] if "Especialidad" in row and pd.notna(row["Especialidad"]) else "",
+                        "estatus": row["Estatus"] if "Estatus" in row and pd.notna(row["Estatus"]) else "",
+                        "fecha_ingreso": row["Fecha ingreso"] if "Fecha ingreso" in row and pd.notna(row["Fecha ingreso"]) else None,
+                        "observaciones": row["Observaciones"] if "Observaciones" in row and pd.notna(row["Observaciones"]) else ""
+                    }
+                elif rol == "coordinador":
+                    datos = {
+                        "usuario_id": usuario.id,
+                        "telefono": row["Teléfono"] if "Teléfono" in row and pd.notna(row["Teléfono"]) else ""
+                    }
+
+                if carrera_field and "Carrera" in row and pd.notna(row["Carrera"]):
                     carrera = await Carrera.get_or_none(nombre=row["Carrera"])
                     if carrera:
                         datos[carrera_field] = carrera.id
-                await model.get_or_create(usuario_id=usuario.id, defaults=datos)
+
+                registro, creado = await model.get_or_create(usuario_id=usuario.id, defaults=datos)
+                if not creado:
+                    for k, v in datos.items():
+                        setattr(registro, k, v)
+                    await registro.save()
 
         return jsonify({"ok": True, "status": 200})
 
@@ -381,7 +423,7 @@ async def importar_usuarios():
         return jsonify({"ok": False, "status": 500, "message": str(ex)}), 500
 
 
-@arc.get("/descargar/excel")
+@arc.get("/excel")
 @jwt_required()
 async def descargar_excel():
     try:

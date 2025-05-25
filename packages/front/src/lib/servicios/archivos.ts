@@ -90,3 +90,32 @@ export const exportarTrazabilidad = async (
 		throw error;
 	}
 };
+
+export const descargarExcel = async (fetch: typeof globalThis.fetch) => {
+	const res = await fetch(`${API}/excel`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+		}
+	});
+
+	if (!res.ok) throw new Error('Error al descargar el archivo Excel');
+
+	const contentType = res.headers.get('Content-Type') || 'application/octet-stream';
+	const arrayBuffer = await res.arrayBuffer();
+	const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+	return {
+		base64,
+		type: contentType
+	};
+}
+
+export const subirExcelUsuarios = async (fetch: typeof window.fetch, formData: FormData) => {
+	const res = await fetch(`${API}/usuarios/importar`, {
+		method: 'POST',
+		body: formData
+	});
+	if (!res.ok) throw new Error('Error al subir el archivo Excel');
+	return await res.json();
+};

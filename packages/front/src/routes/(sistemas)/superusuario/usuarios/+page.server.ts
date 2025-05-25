@@ -1,6 +1,7 @@
 import { actualizarUsuario, addToast, crearUsuario, eliminarUsuario, obtenerUsuarios } from '$lib';
 import type { Usuario } from '../../../../app';
 import type { Actions, PageServerLoad } from './$types';
+import { descargarExcel, subirExcelUsuarios } from '$lib/servicios/archivos';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {
@@ -92,6 +93,49 @@ export const actions: Actions = {
 				type: 'failure',
 				message: error.message
 			};
+		}
+	},
+
+	descargar: async ({fetch }) => {
+		try {
+			const { base64, type } = await descargarExcel(fetch);
+			return {
+				type,
+				base64,
+				message: 'Archivo descargado exitosamente'
+			}
+		} catch (error) {
+			console.error('Error al descargar el archivo:', error);
+			return {
+				type: 'failure',
+				message: 'Error al descargar el archivo'
+			};
+		}
+	},
+	cargar: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const archivo = formData.get('archivo');
+
+		if (!archivo || !(archivo instanceof File)) {
+			return {type: 'failure', message: 'No se ha seleccionado un archivo válido'};
+		}
+
+		const nuevoForm = new FormData();
+		nuevoForm.set('file', archivo);
+
+		try {
+			await subirExcelUsuarios(fetch, nuevoForm);
+			return {
+				type: 'success',
+				message: 'Archivo subido exitosamente',
+				invalidate: true
+			}
+		} catch (err) {
+			console.error(err);
+			return {
+				type: 'failure',
+				message: 'Error al subir el archivo'
+			}
 		}
 	}
 };

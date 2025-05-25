@@ -18,8 +18,6 @@ export const load = async ({ fetch }) => {
 		obtenerPagosPorDia(fetch, 7)
 	]);
 
-	console.log(estudiantes.length, peticiones.length, totalRecaudado, pagosPorTipo, pagosPorDia);
-
 	return {
 		totalEstudiantes: estudiantes.length,
 		totalPeticiones: peticiones.length,

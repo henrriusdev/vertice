@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Trazabilidad del Sistema</title>
+    <style>
+        @page {
+            margin: 2cm;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10px;
+                color: #666;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .generation-date {
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .filters-section {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .filters-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .filter-item {
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .filter-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .table-container {
+            margin-bottom: 30px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #333;
+        }
+
+        .table th {
+            background-color: #f1f1f1;
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .table td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            font-size: 10px;
+            vertical-align: top;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .no-data {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            padding: 20px;
+        }
+
+        .summary {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado -->
+    <div class="header">
+
+        <div class="title">
+            Reporte de Trazabilidad del Sistema
+        </div>
+
+        <div class="generation-date">
+            Fecha de generación: {{ fecha_generacion }}
+        </div>
+    </div>
+
+    <!-- Filtros aplicados -->
+    {% if filtros and (filtros.desde or filtros.hasta or filtros.rol or filtros.query) %}
+    <div class="filters-section">
+        <div class="filters-title">Filtros Aplicados:</div>
+
+        {% if filtros.desde %}
+        <div class="filter-item">
+            <span class="filter-label">Fecha desde:</span>
+            {{ filtros.desde }}
+        </div>
+        {% endif %}
+
+        {% if filtros.hasta %}
+        <div class="filter-item">
+            <span class="filter-label">Fecha hasta:</span>
+            {{ filtros.hasta }}
+        </div>
+        {% endif %}
+
+        {% if filtros.rol %}
+        <div class="filter-item">
+            <span class="filter-label">Rol:</span>
+            {{ filtros.rol }}
+        </div>
+        {% endif %}
+
+        {% if filtros.query %}
+        <div class="filter-item">
+            <span class="filter-label">Búsqueda:</span>
+            {{ filtros.query }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Tabla de trazabilidad -->
+    <div class="table-container">
+        {% if registros and registros|length > 0 %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Usuario</th>
+                    <th style="width: 15%;">Rol</th>
+                    <th style="width: 20%;">Módulo</th>
+                    <th style="width: 25%;">Acción</th>
+                    <th style="width: 20%;">Fecha y Hora</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in registros %}
+                <tr>
+                    <td>{{ item.usuario or 'N/A' }}</td>
+                    <td style="text-transform: capitalize">{{ item.rol or 'N/A' }}</td>
+                    <td>{{ item.modulo or 'N/A' }}</td>
+                    <td>{{ item.accion or 'N/A' }}</td>
+                    <td>{{ item.fecha or 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary">
+            <strong>Total de registros:</strong> {{ registros|length }}
+        </div>
+        {% else %}
+        <div class="no-data">
+            No se encontraron registros de trazabilidad con los filtros aplicados.
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

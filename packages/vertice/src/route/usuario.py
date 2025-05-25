@@ -2,7 +2,6 @@ from datetime import timedelta, datetime
 import traceback
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, decode_token, jwt_required, get_jwt_identity, get_jwt
-from src.model.trazabilidad import Trazabilidad
 from src.service.sesiones import eliminar_sesion_por_jti, registrar_sesion
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import bloquear_usuario, delete_usuario, get_usuarios, login, reactivar_usuario, update_password, get_usuario_por_correo, update_email, registrar_usuario, update_usuario

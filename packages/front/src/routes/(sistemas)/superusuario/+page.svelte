@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Chart } from 'flowbite-svelte';
+  import { Chart, Button } from 'flowbite-svelte';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -33,7 +33,7 @@
 </script>
 
 <div class="p-4 space-y-8">
-  <h1 class="text-2xl font-bold">Dashboard</h1>
+  <h1 class="text-2xl font-bold">Bienvenido, {data.nombre}</h1>
 
   <!-- Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -47,12 +47,12 @@
     </div>
     <div class="bg-white p-4 rounded shadow">
       <p class="text-sm text-gray-500">Recaudado hoy</p>
-      <p class="text-2xl font-bold">${data.totalRecaudado.toFixed(2)}</p>
+      <p class="text-2xl font-bold">{data.totalRecaudado.toFixed(2)} Bs.</p>
     </div>
     <div class="bg-white p-4 rounded shadow">
       <p class="text-sm text-gray-500">Peticiones por estado</p>
       <ul class="text-sm mt-1">
-        {#each Object.entries(data.peticionesPorEstado) as [estado, cantidad]}
+        {#each Object.entries(data.peticionesPorEstado) as [estado, cantidad] (estado)}
           <li>{estado}: {cantidad}</li>
         {/each}
       </ul>
