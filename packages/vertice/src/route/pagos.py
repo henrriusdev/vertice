@@ -13,6 +13,8 @@ from src.service.trazabilidad import add_trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
 from datetime import datetime
 
+from src.utils.fecha import parse_fecha
+
 pago = Blueprint("pagos_blueprint", __name__)
 
 @pago.route("/")
@@ -65,6 +67,7 @@ async def crear_pago():
         referencia: str = body.get('reference')
         ciclo: str = body.get('ciclo', '2025-1')
         billetes = body.get('billetes', [])
+        print(cedula_str)
 
         # Buscar estudiante
         estudiante = await Estudiante.get(usuario__cedula=cedula_str)
@@ -220,3 +223,64 @@ async def get_pagos_by_estudiante():
         "nombre": estudiante.usuario.nombre,
         "pagos": resultado
     })
+
+
+@pago.route("/total")
+@jwt_required()
+async def total_recaudado():
+    desde = datetime.strptime(request.args.get("desde"), "%Y-%m-%d")
+    hasta = datetime.strptime(request.args.get("hasta"), "%Y-%m-%d")
+    pagos = (await get_all_pagos())["pagos"]
+
+    total = sum(
+        p["monto"]
+        for p in pagos
+        if desde <= p["fecha_pago"].replace(tzinfo=None) <= hasta
+    )
+    return jsonify({"ok": True, "status": 200, "total": float(total)})
+
+
+@pago.route("/por-tipo")
+@jwt_required()
+async def pagos_por_tipo():
+    desde = request.args.get("desde")
+    hasta = request.args.get("hasta")
+    pagos = (await get_all_pagos())["pagos"]
+
+    tipos = {"transferencia": 0, "efectivo": 0, "punto": 0}
+    for p in pagos:
+        # Convert p["fecha_pago"] to a naive datetime object
+        fecha_pago = p["fecha_pago"].replace(tzinfo=None)
+        if datetime.strptime(desde, "%Y-%m-%d") <= fecha_pago <= datetime.strptime(hasta, "%Y-%m-%d"):
+            nombre = p["metodo_pago"]
+            if nombre == "Transferencia":
+                tipos["ransferencia"] += float(p["monto"])
+            elif nombre == "Efectivo":
+                tipos["efectivo"] += float(p["monto"])
+            elif nombre == "Punto":
+                tipos["punto"] += float(p["monto"])
+
+    return jsonify({"ok": True, "status": 200, "data": tipos})
+
+
+from datetime import timedelta
+
+@pago.route("/por-dia")
+@jwt_required()
+async def pagos_por_dia():
+    dias = int(request.args.get("dias", 7))
+    pagos = (await get_all_pagos())["pagos"]
+
+    hoy = datetime.now()
+    conteo = {}
+
+    for i in range(dias, 0, -1):
+        fecha = hoy - timedelta(days=i)
+        conteo[fecha.strftime("%Y-%m-%d")] = 0
+
+    for p in pagos:
+        fecha_pago = p["fecha_pago"].strftime("%Y-%m-%d")
+        if fecha_pago in conteo:
+            conteo[fecha_pago] += float(p["monto"])
+
+    return jsonify({"ok": True, "status": 200, "data": conteo})

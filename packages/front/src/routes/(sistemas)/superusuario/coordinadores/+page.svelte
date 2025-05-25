@@ -313,11 +313,11 @@
 				</div>
 			</div>
 		</form>
-		<svelte:fragment slot="footer">
+		{#snippet footer()}
 			<Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
 				{isEditing ? 'Actualizar' : 'Guardar'}
 			</Button>
 			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
-		</svelte:fragment>
+		{/snippet}
 	</Modal>
 </div>

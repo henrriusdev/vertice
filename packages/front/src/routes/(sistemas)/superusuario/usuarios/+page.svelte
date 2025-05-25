@@ -256,12 +256,12 @@
 					</div>
 				{/if}
 			</div>
+			{#snippet footer()}
+				<Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
+					{isEditing ? 'Actualizar' : 'Guardar'}
+				</Button>
+				<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
+			{/snippet}
 		</form>
-		<svelte:fragment slot="footer">
-			<Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
-				{isEditing ? 'Actualizar' : 'Guardar'}
-			</Button>
-			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
-		</svelte:fragment>
 	</Modal>
 </div>

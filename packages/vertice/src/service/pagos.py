@@ -7,7 +7,7 @@ from src.utils.reporte_pdf import generar_html_reporte, generar_html_montos
 async def get_all_pagos():
     result = {"pagos": [], "metodos": []}
     
-    pagos = await Pago.all().prefetch_related("metodo_pago", "cedula_estudiante")
+    pagos = await Pago.all().prefetch_related("metodo_pago", "cedula_estudiante__usuario")
 
     for pago in pagos:
         result["pagos"].append({
@@ -16,11 +16,8 @@ async def get_all_pagos():
             "monto": pago.monto,
             "concepto": pago.concepto,
             "fecha_pago": pago.fecha_pago,
-            "ciclo": pago.ciclo
-        })
-        result["metodos"].append({
-            "id": pago.metodo_pago.id,
-            "nombre": pago.metodo_pago.nombre
+            "ciclo": pago.ciclo,
+            "metodo_pago": pago.metodo_pago.nombre,
         })
     
     return result

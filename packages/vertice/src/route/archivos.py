@@ -5,9 +5,9 @@ from datetime import date, datetime
 from io import BytesIO
 from weasyprint import HTML
 import traceback
-from route.trazabilidad import superuser_required
-from service.trazabilidad import get_trazabilidad
-from src.model import Configuracion
+from src.route.trazabilidad import superuser_required
+from src.service.trazabilidad import get_trazabilidad
+from src.model import Configuracion, Estudiante, Docente, Coordinador, Usuario, Rol, Carrera
 from src.service.estudiantes import obtener_info_estudiante_para_constancia
 from src.service.trazabilidad import add_trazabilidad
 from src.service.materias import listar_materias_asignadas, get_materia_con_nombre_y_config, get_estudiantes_con_notas
@@ -24,6 +24,7 @@ env = Environment(
 
 arc = Blueprint("archivo", __name__)
 PATH_FILES = path.abspath(path.join(getcwd(), "../../uploads/planificacion/"))
+EXCEL_PATH = path.abspath(path.join(getcwd(), "../../uploads/excel/carga.xslm"))
 
 
 def create_folder_if_not_exists(folder_path):
@@ -249,6 +250,15 @@ async def exportar_archivo_trazabilidad():
             filtros["fechaHasta"] = datetime.strptime(filtros["fechaHasta"], "%Y-%m-%d").date()
 
         trazas = await get_trazabilidad(filtros)
+        for item in trazas:
+            if item.get("fecha"):
+                try:
+                    fecha = item["fecha"]
+                    if isinstance(fecha, str):
+                        fecha = datetime.fromisoformat(fecha)
+                    item["fecha"] = fecha.strftime("%d/%m/%Y %I:%M:%S %p")
+                except Exception:
+                    item["fecha"] = "N/A"
         contenido, nombre, tipo = await generar_archivo_trazabilidad(trazas, formato, filtros)
 
         return send_file(
@@ -299,3 +309,85 @@ async def generar_archivo_trazabilidad(data: list[dict], formato: str, filtros=N
         return pdf_bytes, nombre, "application/pdf"
 
     raise ValueError("Formato no soportado")
+
+
+@arc.post("/usuarios/importar")
+@jwt_required()
+async def importar_usuarios():
+    try:
+        claims = get_jwt()
+        usuario = await get_usuario_por_correo(claims.get('sub'))
+        file = request.files['file']
+
+        xls = pd.read_excel(file, sheet_name=None, header=3)
+        carreras_df = pd.read_excel(file, sheet_name="BD APOYO", header=None).iloc[14:, [5, 6]]
+        carreras_df.columns = ["id", "nombre"]
+        carreras_df = carreras_df.dropna()
+
+        for _, row in carreras_df.iterrows():
+            await Carrera.get_or_create(nombre=row["nombre"])
+
+        entrada = xls["ENTRADA"]
+        roles_df = pd.read_excel(file, sheet_name="BD APOYO", header=None).iloc[14:, [1, 2]]
+        roles_df.columns = ["id", "nombre"]
+        roles_map = {r["nombre"].strip().lower(): r["id"] for _, r in roles_df.iterrows() if pd.notna(r["nombre"])}
+
+        for _, row in entrada.iterrows():
+            if pd.isna(row["Cedula"]):
+                continue
+            rol_name = str(row["Rol"]).strip().lower()
+            rol = await Rol.get_or_none(nombre__icontains=rol_name)
+            if not rol:
+                continue
+            await Usuario.get_or_create(
+                cedula=row["Cedula"],
+                defaults={
+                    "nombre": row["Nombre"],
+                    "correo": row["Correo"],
+                    "password": row["Password"],
+                    "rol_id": rol.id
+                }
+            )
+
+        hojas_roles = {
+            "estudiante": ("ESTUDIANTES", Estudiante, "carrera_id"),
+            "docente": ("DOCENTES", Docente, None),
+            "coordinador": ("COORDINADORES", Coordinador, "carrera_id")
+        }
+
+        for rol, (sheet_name, model, carrera_field) in hojas_roles.items():
+            hoja = xls.get(sheet_name)
+            if hoja is None:
+                continue
+            for _, row in hoja.iterrows():
+                cedula = row.get("Cedula") or row.get("cedula")
+                if pd.isna(cedula):
+                    continue
+                usuario = await Usuario.get_or_none(cedula=cedula)
+                if not usuario:
+                    continue
+                datos = {"usuario_id": usuario.id}
+                if carrera_field and "Carrera" in row:
+                    carrera = await Carrera.get_or_none(nombre=row["Carrera"])
+                    if carrera:
+                        datos[carrera_field] = carrera.id
+                await model.get_or_create(usuario_id=usuario.id, defaults=datos)
+
+        return jsonify({"ok": True, "status": 200})
+
+    except Exception as ex:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "message": str(ex)}), 500
+
+
+@arc.get("/descargar/excel")
+@jwt_required()
+async def descargar_excel():
+    try:
+        file_path = path.abspath(EXCEL_PATH)
+        return send_file(file_path, as_attachment=True, download_name="carga.xlsm")
+    except Exception as ex:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "message": str(ex)}), 500

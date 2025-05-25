@@ -30,6 +30,7 @@
 	} from 'flowbite-svelte-icons';
 	import type { PageServerData } from './$types';
 	import { goto } from '$app/navigation';
+	import { resolver } from '$lib/utilidades/resolver';
 
 	let { data }: { data: PageServerData } = $props();
 
@@ -119,15 +120,17 @@
 		showPaymentModal = false;
 	}
 
+	$inspect(paymentDate)
 	const handleSubmit: SubmitFunction = ({ formData, cancel }) => {
 		// Validación de campos
-		if (!data.estudiantes.includes(student)) {
-			alert('No hay algún estudiante con esa cédula en nuestro sistema');
-			return cancel();
-		}
-
+		
 		if (!student.includes('-')) {
 			alert('Por favor, seleccione si el estudiante es extranjero o no');
+			return cancel();
+		}
+		
+		if (!data.estudiantes.includes(student)) {
+			alert('No hay algún estudiante con esa cédula en nuestro sistema');
 			return cancel();
 		}
 
@@ -151,7 +154,7 @@
 
 		// fecha formateada
 		if (paymentDate) {
-			formData.append('fecha_pago', paymentDate.toUTCString().split('T')[0]);
+			formData.append('fecha_pago', paymentDate.toISOString().split('T')[0]);
 		}
 
 		return async ({ update }) => {
@@ -191,7 +194,7 @@
 
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 		<!-- Search Payments Section -->
-		<Card padding="xl">
+		<Card class="p-6">
 			<Heading tag="h2" class="text-2xl font-bold text-blue-600 mb-6">Buscar Pagos</Heading>
 
 			<div class="space-y-6">
@@ -229,7 +232,7 @@
 		</Card>
 
 		<!-- Reports Section -->
-		<Card padding="xl">
+		<Card class="p-6">
 			<Heading tag="h2" class="text-2xl font-bold text-blue-600 mb-6">Reportes</Heading>
 
 			<form
@@ -239,32 +242,13 @@
 					formData.append('tipo', reportType);
 					formData.append('filtro', paymentSelection);
 					if (reportType === 'dia') {
-						formData.append('fecha', (reportDate as Date)?.toUTCString().split('T')[0]);
+						formData.append('fecha', (reportDate as Date)?.toISOString().split('T')[0]);
 					}
 					if (reportType === 'fechas' || reportType === 'monto') {
-						formData.append('fi', (reportDate as Date[])[0].toUTCString().split('T')[0]);
-						formData.append('ff', (reportDate as Date[])[1].toUTCString().split('T')[0]);
+						formData.append('fi', (reportDate as Date[])[0].toISOString().split('T')[0]);
+						formData.append('ff', (reportDate as Date[])[1].toISOString().split('T')[0]);
 					}
-					return async ({ result, update }) => {
-						const { base64 } = result.data;
-
-						const byteCharacters = atob(base64);
-						const byteArrays = [new Uint8Array(byteCharacters.length)];
-
-						for (let i = 0; i < byteCharacters.length; i++) {
-							byteArrays[0][i] = byteCharacters.charCodeAt(i);
-						}
-
-						const blob = new Blob(byteArrays, { type: 'application/pdf' });
-
-						const url = URL.createObjectURL(blob);
-						const a = document.createElement('a');
-						a.href = url;
-						a.download = 'reporte.pdf';
-						a.click();
-						URL.revokeObjectURL(url);
-						await update();
-					};
+					return resolver(()=>{})
 				}}
 				class="space-y-6"
 			>
@@ -342,12 +326,10 @@
 			<div class="md:col-span-3">
 				<Label for="payment-date" class="mb-2 font-medium">Fecha del Pago</Label>
 				<Datepicker
-					id="payment-date"
-					name="payment-date"
 					bind:value={paymentDate}
-					maxDate={new Date()}
-					placeholder="dd/mm/aaaa"
+					maxYear={new Date().getFullYear()}
 				/>
+				<input type="hidden" name="payment-date" value={paymentDate?.toISOString().split('T')[0] ?? ''} />
 			</div>
 
 			<div class="md:col-span-3">
@@ -454,13 +436,13 @@
 		</form>
 
 		<!-- Modal Footer -->
-		<svelte:fragment slot="footer">
+		{#snippet footer()}
 			<Button color="alternative" onclick={closePaymentModal}>Cancelar</Button>
 			<Button color="primary" onclick={() => form.requestSubmit()} disabled={!isFormValid}>
 				<CreditCardOutline class="mr-2 h-5 w-5" />
 				Realizar Pago
 			</Button>
-		</svelte:fragment>
+		{/snippet}
 	</Modal>
 </div>
 

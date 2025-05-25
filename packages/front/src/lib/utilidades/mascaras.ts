@@ -2,42 +2,34 @@ import { MaskedDynamic } from 'imask';
 
 export const cedulaMask = {
 	mask: [
-		// V - de 7 a 8 dígitos
-		{ mask: 'V-0.000.000', startsWith: 'V', lazy: false, name: 'V7' },
-		{ mask: 'V-00.000.000', startsWith: 'V', lazy: false, name: 'V8' },
-
-		// E - de 5 a 10 dígitos
-		{ mask: 'E-00.000', startsWith: 'E', lazy: false, name: 'E5' },
-		{ mask: 'E-000.000', startsWith: 'E', lazy: false, name: 'E6' },
-		{ mask: 'E-0.000.000', startsWith: 'E', lazy: false, name: 'E7' },
-    { mask: 'E-00.000.000', startsWith: 'E', lazy: false, name: 'E8' },
-    { mask: 'E-000.000.000', startsWith: 'E', lazy: false, name: 'E9' },
-    { mask: 'E-0.000.000.000', startsWith: 'E', lazy: false, name: 'E10' },
+		{ mask: 'V-0000000', name: 'V7' },
+		{ mask: 'V-00000000', name: 'V8' },
+		{ mask: 'E-00000', name: 'E5' },
+		{ mask: 'E-000000', name: 'E6' },
+		{ mask: 'E-0000000', name: 'E7' },
+		{ mask: 'E-00000000', name: 'E8' },
+		{ mask: 'E-000000000', name: 'E9' },
+		{ mask: 'E-0000000000', name: 'E10' }
 	],
 	lazy: false,
 	overwrite: true,
-	prepare: (str: string) => str.toUpperCase().replace(/[^VE0-9]/g, ''),
 	dispatch: (appended: string, dynamicMasked: MaskedDynamic) => {
-		const raw = (dynamicMasked.value + appended).toUpperCase().replace(/[^VE0-9]/g, '');
-
+		const raw = (dynamicMasked.value + appended).replace(/[^VE0-9]/gi, '').toUpperCase();
 		const tipo = raw[0];
-		const digits = raw.replace(/[^0-9]/g, '');
+		const digits = raw.slice(1).replace(/\D/g, '');
+		const len = digits.length;
 
 		if (tipo === 'V') {
-			// eslint-disable-next-line
-			if (digits.length >= 8) return dynamicMasked.compiledMasks.find((m: any) => m.name === 'V8');
-			// eslint-disable-next-line
-			return dynamicMasked.compiledMasks.find((m: any) => m.name === 'V7');
+			if (len === 7) return dynamicMasked.compiledMasks.find((m) => m.name === 'V7');
+			if (len === 8) return dynamicMasked.compiledMasks.find((m) => m.name === 'V8');
 		}
 
-    if (tipo === 'E') {
-			const name = digits.length > 10 ? 'E10' : `E${digits.length < 5 ? 5 : digits.length}`;
-			// eslint-disable-next-line
-      return dynamicMasked.compiledMasks.find((m: any) => m.name === name);
+		if (tipo === 'E') {
+			if (len >= 5 && len <= 10)
+				return dynamicMasked.compiledMasks.find((m) => m.name === `E${len}`);
 		}
 
-		// fallback si aún no hay tipo claro
-		return ""
+		return dynamicMasked.compiledMasks[0];
 	}
 };
 
