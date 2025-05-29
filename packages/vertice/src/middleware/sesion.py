@@ -1,8 +1,10 @@
 from functools import wraps
-from flask import current_app, jsonify
+
+from flask import jsonify
 from flask_jwt_extended import get_jwt
 
 from src.service.sesiones import verificar_sesion_activa
+
 
 def unica_sesion_requerida(fn):
     @wraps(fn)

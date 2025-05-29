@@ -301,9 +301,7 @@ async def listar_materias_asignadas():
                     "cedula": usuario.cedula,
                     "nombre": usuario.nombre,
                     "titulo": docente.titulo,
-                    "especialidad": docente.especialidad,
-                    "dedicacion": docente.dedicacion,
-                    "estatus": docente.estatus
+                    "especialidad": docente.especialidad
                 }
             })
 

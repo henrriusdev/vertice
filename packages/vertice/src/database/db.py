@@ -29,7 +29,7 @@ async def init_db():
         "Efectivo",
         "Divisas",
     ]
-    hashed_password = generate_password_hash("admin123")
+    hashed_password = generate_password_hash("admin123", method="pbkdf2:sha256")
     print("Inicializando DB...")
 
     # Roles

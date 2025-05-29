@@ -1,10 +1,12 @@
 import traceback
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request
-from src.service.usuarios import get_usuario_por_correo
+from flask_jwt_extended import jwt_required, get_jwt
+
 from src.service.configuracion import get_configuracion, add_configuracion, update_configuracion
 from src.service.trazabilidad import add_trazabilidad
-from flask_jwt_extended import jwt_required, get_jwt
-from datetime import datetime
+from src.service.usuarios import get_usuario_por_correo
 
 cfg = Blueprint('config_blueprint', __name__)
 
@@ -18,6 +20,7 @@ async def get_one_config():
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
 
 @cfg.route('/add', methods=['POST'])
 @jwt_required()
@@ -40,6 +43,7 @@ async def add_config():
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
 
 @cfg.route('/update', methods=['PUT'])
 @jwt_required()

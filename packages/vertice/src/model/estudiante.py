@@ -10,6 +10,7 @@ class Estudiante(Model):
     fecha_nac = fields.DatetimeField()
     edad = fields.IntField()
     sexo = fields.CharField(max_length=20)
+    estatus = fields.CharField(max_length=20, default="Activo")
 
     class Meta:
         table = "estudiantes"

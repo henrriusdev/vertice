@@ -1,17 +1,17 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt
-from datetime import datetime
 import traceback
 
-from src.service.usuarios import get_usuario_por_correo
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt
+
 from src.service.materias import (
     get_materias, get_materia, get_materias_validas,
     add_materia, modificar_materia_estudiante, update_materia, delete_materia
 )
 from src.service.trazabilidad import add_trazabilidad
-from src.service.configuracion import get_configuracion
+from src.service.usuarios import get_usuario_por_correo
 
 mat = Blueprint('materia_blueprint', __name__)
+
 
 @mat.route('/')
 @jwt_required()
@@ -20,6 +20,7 @@ async def listar_materias():
     await add_trazabilidad({"accion": "Obtener todas las Materias", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
     data = await get_materias()
     return jsonify({"ok": True, "status": 200, "data": data})
+
 
 @mat.route('/<id>')
 @jwt_required()
@@ -30,6 +31,7 @@ async def obtener_materia(id: str):
         await add_trazabilidad({"accion": f"Obtener Materia con id: {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
         return jsonify({"ok": True, "status": 200, "data": data})
     return jsonify({"ok": False, "status": 404, "data": {"message": "materia no encontrada"}}), 404
+
 
 @mat.route('/inscribir/<cedula_estudiante>', methods=['GET'])
 @jwt_required()
@@ -44,6 +46,7 @@ async def materias_validas(cedula_estudiante: str):
     except Exception as ex:
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 204
 
+
 @mat.route('/add', methods=['POST'])
 @jwt_required()
 async def crear_materia():
@@ -56,6 +59,7 @@ async def crear_materia():
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
 
 @mat.route('/update/<id_materia>', methods=['PUT'])
 @jwt_required()
@@ -70,6 +74,7 @@ async def modificar_materia(id_materia: str):
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
 
 @mat.route('/delete/<id>', methods=['DELETE'])
 @jwt_required()

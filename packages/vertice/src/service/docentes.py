@@ -17,11 +17,8 @@ async def get_docentes():
                 "correo": d.usuario.correo,
                 "usuario": d.usuario.id,
                 "titulo": d.titulo,
-                "dedicacion": d.dedicacion,
                 "especialidad": d.especialidad,
-                "estatus": d.estatus,
                 "fecha_ingreso": format_fecha(d.fecha_ingreso) if d.fecha_ingreso else None,
-                "observaciones": d.observaciones
             })
         return resultado
     except Exception as ex:
@@ -37,28 +34,22 @@ async def get_docente(id: int):
             "nombre": d.usuario.nombre,
             "correo": d.usuario.correo,
             "titulo": d.titulo,
-            "dedicacion": d.dedicacion,
             "especialidad": d.especialidad,
-            "estatus": d.estatus,
             "fecha_ingreso": format_fecha(d.fecha_ingreso) if d.fecha_ingreso else None,
-            "observaciones": d.observaciones
         }
     except DoesNotExist:
         return None
     except Exception as ex:
         raise Exception(ex)
 
-async def add_docente(usuario_id: int, titulo: str, dedicacion: str, especialidad: str, estatus: str = "Activo", fecha_ingreso=None, observaciones=None):
+async def add_docente(usuario_id: int, titulo: str, especialidad: str, fecha_ingreso=None):
     try:
         usuario = await Usuario.get(id=usuario_id)
         docente = Docente(
             usuario=usuario,
             titulo=titulo,
-            dedicacion=dedicacion,
             especialidad=especialidad,
-            estatus=estatus,
             fecha_ingreso=parse_fecha(fecha_ingreso) if fecha_ingreso else None,
-            observaciones=observaciones
         )
         await docente.save()
         return docente.id

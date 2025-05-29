@@ -1,21 +1,23 @@
-from flask import Blueprint, request, jsonify, send_file, render_template
-from flask_jwt_extended import jwt_required, get_jwt
-from os import getcwd, path, remove, makedirs, listdir
+import traceback
 from datetime import date, datetime
 from io import BytesIO
+from os import getcwd, path, remove, makedirs, listdir
+
+import pandas as pd
+from flask import Blueprint, request, jsonify, send_file, render_template
+from flask_jwt_extended import jwt_required, get_jwt
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
-import traceback
-from src.route.trazabilidad import superuser_required
-from src.service.trazabilidad import get_trazabilidad
+from werkzeug.security import generate_password_hash
+
 from src.model import Configuracion, Estudiante, Docente, Coordinador, Usuario, Rol, Carrera
+from src.route.trazabilidad import superuser_required
 from src.service.estudiantes import obtener_info_estudiante_para_constancia
-from src.service.trazabilidad import add_trazabilidad
 from src.service.materias import listar_materias_asignadas, get_materia_con_nombre_y_config, get_estudiantes_con_notas
+from src.service.trazabilidad import add_trazabilidad
+from src.service.trazabilidad import get_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
 from src.utils.fecha import generar_fecha_larga
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-import pandas as pd
-from werkzeug.security import generate_password_hash
 
 env = Environment(
     loader=FileSystemLoader(path.join(path.dirname(__file__), "..", "template")),
@@ -340,7 +342,6 @@ async def importar_usuarios():
         entrada = xls["ENTRADA"]
         roles_df = xls["BD APOYO"].iloc[14:, [1, 2]]
         roles_df.columns = ["id", "nombre"]
-        roles_map = {r["nombre"].strip().lower(): r["id"] for _, r in roles_df.iterrows() if pd.notna(r["nombre"])}
 
         for _, row in entrada.iterrows():
             if pd.isna(row["Cedula"]):
@@ -349,12 +350,15 @@ async def importar_usuarios():
             rol = await Rol.get_or_none(nombre__icontains=rol_name)
             if not rol:
                 continue
+
+            # Quitar el prefijo V- o E- de la cédula y usarla como clave
+            cedula = str(row["Cedula"]).strip().replace("V-", "").replace("E-", "")
             await Usuario.get_or_create(
                 cedula=row["Cedula"],
                 defaults={
                     "nombre": row["Nombre"],
                     "correo": row["Correo"],
-                    "password": generate_password_hash(row['Password'], method="pbkdf2:sha256", salt_length=16),
+                    "password": generate_password_hash(cedula, method="pbkdf2:sha256", salt_length=16),
                     "rol_id": rol.id
                 }
             )
@@ -386,17 +390,15 @@ async def importar_usuarios():
                         "fecha_nac": row["Fecha nacimiento"] if "Fecha nacimiento" in row and pd.notna(row["Fecha nacimiento"]) else None,
                         "edad": int(row["Edad"]) if "Edad" in row and pd.notna(row["Edad"]) else 0,
                         "sexo": row["Sexo"] if "Sexo" in row and pd.notna(row["Sexo"]) else "",
-                        "promedio": float(row["Promedio"]) if "Promedio" in row and pd.notna(row["Promedio"]) else 0.0
+                        "promedio": float(row["Promedio"]) if "Promedio" in row and pd.notna(row["Promedio"]) else 0.0,
+                        "estatus": row["Estatus"] if "Estatus" in row and pd.notna(row["Estatus"]) else "Activo"
                     }
                 elif rol == "docente":
                     datos = {
                         "usuario_id": usuario.id,
                         "titulo": row["Titulo"] if "Titulo" in row and pd.notna(row["Titulo"]) else "",
-                        "dedicacion": row["Dedicacion"] if "Dedicacion" in row and pd.notna(row["Dedicacion"]) else "",
                         "especialidad": row["Especialidad"] if "Especialidad" in row and pd.notna(row["Especialidad"]) else "",
-                        "estatus": row["Estatus"] if "Estatus" in row and pd.notna(row["Estatus"]) else "",
                         "fecha_ingreso": row["Fecha ingreso"] if "Fecha ingreso" in row and pd.notna(row["Fecha ingreso"]) else None,
-                        "observaciones": row["Observaciones"] if "Observaciones" in row and pd.notna(row["Observaciones"]) else ""
                     }
                 elif rol == "coordinador":
                     datos = {

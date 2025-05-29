@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request
-from src.service.usuarios import get_usuario_por_correo
+from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
+
 from src.service.coordinadores import (
     get_coordinadores,
     get_coordinador,
@@ -10,8 +13,7 @@ from src.service.coordinadores import (
 )
 from src.service.estudiantes import get_notas_estudiante
 from src.service.trazabilidad import add_trazabilidad
-from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
-from datetime import datetime
+from src.service.usuarios import get_usuario_por_correo
 
 crd = Blueprint('coordinacion_blueprint', __name__)
 

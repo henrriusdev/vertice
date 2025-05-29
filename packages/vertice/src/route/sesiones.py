@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
 from src.service.sesiones import (
     obtener_sesiones_usuario,
     eliminar_sesion,

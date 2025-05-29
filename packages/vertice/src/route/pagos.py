@@ -1,21 +1,23 @@
+import traceback
+from datetime import datetime, timedelta
 from decimal import Decimal
 from io import BytesIO
-import traceback
+
 from flask import Blueprint, Response, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt
 from weasyprint import HTML
+
+from src.model.estudiante import Estudiante
 from src.model.pago import Pago
 from src.service.billetes import add_billete
-from src.model.estudiante import Estudiante
 from src.service.pagos import (
-    generar_reporte_dia, generar_reporte_fechas, generar_reporte_monto, get_all_pagos, get_pago_by_id, add_pago, update_pago
+    generar_reporte_dia, generar_reporte_fechas, generar_reporte_monto, get_all_pagos, get_pago_by_id, add_pago,
+    update_pago
 )
 from src.service.trazabilidad import add_trazabilidad
-from flask_jwt_extended import jwt_required, get_jwt
-from datetime import datetime
-
-from src.utils.fecha import parse_fecha
 
 pago = Blueprint("pagos_blueprint", __name__)
+
 
 @pago.route("/")
 @jwt_required()
@@ -151,6 +153,7 @@ def pdf_response(html: str, filename: str):
         }
     )
 
+
 @pago.get("/reporte")
 @jwt_required()
 async def generar_reporte():
@@ -262,8 +265,6 @@ async def pagos_por_tipo():
 
     return jsonify({"ok": True, "status": 200, "data": tipos})
 
-
-from datetime import timedelta
 
 @pago.route("/por-dia")
 @jwt_required()

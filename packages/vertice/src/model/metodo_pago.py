@@ -5,8 +5,7 @@ from tortoise import fields
 class MetodoPago(Model):
   id = fields.IntField(pk=True)
   nombre = fields.CharField(max_length=50, unique=True)
-  
-  
+
   def to_dict(self):
     return {
       "id": self.id,

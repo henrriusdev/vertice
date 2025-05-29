@@ -1,6 +1,8 @@
 import traceback
+
 from flask import Blueprint, jsonify, request
-from src.service.usuarios import get_usuario_por_correo
+from flask_jwt_extended import jwt_required, get_jwt
+
 from src.service.docentes import (
     get_docentes,
     get_docente,
@@ -10,9 +12,9 @@ from src.service.docentes import (
     update_docente,
     delete_docente,
 )
-from src.service.trazabilidad import add_trazabilidad
 from src.service.materias import modificar_materia_estudiante
-from flask_jwt_extended import jwt_required, get_jwt
+from src.service.trazabilidad import add_trazabilidad
+from src.service.usuarios import get_usuario_por_correo
 
 doc = Blueprint('docentes_blueprint', __name__)
 
@@ -28,6 +30,7 @@ async def get_all_docentes():
     })
     data = await get_docentes()
     return jsonify({"ok": True, "status": 200, "data": data})
+
 
 
 @doc.route('/<cedula>')
@@ -115,8 +118,8 @@ async def actualizar_nota_estudiante():
     body = request.json
     await modificar_materia_estudiante(
         cod_materia=body.get("materia"),
-        id_estudiante=body.get("cedula_estudiante"),
-        campo=body.get("nombre_campo"),
+        cedula_estudiante=body.get("cedula_estudiante"),
+        nombre_campo=body.get("nombre_campo"),
         valor=body.get("valor")
     )
 

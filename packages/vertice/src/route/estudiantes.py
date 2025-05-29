@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request
-from datetime import datetime
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 from src.service.estudiantes import (
@@ -24,6 +23,7 @@ def after_request(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
+
 @est.route('/')
 @jwt_required()
 async def list_students():
@@ -36,6 +36,7 @@ async def list_students():
         "nivel_alerta": 1
     })
     return jsonify({"ok": True, "status": 200, "data": data})
+
 
 @est.route("/materias", methods=["GET"])
 @jwt_required()
@@ -56,6 +57,7 @@ async def listar_notas():
     })
     return jsonify({"ok": True, "status": 200, "data": data})
 
+
 @est.route("/historico", methods=["GET"])
 @jwt_required()
 async def listar_historico():
@@ -72,6 +74,7 @@ async def listar_historico():
         "nivel_alerta": 1
     })
     return jsonify({"ok": True, "status": 200, "data": data})
+
 
 @est.route("/horario", methods=["GET"])
 @jwt_required()
@@ -91,6 +94,7 @@ async def listar_horario():
     return jsonify({"ok": True, "status": 200, "data": {"materias": data}})
 
 
+
 @est.route('/<cedula>')
 @jwt_required()
 async def one_student(cedula):
@@ -107,6 +111,7 @@ async def one_student(cedula):
     })
     return jsonify({"ok": True, "status": 200, "data": data})
 
+
 @est.route('/add', methods=["POST"])
 @jwt_required()
 async def create_student():
@@ -121,6 +126,7 @@ async def create_student():
         "nivel_alerta": 2
     })
     return jsonify({"ok": True, "status": 200})
+
 
 @est.route('/update/<int:id_estudiante>', methods=["PUT"])
 @jwt_required()
@@ -138,6 +144,7 @@ async def patch_student(id_estudiante):
     })
     return jsonify({"ok": True, "status": 200})
 
+
 @est.route('/delete/<cedula>', methods=["DELETE"])
 @jwt_required()
 async def remove_student(cedula):
@@ -152,6 +159,7 @@ async def remove_student(cedula):
         "nivel_alerta": 3
     })
     return jsonify({"ok": True, "status": 200})
+
 
 @est.route("/add-materia", methods=["POST"])
 @jwt_required()

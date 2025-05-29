@@ -8,16 +8,19 @@ async def get_all():
     data = await get_billetes()
     return jsonify({"ok": True, "status": 200, "data": data})
 
+
 @bil.route('/<int:id>')
 async def get_one(id):
     data = await get_billete(id)
     return jsonify({"ok": True, "status": 200, "data": data})
+
 
 @bil.route('/add', methods=['POST'])
 async def add():
     payload = request.json
     await add_billete(payload)
     return jsonify({"ok": True, "status": 200})
+
 
 @bil.route('/update/<int:id>', methods=['PUT'])
 async def update(id):

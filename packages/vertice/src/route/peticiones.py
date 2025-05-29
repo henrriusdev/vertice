@@ -1,7 +1,8 @@
 import traceback
+
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
-from src.service.usuarios import get_usuario_por_correo
+
 from src.service.peticiones import (
     get_peticiones,
     get_peticion,
@@ -11,6 +12,7 @@ from src.service.peticiones import (
     delete_peticion
 )
 from src.service.trazabilidad import add_trazabilidad
+from src.service.usuarios import get_usuario_por_correo
 
 ptc = Blueprint('peticion_blueprint', __name__)
 
