@@ -18,13 +18,12 @@ export const actions: Actions = {
 	create: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as Omit<Usuario, "rol"> & { rol: number };
 
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			id: 0,
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,
 			nombre: payload.nombre,
-			password: payload.password,
 			rol_id: payload.rol
 		};
 
@@ -52,7 +51,7 @@ export const actions: Actions = {
 			rol: number;
 		};
 
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,

@@ -18,10 +18,7 @@ export type ErroresDocente = {
 	password?: string;
 	titulo?: string;
 	especialidad?: string;
-	dedicacion?: string;
-	estatus?: string;
 	fecha_ingreso?: string;
-	observaciones?: string;
 	activo?: string;
 };
 
@@ -54,13 +51,12 @@ export const actions: Actions = {
 				message: 'Errores en los datos del formulario'
 			};
 		}
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			id: 0,
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,
 			nombre: payload.nombre,
-			password: payload.password,
 			rol_id: 6
 		};
 
@@ -77,11 +73,8 @@ export const actions: Actions = {
 
 		const docente: DocenteReq = {
 			titulo: payload.titulo,
-			dedicacion: payload.dedicacion,
 			especialidad: payload.especialidad,
-			estatus: payload.estatus,
 			fecha_ingreso: payload.fecha_ingreso,
-			observaciones: payload.observaciones,
 			usuario_id: usuario.id,
 		};
 
@@ -113,7 +106,7 @@ export const actions: Actions = {
 			};
 		}
 
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,
@@ -133,13 +126,9 @@ export const actions: Actions = {
 
 		const docente: DocenteReq = {
 			titulo: payload.titulo,
-			dedicacion: payload.dedicacion,
 			especialidad: payload.especialidad,
-			estatus: payload.estatus,
 			fecha_ingreso: payload.fecha_ingreso,
-			observaciones: payload.observaciones,
 			usuario_id: payload.id,
-			password: payload.password
 		};
 
 		try {
@@ -192,10 +181,7 @@ function validarPayload(
 		'correo',
 		'titulo',
 		'especialidad',
-		'dedicacion',
-		'estatus',
 		'fecha_ingreso',
-		'observaciones'
 	];
 
 	if (!isEditing) camposBase.push('password');

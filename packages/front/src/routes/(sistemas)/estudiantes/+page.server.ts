@@ -57,7 +57,7 @@ export const actions: Actions = {
 				message: 'Errores en los datos del formulario'
 			};
 		}
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			id: 0,
 			cedula: payload.cedula,
 			correo: payload.correo,
@@ -117,7 +117,7 @@ export const actions: Actions = {
 			};
 		}
 
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,

@@ -1,13 +1,12 @@
 import {
 	actualizarCoordinador,
 	actualizarUsuario,
-	addToast,
+	type CoordinadorReq,
 	crearCoordinador,
 	crearUsuario,
 	eliminarCoordinador,
 	obtenerCarreras,
-	obtenerCoordinadores,
-	type CoordinadorReq
+	obtenerCoordinadores
 } from '$lib';
 import type { Usuario } from '../../../../app';
 import type { Actions, PageServerLoad } from './$types';
@@ -28,14 +27,13 @@ export const actions: Actions = {
 	create: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as CoordinadorReq &
 			Usuario;
-		
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			id: 0,
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,
 			nombre: payload.nombre,
-			password: payload.password,
 			rol_id: 4
 		};
 
@@ -75,8 +73,8 @@ export const actions: Actions = {
 	edit: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as CoordinadorReq &
 			Usuario & { id_coordinador: number };
-		
-		const usuario: Partial<Usuario & { password: string; rol_id: number }> = {
+
+		const usuario: Partial<Usuario & { rol_id: number }> = {
 			cedula: payload.cedula,
 			correo: payload.correo,
 			activo: true,

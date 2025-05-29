@@ -1,97 +1,92 @@
 <script lang="ts">
-  import {cedulaMask, DataTable} from '$lib';
-  import {imask} from '@imask/svelte';
-  import {Button, Helper, Input, Label, Modal, Select, Spinner, TableSearch} from 'flowbite-svelte';
-  import {EyeSlashSolid, EyeSolid, PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
-  import type {Usuario} from '../../../../app';
-  import type {ActionData, PageData} from './$types';
-  import {resolver} from '$lib/utilidades/resolver';
-  import type {SubmitFunction} from '@sveltejs/kit';
-  import {enhance} from '$app/forms';
+    import {cedulaMask, DataTable} from '$lib';
+    import {imask} from '@imask/svelte';
+    import {Button, Input, Label, Modal, Select, Spinner, TableSearch} from 'flowbite-svelte';
+    import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
+    import type {Usuario} from '../../../../app';
+    import type {ActionData, PageData} from './$types';
+    import {resolver} from '$lib/utilidades/resolver';
+    import type {SubmitFunction} from '@sveltejs/kit';
+    import {enhance} from '$app/forms';
 
-  // Datos de la página
-  let {data}: { data: PageData; form: ActionData } = $props<{
-    data: PageData;
-    form: ActionData;
-  }>();
+    // Datos de la página
+    let {data}: { data: PageData; form: ActionData } = $props<{
+        data: PageData;
+        form: ActionData;
+    }>();
 
-  // Estado para el modal
-  let modalVisible = $state(false);
-  let descargando = $state(false);
+    // Estado para el modal
+    let modalVisible = $state(false);
+    let descargando = $state(false);
     let cargando = $state(false);
-  let isEditing = $state(false);
-  let passwordVisible = $state(false);
-  let confirmPVisible = $state(false);
-  let searchTerm = $state('');
-  let formEl: HTMLFormElement | undefined = $state();
-  let usuarioActual: Partial<{
-    id: number;
-    cedula: string;
-    nombre: string;
-    correo: string;
-    rol: { id: number; nombre: string };
-  }> = $state({
-    cedula: '',
-    nombre: '',
-    correo: '',
-    rol: {id: 0, nombre: ''}
-  });
-  let password = $state('');
-  let confirmPassword = $state('');
+    let isEditing = $state(false);
+    let searchTerm = $state('');
+    let formEl: HTMLFormElement | undefined = $state();
+    let usuarioActual: Partial<{
+        id: number;
+        cedula: string;
+        nombre: string;
+        correo: string;
+        rol: { id: number; nombre: string };
+    }> = $state({
+        cedula: '',
+        nombre: '',
+        correo: '',
+        rol: {id: 0, nombre: ''}
+    });
 
-  $effect(() => {
-    if (!modalVisible) {
-      usuarioActual = {};
-    }
-  });
+    $effect(() => {
+        if (!modalVisible) {
+            usuarioActual = {};
+        }
+    });
 
-  $effect(() => {
-    if (data.usuarios) {
-      usuariosFiltrados =
-        data?.usuarios.filter(
-          (est) =>
-            est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
-        ) ?? [];
-    }
-  });
+    $effect(() => {
+        if (data.usuarios) {
+            usuariosFiltrados =
+                data?.usuarios.filter(
+                    (est) =>
+                        est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
+                ) ?? [];
+        }
+    });
 
-  let isConfirmed = $derived(password === confirmPassword);
-  let usuarios: Usuario[] = $state(data.usuarios);
-  let usuariosFiltrados = $derived(
-    usuarios.filter(
-      (est) =>
-        est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) ?? []
-  );
+    let usuarios: Usuario[] = $state(data.usuarios);
+    let usuariosFiltrados = $derived(
+        usuarios.filter(
+            (est) =>
+                est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ?? []
+    );
 
-  // Función para abrir el modal en modo edición
-  function editarUsuario(usuario: any) {
-    usuarioActual = {...usuario};
-    console.log('usuarioActual', usuarioActual);
-    isEditing = true;
-    modalVisible = true;
-  }
-
-  // Función para abrir el modal en modo creación
-  function crearUsuario() {
-    isEditing = false;
-    modalVisible = true;
-  }
-
-  const handleSubmit: SubmitFunction = () => {
-    return resolver(() => modalVisible = false);
-  };
-
-  const downloadSubmit: SubmitFunction = () => {
-    if (descargando) {
-      return;
+    // Función para abrir el modal en modo edición
+    function editarUsuario(usuario: any) {
+        usuarioActual = {...usuario};
+        console.log('usuarioActual', usuarioActual);
+        isEditing = true;
+        modalVisible = true;
     }
 
-    descargando = true;
-    return resolver(() => descargando = false);
-  };
+    // Función para abrir el modal en modo creación
+    function crearUsuario() {
+        isEditing = false;
+        modalVisible = true;
+    }
+
+    const handleSubmit: SubmitFunction = () => {
+        return resolver(() => modalVisible = false);
+    };
+
+    const downloadSubmit: SubmitFunction = () => {
+        if (descargando) {
+            return;
+        }
+
+        descargando = true;
+        return resolver(() => descargando = false);
+    };
 </script>
 
 <div class="w-full">
@@ -134,7 +129,8 @@
                         class="hidden"
                         onchange={() => document.getElementById('uploadForm')?.requestSubmit()}
                 />
-                <Button type="button" color="emerald" onclick={() => document.getElementById('uploadInput')?.click()} class="flex items-center space-x-3">
+                <Button type="button" color="emerald" onclick={() => document.getElementById('uploadInput')?.click()}
+                        class="flex items-center space-x-3">
                     {#if cargando}
                         <Spinner color="primary" class="h-5 w-5"/>
                     {:else}
@@ -225,74 +221,9 @@
 						]}
                     />
                 </div>
-                {#if !isEditing}
-                    <div class="md:col-span-2">
-                        <Label for="password" class="mb-2">Contraseña</Label>
-                        <Input
-                                id="password"
-                                bind:value={password}
-                                type={passwordVisible ? 'text' : 'password'}
-                                name="password"
-                                color={confirmPassword.length !== 0 && !isConfirmed
-								? 'red'
-								: confirmPassword.length === 0
-									? 'base'
-									: 'green'}
-                                required
-                        >
-                            <Button
-                                    slot="right"
-                                    type="button"
-                                    outline
-                                    size="xs"
-                                    class="!p-2"
-                                    onclick={() => (passwordVisible = !passwordVisible)}
-                            >
-                                {#if passwordVisible}
-                                    <EyeSlashSolid/>
-                                {:else}
-                                    <EyeSolid/>
-                                {/if}
-                            </Button>
-                        </Input>
-                    </div>
-                    <div class="md:col-span-2">
-                        <Label for="password" class="mb-2">Confirmar contraseña</Label>
-                        <Input
-                                id="password"
-                                bind:value={confirmPassword}
-                                type={confirmPVisible ? 'text' : 'password'}
-                                name=""
-                                required
-                                color={confirmPassword.length !== 0 && !isConfirmed
-								? 'red'
-								: confirmPassword.length === 0
-									? 'base'
-									: 'green'}
-                        >
-                            <Button
-                                    slot="right"
-                                    type="button"
-                                    outline
-                                    size="xs"
-                                    class="!p-2"
-                                    onclick={() => (confirmPVisible = !confirmPVisible)}
-                            >
-                                {#if confirmPVisible}
-                                    <EyeSlashSolid/>
-                                {:else}
-                                    <EyeSolid/>
-                                {/if}
-                            </Button>
-                        </Input>
-                        {#if confirmPassword.length !== 0 && !isConfirmed}
-                            <Helper class="mt-2" color="red">Las contraseñas deben ser iguales</Helper>
-                        {/if}
-                    </div>
-                {/if}
             </div>
             {#snippet footer()}
-                <Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
+                <Button color="blue" type="button" onclick={() => formEl?.requestSubmit()}>
                     {isEditing ? 'Actualizar' : 'Guardar'}
                 </Button>
                 <Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>

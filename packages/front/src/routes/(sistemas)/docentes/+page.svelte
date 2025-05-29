@@ -1,41 +1,16 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
-	import { imask } from '@imask/svelte';
-	import {
-		Alert,
-		Button,
-		Checkbox,
-		Helper,
-		Input,
-		Label,
-		Modal,
-		Select,
-		TableSearch,
-		Textarea
-	} from 'flowbite-svelte';
-	import {
-		CheckCircleOutline,
-		ExclamationCircleOutline,
-		EyeSlashSolid,
-		EyeSolid,
-		PenOutline,
-		PlusOutline,
-		TrashBinOutline
-	} from 'flowbite-svelte-icons';
-	import type { Docente } from '../../../../app';
-	import type { ActionData, PageData } from './$types';
+	import {cedulaMask, DataTable, Datepicker} from '$lib';
+	import {imask} from '@imask/svelte';
+	import {Button, Input, Label, Modal, TableSearch} from 'flowbite-svelte';
+	import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
+	import type {Docente} from '../../../../app';
 
 	// Datos de la página
-	let { data, form }: { data: PageData; form: ActionData } = $props<{
-		data: PageData;
-		form: ActionData;
-	}>();
+	let { data } = $props();
 
 	// Estado para el modal
 	let modalVisible = $state(false);
 	let isEditing = $state(false);
-	let passwordVisible = $state(false);
-	let confirmPVisible = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
 	let docenteActual: Partial<{
@@ -43,10 +18,7 @@
 		cedula: string;
 		nombre: string;
 		correo: string;
-		estatus: string;
 		fecha_ingreso: Date | string;
-		observaciones: string;
-		dedicacion: string;
 		titulo: string;
 		especialidad: string;
 		usuario: number;
@@ -62,33 +34,7 @@
 		sexo: 'M',
 		fecha_ingreso: new Date()
 	});
-	let showAlert = $state(false);
-	let alertMessage = $state('');
-	let password = $state('');
-	let confirmPassword = $state('');
-	let alertType: 'success' | 'error' = $state('success');
 
-	// Función para mostrar alerta
-	function mostrarAlerta(mensaje: string, tipo: 'success' | 'error') {
-		alertMessage = mensaje;
-		alertType = tipo;
-		showAlert = true;
-		setTimeout(() => {
-			showAlert = false;
-		}, 5000);
-	}
-
-	// Procesar respuesta del formulario
-	$effect(() => {
-		if (form) {
-			console.log('form', form);
-			if ((form as any).success) {
-				modalVisible = false;
-				mostrarAlerta((form as any).message, 'success');
-			} else if (form.errores) {
-			}
-		}
-	});
 
 	$effect(() => {
 		if (!modalVisible) {
@@ -109,7 +55,6 @@
 		}
 	});
 
-	let isConfirmed = $derived(password === confirmPassword);
 	let docentes: Docente[] = $state(data.docentes);
 	let docentesFiltrados = $derived(
 		docentes.filter(
@@ -144,26 +89,6 @@
 			Registrar
 		</Button>
 	</div>
-
-	<!-- Alertas -->
-	{#if showAlert}
-		<Alert
-			color={alertType === 'success' ? 'green' : 'red'}
-			dismissable
-			bind:open={showAlert}
-			class="mb-4"
-		>
-			<svelte:fragment slot="icon">
-				{#if alertType === 'success'}
-					<CheckCircleOutline class="h-5 w-5" />
-				{:else}
-					<ExclamationCircleOutline class="h-5 w-5" />
-				{/if}
-			</svelte:fragment>
-			{alertMessage}
-		</Alert>
-	{/if}
-
 	<div class="mb-4">
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
 	</div>
@@ -205,12 +130,8 @@
 						required
 						use:imask={cedulaMask as any}
 						class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-						color={form?.errores?.cedula ? 'red' : undefined}
 					/>
 
-					{#if form?.errores?.cedula}
-						<Helper class="mt-2" color="red">{form?.errores.cedula}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="nombre" class="mb-2">Nombre Completo</Label>
@@ -220,11 +141,7 @@
 						placeholder="Ingrese el nombre completo"
 						value={docenteActual!.nombre}
 						required
-						color={form?.errores?.nombre ? 'red' : undefined}
 					/>
-					{#if form?.errores?.nombre}
-						<Helper class="mt-2" color="red">{form?.errores.nombre}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="correo" class="mb-2">Correo Electrónico</Label>
@@ -235,77 +152,8 @@
 						placeholder="correo@ejemplo.com"
 						value={docenteActual?.correo}
 						required
-						color={form?.errores?.correo ? 'red' : undefined}
 					/>
-					{#if form?.errores?.correo}
-						<Helper class="mt-2" color="red">{form?.errores.correo}</Helper>
-					{/if}
 				</div>
-				{#if !isEditing}
-					<div class="md:col-span-3">
-						<Label for="password" class="mb-2">Contraseña</Label>
-						<Input
-							id="password"
-							bind:value={password}
-							type={passwordVisible ? 'text' : 'password'}
-							name="password"
-							color={confirmPassword.length !== 0 && !isConfirmed
-								? 'red'
-								: confirmPassword.length === 0
-									? 'base'
-									: 'green'}
-							required
-						>
-							<Button
-								slot="right"
-								type="button"
-								outline
-								size="xs"
-								class="!p-2"
-								onclick={() => (passwordVisible = !passwordVisible)}
-							>
-								{#if passwordVisible}
-									<EyeSlashSolid />
-								{:else}
-									<EyeSolid />
-								{/if}
-							</Button>
-						</Input>
-					</div>
-					<div class="md:col-span-3">
-						<Label for="password" class="mb-2">Confirmar contraseña</Label>
-						<Input
-							id="password"
-							bind:value={confirmPassword}
-							type={confirmPVisible ? 'text' : 'password'}
-							name=""
-							required
-							color={confirmPassword.length !== 0 && !isConfirmed
-								? 'red'
-								: confirmPassword.length === 0
-									? 'base'
-									: 'green'}
-						>
-							<Button
-								slot="right"
-								type="button"
-								outline
-								size="xs"
-								class="!p-2"
-								onclick={() => (confirmPVisible = !confirmPVisible)}
-							>
-								{#if confirmPVisible}
-									<EyeSlashSolid />
-								{:else}
-									<EyeSolid />
-								{/if}
-							</Button>
-						</Input>
-						{#if confirmPassword.length !== 0 && !isConfirmed}
-							<Helper class="mt-2" color="red">Las contraseñas deben ser iguales</Helper>
-						{/if}
-					</div>
-				{/if}
 				<div class="md:col-span-2">
 					<Label for="titulo" class="mb-2">Titulo</Label>
 					<Input
@@ -314,11 +162,7 @@
 						placeholder="Ingrese el titulo"
 						value={docenteActual!.titulo}
 						required
-						color={form?.errores?.titulo ? 'red' : undefined}
 					/>
-					{#if form?.errores?.titulo}
-						<Helper class="mt-2" color="red">{form?.errores.titulo}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="especialidad" class="mb-2">Especialidad</Label>
@@ -328,46 +172,7 @@
 						placeholder="Ingrese la especialidad"
 						value={docenteActual!.nombre}
 						required
-						color={form?.errores?.nombre ? 'red' : undefined}
 					/>
-					{#if form?.errores?.especialidad}
-						<Helper class="mt-2" color="red">{form?.errores.especialidad}</Helper>
-					{/if}
-				</div>
-				<div class="md:col-span-2">
-					<Label for="dedicacion" class="mb-2">Dedicacion</Label>
-					<Input
-						id="dedicacion"
-						name="dedicacion"
-						placeholder="Ingrese la dedicacion"
-						value={docenteActual!.dedicacion}
-						required
-						color={form?.errores?.dedicacion ? 'red' : undefined}
-					/>
-					{#if form?.errores?.dedicacion}
-						<Helper class="mt-2" color="red">{form?.errores.dedicacion}</Helper>
-					{/if}
-				</div>
-				<div class="md:col-span-2">
-					<Label for="estatus" class="mb-2">Estatus</Label>
-					<Select
-						id="estatus"
-						name="estatus"
-						value={docenteActual?.estatus}
-						required
-						color={form?.errores?.estatus ? 'red' : undefined}
-						items={[
-							{ value: 'activo', name: 'Activo' },
-							{ value: 'inactivo', name: 'Inactivo' },
-							{ value: 'suspendido', name: 'Suspendido' },
-							{ value: 'retirado', name: 'Retirado' },
-							{ value: 'expulsado', name: 'Expulsado' },
-							{ value: 'de permiso', name: 'De permiso' }
-						]}
-					/>
-					{#if form?.errores?.estatus}
-						<Helper class="mt-2" color="red">{form?.errores.estatus}</Helper>
-					{/if}
 				</div>
 				<div class="md:col-span-2">
 					<Label for="fecha_ingreso" class="mb-2">Fecha e ingreso</Label>
@@ -378,24 +183,10 @@
 						bind:value={docenteActual.fecha_ingreso}
 					/>
 				</div>
-				<div class="md:col-span-2">
-					<Label for="observaciones" class="mb-2">Observaciones</Label>
-					<Textarea
-						id="observaciones"
-						name="observaciones"
-						placeholder="Ingrese la observación completa"
-						value={docenteActual?.observaciones}
-						rows={1}
-						color={form?.errores?.observaciones ? 'red' : undefined}
-					/>
-					{#if form?.errores?.observaciones}
-						<Helper class="mt-2" color="red">{form?.errores.observaciones}</Helper>
-					{/if}
-				</div>
 			</div>
 		</form>
 		<svelte:fragment slot="footer">
-			<Button color="blue" type="button" onclick={() => isConfirmed && formEl.requestSubmit()}>
+			<Button color="blue" type="button" onclick={() => formEl.requestSubmit()}>
 				{isEditing ? 'Actualizar' : 'Guardar'}
 			</Button>
 			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>

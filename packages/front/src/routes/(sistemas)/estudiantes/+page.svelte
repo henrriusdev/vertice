@@ -1,45 +1,19 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
-	import { imask } from '@imask/svelte';
-	import {
-		Alert,
-		Button,
-		Checkbox,
-		Helper,
-		Input,
-		Label,
-		Modal,
-		Select,
-		TableSearch,
-		Textarea
-	} from 'flowbite-svelte';
-	import {
-		CheckCircleOutline,
-		ExclamationCircleOutline,
-		EyeOutline,
-		EyeSlashSolid,
-		EyeSolid,
-		PenOutline,
-		PlusOutline,
-		TrashBinOutline
-	} from 'flowbite-svelte-icons';
-	import type { Estudiante } from '../../../app';
-	import type { ActionData, PageData } from './$types';
-	import { resolver } from '$lib/utilidades/resolver';
-	import type { SubmitFunction } from '@sveltejs/kit';
-	import { enhance } from '$app/forms';
+	import {cedulaMask, DataTable, Datepicker, maxYearDate, nota} from '$lib';
+	import {imask} from '@imask/svelte';
+	import {Button, Checkbox, Input, Label, Modal, Select, TableSearch, Textarea} from 'flowbite-svelte';
+	import {EyeOutline, PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
+	import type {Estudiante} from '../../../app';
+	import {resolver} from '$lib/utilidades/resolver';
+	import type {SubmitFunction} from '@sveltejs/kit';
+	import {enhance} from '$app/forms';
 
 	// Datos de la página
-	let { data, form }: { data: PageData; form: ActionData } = $props<{
-		data: PageData;
-		form: ActionData;
-	}>();
+	let { data } = $props();
 
 	// Estado para el modal
 	let modalVisible = $state(false);
 	let isEditing = $state(false);
-	let passwordVisible = $state(false);
-	let confirmPVisible = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
 	let estudianteActual: Partial<{
@@ -69,32 +43,6 @@
 			fecha_nac: maxYearDate(),
 			sexo: 'M'
 		});
-	let showAlert = $state(false);
-	let alertMessage = $state('');
-	let password = $state('');
-	let confirmPassword = $state('');
-	let alertType: 'success' | 'error' = $state('success');
-
-	// Función para mostrar alerta
-	function mostrarAlerta(mensaje: string, tipo: 'success' | 'error') {
-		alertMessage = mensaje;
-		alertType = tipo;
-		showAlert = true;
-		setTimeout(() => {
-			showAlert = false;
-		}, 5000);
-	}
-
-	// Procesar respuesta del formulario
-	$effect(() => {
-		if (form) {
-			if ((form as any).success) {
-				modalVisible = false;
-				mostrarAlerta((form as any).message, 'success');
-			} else if (form.errores) {
-			}
-		}
-	});
 
 	$effect(() => {
 		if (!modalVisible) {
@@ -115,7 +63,6 @@
 		}
 	});
 
-	let isConfirmed = $derived(password === confirmPassword);
 	let estudiantes: Estudiante[] = $state(data.estudiantes)
 	let estudiantesFiltrados = $derived(
 		estudiantes.filter(
@@ -186,25 +133,6 @@
 		</Button>
 		{/if}
 	</div>
-
-	<!-- Alertas -->
-	{#if showAlert}
-		<Alert
-			color={alertType === 'success' ? 'green' : 'red'}
-			dismissable
-			bind:open={showAlert}
-			class="mb-4"
-		>
-			<svelte:fragment slot="icon">
-				{#if alertType === 'success'}
-					<CheckCircleOutline class="h-5 w-5" />
-				{:else}
-					<ExclamationCircleOutline class="h-5 w-5" />
-				{/if}
-			</svelte:fragment>
-			{alertMessage}
-		</Alert>
-	{/if}
 
 	<div class="mb-4">
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
@@ -294,61 +222,6 @@
 						required
 					/>
 				</div>
-				{#if !isEditing}
-				<div class="md:col-span-2">
-					<Label for="password" class="mb-2">Contraseña</Label>
-					<Input
-						id="password"
-						bind:value={password}
-						type={passwordVisible ? 'text' : 'password'}
-						name="password"
-						required
-					>
-						<Button
-							slot="right"
-							type="button"
-							outline
-							size="xs"
-							class="!p-2"
-							onclick={() => (passwordVisible = !passwordVisible)}
-						>
-							{#if passwordVisible}
-								<EyeSlashSolid />
-							{:else}
-								<EyeSolid />
-							{/if}
-						</Button>
-					</Input>
-				</div>
-				<div class="md:col-span-2">
-					<Label for="password" class="mb-2">Confirmar contraseña</Label>
-					<Input
-						id="password"
-						bind:value={confirmPassword}
-						type={confirmPVisible ? 'text' : 'password'}
-						name=""
-						required
-					>
-						<Button
-							slot="right"
-							type="button"
-							outline
-							size="xs"
-							class="!p-2"
-							onclick={() => (confirmPVisible = !confirmPVisible)}
-						>
-							{#if confirmPVisible}
-								<EyeSlashSolid />
-							{:else}
-								<EyeSolid />
-							{/if}
-						</Button>
-					</Input>
-					{#if confirmPassword.length !== 0 && !isConfirmed}
-						<Helper class="mt-2" color="red">Las contraseñas deben ser iguales</Helper>
-					{/if}
-				</div>
-				{/if}
 				<div class="md:col-span-2">
 					<Label for="carrera" class="mb-2">Carrera</Label>
 					<Select
@@ -424,7 +297,7 @@
 			</div>
 		</form>
 		{#snippet footer()}
-			<Button color="blue" type="button" onclick={() => isConfirmed && formEl?.requestSubmit()}>
+			<Button color="blue" type="button" onclick={() => formEl?.requestSubmit()}>
 				{isEditing ? 'Actualizar' : 'Guardar'}
 			</Button>
 			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
