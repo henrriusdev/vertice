@@ -81,15 +81,6 @@ export type Materia = {
 	id_docente: number;
 };
 
-export type Matricula = {
-	id: number;
-	cod_materia: number | object;
-	cedula_estudiante: number | object;
-	notas: number[];
-	uc: number;
-	ciclo: string;
-};
-
 export type Metodo_pago = {
 	id: number;
 	nombre: string;
@@ -97,8 +88,8 @@ export type Metodo_pago = {
 
 export type Pago = {
 	id: number;
-	cedula_estudiante: number | object;
-	metodo_pago: number | object;
+	cedula_estudiante: number | Estudiante;
+	metodo_pago: Metodo_pago | number;
 	monto: number;
 	concepto: string;
 	fecha_pago: string;
@@ -117,13 +108,6 @@ export type Peticion = {
 	valor: number
 };
 
-export type SesionActiva = {
-	id: number;
-	usuario: number | object;
-	jti: string;
-	creado_en: string;
-};
-
 export type Trazabilidad = {
 	id: number;
 	accion: string;
@@ -140,9 +124,8 @@ export type Usuario = {
 	nombre: string;
 	correo: string;
 	activo: boolean;
-	ruta_foto?: string;
 	fecha_creacion: string;
-	ultima_sesion?: string;
+	cambiar_clave: boolean;
 	rol: { id: number; nombre: string };
 };
 

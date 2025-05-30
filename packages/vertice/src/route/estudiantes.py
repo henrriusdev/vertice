@@ -15,17 +15,13 @@ from src.service.estudiantes import (
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
+from src.middleware.sesion import unica_sesion_requerida
 
 est = Blueprint('students_blueprint', __name__)
 
-@est.after_request
-def after_request(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
-
-
 @est.route('/')
 @jwt_required()
+@unica_sesion_requerida
 async def list_students():
     claims = get_jwt()
     data = await get_students()
@@ -40,6 +36,7 @@ async def list_students():
 
 @est.route("/materias", methods=["GET"])
 @jwt_required()
+@unica_sesion_requerida
 async def listar_notas():
     correo = get_jwt_identity()
     claims = get_jwt()
@@ -60,6 +57,7 @@ async def listar_notas():
 
 @est.route("/historico", methods=["GET"])
 @jwt_required()
+@unica_sesion_requerida
 async def listar_historico():
     correo = get_jwt_identity()
     claims = get_jwt()
@@ -78,6 +76,7 @@ async def listar_historico():
 
 @est.route("/horario", methods=["GET"])
 @jwt_required()
+@unica_sesion_requerida
 async def listar_horario():
     correo = get_jwt_identity()
     claims = get_jwt()
@@ -97,6 +96,7 @@ async def listar_horario():
 
 @est.route('/<cedula>')
 @jwt_required()
+@unica_sesion_requerida
 async def one_student(cedula):
     claims = get_jwt()
     usuario = claims.get('nombre')
@@ -114,6 +114,7 @@ async def one_student(cedula):
 
 @est.route('/add', methods=["POST"])
 @jwt_required()
+@unica_sesion_requerida
 async def create_student():
     body = request.json
     claims = get_jwt()
@@ -130,6 +131,7 @@ async def create_student():
 
 @est.route('/update/<int:id_estudiante>', methods=["PUT"])
 @jwt_required()
+@unica_sesion_requerida
 async def patch_student(id_estudiante):
     body = request.json
     claims = get_jwt()
@@ -147,6 +149,7 @@ async def patch_student(id_estudiante):
 
 @est.route('/delete/<cedula>', methods=["DELETE"])
 @jwt_required()
+@unica_sesion_requerida
 async def remove_student(cedula):
     claims = get_jwt()
     eliminado = await delete_student(cedula)
@@ -163,6 +166,7 @@ async def remove_student(cedula):
 
 @est.route("/add-materia", methods=["POST"])
 @jwt_required()
+@unica_sesion_requerida
 async def inscribir_materia():
     correo = get_jwt_identity()
     claims = get_jwt()

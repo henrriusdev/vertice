@@ -42,9 +42,7 @@ export async function refresh(fetch: typeof window.fetch, token: string): Promis
 	if (!res.ok) throw new Error('Token inválido');
 
 	const json = await res.json();
-	const usuario = json.data as Usuario;
-	usuario.rol = typeof usuario.rol === 'object' ? usuario.rol : usuario.rol;
-	return usuario;
+	return json.data as Usuario;
 }
 
 export async function logout(fetch: typeof window.fetch, token: string): Promise<boolean> {
@@ -135,4 +133,24 @@ export async function obtenerUsuario(fetch: typeof window.fetch, cedula: string)
 
 	const data = await res.json();
 	return data.data as Usuario;
+}
+
+export async function cambiarPassword(fetch: typeof window.fetch, newPassword: string) {
+	const response = await fetch(`${API}/force-password`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			new_password: newPassword
+		})
+	});
+
+	const result = await response.json();
+
+	if (!result.ok) {
+		throw new Error(result.data.message);
+	}
+
+	return result.data;
 }

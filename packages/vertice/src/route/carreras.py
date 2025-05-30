@@ -4,12 +4,14 @@ from flask_jwt_extended import jwt_required, get_jwt
 from src.service.carrera import get_carreras, get_carrera, add_carrera, update_carrera, delete_carrera
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
+from src.middleware.sesion import unica_sesion_requerida
 
 car = Blueprint("carrera_blueprint", __name__)
 
 
 @car.route('/')
 @jwt_required()
+@unica_sesion_requerida
 async def list_carreras():
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -20,6 +22,7 @@ async def list_carreras():
 
 @car.route('/<int:id>')
 @jwt_required()
+@unica_sesion_requerida
 async def get_one_carrera(id):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -30,6 +33,7 @@ async def get_one_carrera(id):
 
 @car.route('/add', methods=['POST'])
 @jwt_required()
+@unica_sesion_requerida
 async def add_new():
     payload = request.json
     claims = get_jwt()
@@ -41,6 +45,7 @@ async def add_new():
 
 @car.route('/update/<int:id>', methods=['PUT'])
 @jwt_required()
+@unica_sesion_requerida
 async def update_one(id: int):
     print(id)
     payload = request.json
@@ -53,6 +58,7 @@ async def update_one(id: int):
 
 @car.route('/delete/<int:id>', methods=['DELETE'])
 @jwt_required()
+@unica_sesion_requerida
 async def delete_one(id):
     claims = get_jwt()
     await delete_carrera(id)

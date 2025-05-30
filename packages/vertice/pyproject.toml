@@ -3,6 +3,7 @@ tortoise_orm = "src.settings.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
 
+
 [project]
 name = "vertice"
 version = "0.1.0"
@@ -81,3 +82,6 @@ dependencies = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

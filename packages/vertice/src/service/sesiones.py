@@ -3,20 +3,21 @@ from src.model.usuario import Usuario
 from datetime import datetime
 from tortoise.exceptions import DoesNotExist
 
-async def registrar_sesion(correo: str, jti: str):
-    return await SesionActiva.create(correo=correo, jti=jti, creado_en=datetime.now())
-
 async def eliminar_sesion(jti: str):
     return await SesionActiva.filter(jti=jti).delete()
+
 
 async def eliminar_sesiones_usuario(correo: str):
     return await SesionActiva.filter(correo=correo).delete()
 
+
 async def obtener_sesiones_usuario(correo: str):
     return await SesionActiva.filter(correo=correo).all()
 
+
 async def verificar_sesion_activa(jti: str):
     return await SesionActiva.filter(jti=jti).exists()
+
 
 async def registrar_sesion(correo: str, jti: str):
     try:

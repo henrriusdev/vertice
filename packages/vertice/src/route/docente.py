@@ -15,11 +15,13 @@ from src.service.docentes import (
 from src.service.materias import modificar_materia_estudiante
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
+from src.middleware.sesion import unica_sesion_requerida
 
 doc = Blueprint('docentes_blueprint', __name__)
 
 @doc.route('/')
 @jwt_required()
+@unica_sesion_requerida
 async def get_all_docentes():
     claims = get_jwt()
     await add_trazabilidad({
@@ -35,6 +37,7 @@ async def get_all_docentes():
 
 @doc.route('/<cedula>')
 @jwt_required()
+@unica_sesion_requerida
 async def get_one_docente(cedula: str):
     claims = get_jwt()
     docente = await get_docente(cedula)
@@ -52,6 +55,7 @@ async def get_one_docente(cedula: str):
 
 @doc.route('/peticiones/<cedula>')
 @jwt_required()
+@unica_sesion_requerida
 async def get_peticiones(cedula: str):
     claims = get_jwt()
     data = await get_peticiones_por_docente(cedula)
@@ -67,6 +71,7 @@ async def get_peticiones(cedula: str):
 
 @doc.route('/add', methods=["POST"])
 @jwt_required()
+@unica_sesion_requerida
 async def add_new_docente():
     claims = get_jwt()
     payload = request.json
@@ -83,6 +88,7 @@ async def add_new_docente():
 
 @doc.route('/update/<int:id_docente>', methods=["PUT"])
 @jwt_required()
+@unica_sesion_requerida
 async def update_one_docente(id_docente: int):
     claims = get_jwt()
     payload = request.json
@@ -99,6 +105,7 @@ async def update_one_docente(id_docente: int):
 
 @doc.route('/delete/<cedula>', methods=["DELETE"])
 @jwt_required()
+@unica_sesion_requerida
 async def delete_one_docente(cedula: str):
     claims = get_jwt()
     await delete_docente(cedula)
@@ -114,6 +121,7 @@ async def delete_one_docente(cedula: str):
 
 @doc.route("/upload", methods=["PATCH"])
 @jwt_required()
+@unica_sesion_requerida
 async def actualizar_nota_estudiante():
     body = request.json
     await modificar_materia_estudiante(
@@ -134,6 +142,7 @@ async def actualizar_nota_estudiante():
 
 @doc.route("/materias", methods=["GET"])
 @jwt_required()
+@unica_sesion_requerida
 async def materias_por_docente():
     try:
         email = get_jwt().get('sub')

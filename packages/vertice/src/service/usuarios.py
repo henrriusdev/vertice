@@ -1,7 +1,8 @@
-from src.model.usuario import Usuario
-from src.service.estudiantes import validar_pagos_estudiante
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from werkzeug.security import check_password_hash
+
+from src.model.usuario import Usuario
+
 
 async def login(correo: str, password: str):
     try:
@@ -34,7 +35,7 @@ async def get_usuarios():
 async def get_usuario(id: int):
     try:
         usuario = await Usuario.filter(id=id).first()
-        return usuario;
+        return usuario
     except Exception as ex:
         raise Exception(ex)
 

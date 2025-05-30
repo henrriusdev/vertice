@@ -6,11 +6,13 @@ from src.service.sesiones import (
     eliminar_sesion,
     eliminar_sesiones_usuario,
 )
+from src.middleware.sesion import unica_sesion_requerida
 
 ses = Blueprint("sesiones_bp", __name__)
 
 @ses.get("/")
 @jwt_required()
+@unica_sesion_requerida
 async def listar_sesiones():
     correo = get_jwt_identity()
     sesiones = await obtener_sesiones_usuario(correo)
@@ -20,6 +22,7 @@ async def listar_sesiones():
 
 @ses.delete("/sesiones")
 @jwt_required()
+@unica_sesion_requerida
 async def cerrar_esta_sesion():
     jti = get_jwt().get("jti")
     await eliminar_sesion(jti)
@@ -28,6 +31,7 @@ async def cerrar_esta_sesion():
 
 @ses.delete("/sesiones/all")
 @jwt_required()
+@unica_sesion_requerida
 async def cerrar_todas_sesiones():
     correo = get_jwt_identity()
     await eliminar_sesiones_usuario(correo)

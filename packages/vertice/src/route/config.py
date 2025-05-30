@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 from src.service.configuracion import get_configuracion, add_configuracion, update_configuracion
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
+from src.middleware.sesion import unica_sesion_requerida
 
 cfg = Blueprint('config_blueprint', __name__)
 
@@ -24,6 +25,7 @@ async def get_one_config():
 
 @cfg.route('/add', methods=['POST'])
 @jwt_required()
+@unica_sesion_requerida
 async def add_config():
     try:
         usuario = await get_usuario_por_correo(get_jwt().get('sub'))
@@ -47,6 +49,7 @@ async def add_config():
 
 @cfg.route('/update', methods=['PUT'])
 @jwt_required()
+@unica_sesion_requerida
 async def update_config():
     try:
         usuario = await get_usuario_por_correo(get_jwt().get('sub'))

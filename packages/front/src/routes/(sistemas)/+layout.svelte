@@ -7,9 +7,12 @@
 		Breadcrumb,
 		BreadcrumbItem,
 		Button,
+		Drawer,
 		Dropdown,
 		DropdownDivider,
 		DropdownItem,
+		Input,
+		Label,
 		Navbar,
 		Sidebar,
 		SidebarGroup,
@@ -34,15 +37,66 @@
 		UsersOutline
 	} from 'flowbite-svelte-icons';
 	import type { LayoutData } from './$types';
+	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { resolver } from '$lib/utilidades/resolver';
 
 	// Obtener los datos del usuario desde los datos proporcionados por +layout.server.ts
 	let { data, children } = $props<{ data: LayoutData }>();
+	let cambiarClave = $state(!data.cambiarClave);
 
 	// Estado para controlar si el sidebar está abierto o cerrado
 	let sidebarOpen = $state(true);
 
 	// Estado para mostrar alertas
 	let userDropdownOpen = $state(false);
+
+	// Form state
+	let newPassword = $state('');
+	let confirmPassword = $state('');
+	let loading = $state(false);
+	let error = $state('');
+	let passwordErrors = $state<string[]>([]);
+
+	function validatePassword(password: string): string[] {
+		const errors: string[] = [];
+		
+		if (password.length < 6) {
+			errors.push('La contraseña debe tener al menos 6 caracteres');
+		}
+		if (!/[A-Z]/.test(password)) {
+			errors.push('Debe contener al menos una mayúscula');
+		}
+		if (!/[a-z]/.test(password)) {
+			errors.push('Debe contener al menos una minúscula');
+		}
+		if (!/\d/.test(password)) {
+			errors.push('Debe contener al menos un número');
+		}
+		
+		return errors;
+	}
+
+	const handleSubmit: SubmitFunction = async ({ cancel }) => {
+		error = '';
+		passwordErrors = [];
+
+		// Validar que las contraseñas coincidan
+		if (newPassword !== confirmPassword) {
+			error = 'Las contraseñas no coinciden';
+			return cancel();
+		}
+
+		// Validar requisitos de la contraseña
+		const errors = validatePassword(newPassword);
+		if (errors.length > 0) {
+			passwordErrors = errors;
+			return cancel();
+		}
+
+		loading = true;
+		return resolver(() => {loading = false; cambiarClave = false;});
+	}
 
 	// Función para alternar el estado del sidebar
 	function toggleSidebar() {
@@ -350,6 +404,68 @@
 
 		<!-- Main content - only this should scroll vertically -->
 		<main class="flex-1 overflow-y-auto p-6 w-full">
+			<Drawer
+				placement="right"
+				id="drawer-cambiar-clave"
+				bind:hidden={cambiarClave}
+                class="w-1/4"
+			>
+				<div class="flex h-full flex-col justify-between p-4">
+					<div>
+						<h5 class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
+							Cambiar Contraseña
+						</h5>
+						<form 
+							class="flex flex-col gap-4" 
+							use:enhance={handleSubmit}
+							action="/password"
+							method="POST"
+						>
+							<div>
+								<Label for="new-password" class="mb-2">Nueva Contraseña</Label>
+								<Input
+									id="new-password"
+									name="new_password"
+									type="password"
+									required
+									bind:value={newPassword}
+									placeholder="••••••••"
+									class={passwordErrors.length > 0 ? 'border-red-500' : ''}
+								/>
+								{#if passwordErrors.length > 0}
+									<ul class="mt-2 text-sm text-red-500">
+										{#each passwordErrors as error}
+											<li>• {error}</li>
+										{/each}
+									</ul>
+								{/if}
+							</div>
+							<div>
+								<Label for="confirm-password" class="mb-2">Confirmar Nueva Contraseña</Label>
+								<Input
+									id="confirm-password"
+									type="password"
+									required
+									bind:value={confirmPassword}
+									placeholder="••••••••"
+									class={error ? 'border-red-500' : ''}
+								/>
+								{#if error}
+									<p class="mt-2 text-sm text-red-500">{error}</p>
+								{/if}
+							</div>
+							<div class="flex justify-end gap-4">
+								<Button color="alternative" onclick={() => cambiarClave = false}>
+									Cancelar
+								</Button>
+								<Button type="submit" disabled={loading}>
+									{loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+								</Button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</Drawer>
 			{@render children()}
 		</main>
 	</div>

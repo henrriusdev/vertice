@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from src.database.db import init_db
 from src.settings import settings
-from asgiref.wsgi import WsgiToAsgi  # 👈 adaptador WSGI → ASGI
+from asgiref.wsgi import WsgiToAsgi
 
 from src.route import pagos, usuario, docente, carreras, materias, billete, coordinacion, peticiones, config, archivos, trazabilidad, sesiones, estudiantes
 

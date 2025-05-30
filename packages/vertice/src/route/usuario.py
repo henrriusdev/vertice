@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import create_access_token, decode_token, jwt_required, get_jwt_identity, get_jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from src.middleware.sesion import unica_sesion_requerida
 from src.model.usuario import Usuario
 from src.service.sesiones import eliminar_sesion_por_jti, registrar_sesion
 from src.service.trazabilidad import add_trazabilidad
@@ -44,11 +45,11 @@ async def login_usuario():
         await registrar_sesion(usuario.correo, jti)
 
         await add_trazabilidad({
-            "accion":f"Inicio de sesión del usuario: {usuario.correo}",
-            "usuario":usuario,
-            "fecha":datetime.now(),
-            "modulo":"Autenticación",
-            "nivel_alerta":1
+            "accion": f"Inicio de sesión del usuario: {usuario.correo}",
+            "usuario": usuario,
+            "fecha": datetime.now(),
+            "modulo": "Autenticación",
+            "nivel_alerta": 1
         })
 
         return jsonify({
@@ -63,10 +64,11 @@ async def login_usuario():
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
-    
+
 
 @usr.post('/logout')
 @jwt_required()
+@unica_sesion_requerida
 async def logout_usuario():
     try:
         jti = get_jwt().get("jti")
@@ -82,6 +84,7 @@ async def logout_usuario():
 
 @usr.get('/refresh')
 @jwt_required()
+@unica_sesion_requerida
 async def refresh_usuario():
     try:
         correo = get_jwt_identity()
@@ -93,11 +96,13 @@ async def refresh_usuario():
         return jsonify({"ok": True, "status": 200, "data": usuario.to_dict()})
 
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 
 @usr.patch('/update-password')
 @jwt_required()
+@unica_sesion_requerida
 async def update_usuario_password():
     try:
         claims = get_jwt()
@@ -116,11 +121,11 @@ async def update_usuario_password():
         await update_password(correo, hashed)
 
         await add_trazabilidad({
-            'accion':f"Actualizar contraseña del usuario: {nombre}",
-            'usuario':correo,
-            'fecha':datetime.now(),
-            'modulo':"Usuarios",
-            'nivel_alerta':2
+            'accion': f"Actualizar contraseña del usuario: {nombre}",
+            'usuario': correo,
+            'fecha': datetime.now(),
+            'modulo': "Usuarios",
+            'nivel_alerta': 2
         })
 
         return jsonify({"ok": True, "status": 200, "data": "Contraseña actualizada exitosamente"})
@@ -131,6 +136,7 @@ async def update_usuario_password():
 
 @usr.get('/')
 @jwt_required()
+@unica_sesion_requerida
 async def obtener_usuarios():
     try:
         usuarios = await get_usuarios()
@@ -138,6 +144,7 @@ async def obtener_usuarios():
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
 
 @usr.post('/register')
 async def registrar():
@@ -159,11 +166,11 @@ async def registrar():
         creado = await registrar_usuario(usuario)
 
         await add_trazabilidad({
-            "accion":f"Registrar usuario: {usuario.correo}, nombre: {usuario.nombre}",
-            "usuario":usuario,
-            "fecha":datetime.now(),
-            "modulo":"Usuarios",
-            "nivel_alerta":2
+            "accion": f"Registrar usuario: {usuario.correo}, nombre: {usuario.nombre}",
+            "usuario": usuario,
+            "fecha": datetime.now(),
+            "modulo": "Usuarios",
+            "nivel_alerta": 2
         })
 
         return jsonify({"ok": True, "status": 200, "data": creado.to_dict()})
@@ -175,6 +182,7 @@ async def registrar():
 
 @usr.put('/update/<int:id>')
 @jwt_required()
+@unica_sesion_requerida
 async def update(id):
     try:
         payload = request.json
@@ -184,8 +192,10 @@ async def update(id):
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
+
 @usr.patch("/bloquear/<correo>")
 @jwt_required()
+@unica_sesion_requerida
 async def bloquear(correo):
     try:
         claims = get_jwt()
@@ -193,7 +203,8 @@ async def bloquear(correo):
 
         success = await bloquear_usuario(correo)
         if not success:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado o ya estaba inactivo"}}), 404
+            return jsonify(
+                {"ok": False, "status": 404, "data": {"message": "Usuario no encontrado o ya estaba inactivo"}}), 404
 
         return jsonify({"ok": True, "status": 200, "data": f"Usuario {correo} bloqueado correctamente"})
     except Exception as ex:
@@ -202,6 +213,7 @@ async def bloquear(correo):
 
 @usr.patch("/reactivar/<correo>")
 @jwt_required()
+@unica_sesion_requerida
 async def reactivar(correo):
     try:
         claims = get_jwt()
@@ -209,7 +221,8 @@ async def reactivar(correo):
 
         success = await reactivar_usuario(correo)
         if not success:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado o ya estaba activo"}}), 404
+            return jsonify(
+                {"ok": False, "status": 404, "data": {"message": "Usuario no encontrado o ya estaba activo"}}), 404
 
         return jsonify({"ok": True, "status": 200, "data": f"Usuario {correo} reactivado correctamente"})
     except Exception as ex:
@@ -218,9 +231,48 @@ async def reactivar(correo):
 
 @usr.delete('/delete/<cedula>')
 @jwt_required()
+@unica_sesion_requerida
 async def delete(cedula):
     try:
         await delete_usuario(cedula)
         return jsonify({"ok": True, "status": 200})
     except Exception as ex:
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@usr.patch('/force-password')
+@jwt_required()
+@unica_sesion_requerida
+async def force_password():
+    try:
+        claims = get_jwt()
+        correo = claims.get('sub')
+        
+        data = request.json
+        new_password = data.get('new_password')
+
+        if not new_password:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "Nueva contraseña es requerida"}}), 400
+
+        usuario = await get_usuario_por_correo(correo)
+        if not usuario:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
+
+        # Actualizar la contraseña
+        usuario.password = generate_password_hash(new_password, method="pbkdf2:sha256", salt_length=16)
+        usuario.cambiar_clave = False
+        await usuario.save()
+
+        await add_trazabilidad({
+            'accion': f"Actualización forzada de contraseña del usuario: {usuario.nombre}",
+            'usuario': usuario,
+            'fecha': datetime.now(),
+            'modulo': "Usuarios",
+            'nivel_alerta': 2
+        })
+
+        return jsonify({"ok": True, "status": 200, "data": "Contraseña actualizada exitosamente"})
+
+    except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
