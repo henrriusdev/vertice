@@ -93,7 +93,8 @@ export const actions = {
 				await recuperarContrasena(fetch, correo, newPassword);
 				return {
 					type: 'success',
-					message: 'Contraseña actualizada correctamente'
+					message: 'Contraseña actualizada correctamente',
+					location: '/'
 				};
 			} catch (e) {
 				return {

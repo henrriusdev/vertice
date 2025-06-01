@@ -49,13 +49,13 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const pregunta = data.get('pregunta') as string;
 		const respuesta = data.get('respuesta') as string;
-		const password = data.get('password') as string;
+		const password = data.get('currentPassword') as string;
 
 		if (!pregunta || !respuesta || !password) {
-			return fail(400, {
-				type: 'error',
+			return {
+				type: 'failure',
 				message: 'Todos los campos son requeridos'
-			});
+			}
 		}
 
 		try {
@@ -71,10 +71,10 @@ export const actions: Actions = {
 			};
 		} catch (e) {
 			console.error(e);
-			return fail(400, {
-				type: 'error',
+			return {
+				type: 'failure',
 				message: e instanceof Error ? e.message : 'Error al configurar la pregunta de seguridad'
-			});
+			};
 		}
 	}
 };

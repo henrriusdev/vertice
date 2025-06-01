@@ -351,12 +351,6 @@
 									Mi Perfil
 								</div>
 							</DropdownItem>
-							<DropdownItem href="/configuracion">
-								<div class="flex items-center">
-									<CogOutline class="w-5 h-5 mr-2" />
-									Configuración
-								</div>
-							</DropdownItem>
 							<DropdownDivider />
 							<DropdownItem onclick={cerrarSesion}>
 								<div class="flex items-center">

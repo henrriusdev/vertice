@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Alert, Button, Input, Label, StepIndicator } from 'flowbite-svelte';
@@ -9,6 +10,46 @@
 	let error = $state('');
 	let currentStep = $state(0);
 	let intentos = $state(0);
+	let passwordErrors = $state<string[]>([]);
+
+	function validatePassword(password: string): string[] {
+		const errors: string[] = [];
+		
+		if (password.length < 8) {
+			errors.push('La contraseña debe tener al menos 8 caracteres');
+		}
+		if (!/[A-Z]/.test(password)) {
+			errors.push('Debe contener al menos una mayúscula');
+		}
+		if (!/[a-z]/.test(password)) {
+			errors.push('Debe contener al menos una minúscula');
+		}
+		if (!/\d/.test(password)) {
+			errors.push('Debe contener al menos un número');
+		}
+		
+		return errors;
+	}
+
+	// Tipos para la respuesta del servidor
+	type SuccessResponse = {
+		type: 'success';
+		status: number;
+		data: {
+			pregunta?: string;
+			message?: string;
+		}
+	};
+
+	type FailureResponse = {
+		type: 'failure';
+		status: number;
+		data: {
+			message: string;
+		}
+	};
+
+	type ServerResponse = SuccessResponse | FailureResponse;
 
 	// Datos del formulario
 	let correo = $state('');
@@ -18,7 +59,11 @@
 	let confirmPassword = $state('');
 
 	// Validaciones
-	let isPasswordValid = $derived(newPassword.length >= 8 && newPassword === confirmPassword);
+	let isPasswordValid = $derived(
+		newPassword === confirmPassword && 
+		confirmPassword.length > 0 && 
+		validatePassword(newPassword).length === 0
+	);
 	let canSubmitEmail = $derived(correo.length > 0);
 	let canSubmitAnswer = $derived(respuesta.length > 0);
 	let canSubmitPassword = $derived(isPasswordValid);
@@ -28,26 +73,54 @@
 		if (!canSubmitEmail) return;
 		loading = true;
 
-		return resolver(() => {
+		return async ({ result }) => {
 			loading = false;
-		});
+			if (result?.type === 'success' && result.data) {
+				preguntaSeguridad = result.data.pregunta || '';
+				currentStep = 1;
+				error = '';
+			} else if (result?.type === 'failure' && result.data) {
+				error = result.data.message;
+			}
+		};
 	};
 
 	const handleAnswerSubmit: SubmitFunction = () => {
 		if (!canSubmitAnswer) return;
 		loading = true;
 
-		return resolver(() => {
+		return async ({ result }) => {
 			loading = false;
-		});
+			if (result?.type === 'success') {
+				currentStep = 2;
+				error = '';
+			} else if (result?.type === 'failure' && result.data) {
+				error = result.data.message;
+				intentos += 1;
+			}
+		};
 	};
 
-	const handlePasswordSubmit: SubmitFunction = () => {
+	const handlePasswordSubmit: SubmitFunction = async ({ cancel }) => {
 		if (!canSubmitPassword) return;
-		loading = true;
 
+		// Validar que las contraseñas coincidan
+		if (newPassword !== confirmPassword) {
+			error = 'Las contraseñas no coinciden';
+			return cancel();
+		}
+
+		// Validar requisitos de la contraseña
+		const errors = validatePassword(newPassword);
+		if (errors.length > 0) {
+			passwordErrors = errors;
+			return cancel();
+		}
+
+		loading = true;
 		return resolver(() => {
 			loading = false;
+			goto('/');
 		});
 	};
 </script>
@@ -127,8 +200,15 @@
 							name="newPassword"
 							bind:value={newPassword}
 							required
-							color={isPasswordValid ? 'green' : undefined}
+							color={passwordErrors.length === 0 && newPassword.length > 0 ? 'green' : undefined}
 						/>
+						{#if passwordErrors.length > 0}
+							<ul class="mt-2 text-sm text-red-500">
+								{#each passwordErrors as error}
+									<li>• {error}</li>
+								{/each}
+							</ul>
+						{/if}
 					</div>
 
 					<div>
@@ -139,8 +219,11 @@
 							name="confirmPassword"
 							bind:value={confirmPassword}
 							required
-							color={isPasswordValid ? 'green' : undefined}
+							color={newPassword === confirmPassword && confirmPassword.length > 0 ? 'green' : undefined}
 						/>
+						{#if confirmPassword.length > 0 && newPassword !== confirmPassword}
+							<p class="mt-2 text-sm text-red-500">Las contraseñas no coinciden</p>
+						{/if}
 					</div>
 
 					<div class="flex justify-between gap-4">
