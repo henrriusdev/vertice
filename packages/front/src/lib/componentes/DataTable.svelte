@@ -4,7 +4,7 @@
 	import type { Peticion } from '$lib/types';
 	import {
 		Label,
-		Pagination,
+		PaginationNav,
 		Select,
 		Table,
 		TableBody,
@@ -15,7 +15,7 @@
 		type LinkType,
 		type SelectOptionType
 	} from 'flowbite-svelte';
-	import { ChevronLeftOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
+	import { ArrowLeftOutline, ArrowRightOutline } from 'flowbite-svelte-icons';
 
 	let {
 		data = [],
@@ -42,34 +42,17 @@
 	const headers = $derived(
 		Object.keys(data[0] || {})
 			.filter(
-				(k) =>
-					![
-						'usuario',
-						'activo',
-						'ruta_foto',
-						'ultima_sesion',
-						'billetes',
-						'horarios',
-						'notas'
-					].includes(k)
+				(k) => k !== 'id' && !['usuario', 'activo', 'ultima_sesion', 'billetes', 'horarios', 'notas', 'cambiar_clave', 'pregunta_configurada'].includes(k)
 			)
-			// place ID first, nombre second, and then the rest
+			// place nombre first, and then the rest
 			.sort((a, b) =>
-				a === 'id' ? -1 : b === 'id' ? 1 : a === 'nombre' ? -1 : b === 'nombre' ? 1 : 0
+				a === 'nombre' ? -1 : b === 'nombre' ? 1 : 0
 			)
 	);
 	let start = $derived((currentPage - 1) * perPage + 1);
 	let end = $derived(Math.min(start + perPage - 1, total));
 	let paginated = $derived(data.slice(start - 1, end));
 	let totalPages = $derived(Math.ceil(total / perPage));
-
-	let pages: LinkType[] = $derived(
-		Array.from({ length: totalPages }, (_, i) => ({
-			name: String(i + 1),
-			href: `?page=${i + 1}&perPage=${perPage}`,
-			active: i + 1 === currentPage
-		}))
-	);
 
 	// navegación reactiva
 	function goTo(p: number) {
@@ -92,7 +75,8 @@
 </script>
 
 <div class="w-full">
-	<Table striped hoverable shadow>
+	<div class="overflow-x-auto">
+		<Table striped hoverable shadow>
 		<TableHead>
 			{#each headers as h}
 				{#if h.includes('id_')}
@@ -111,7 +95,7 @@
 			{/if}
 		</TableHead>
 
-		<TableBody tableBodyClass="divide-y">
+		<TableBody class="divide-y">
 			{#each paginated as row}
 				<TableBodyRow>
 					{#each headers.length ? headers : Object.keys(row) as h}
@@ -142,12 +126,13 @@
 			{/if}
 		</TableBody>
 	</Table>
+	</div>
 
 	<div class="flex items-center justify-between mt-4 flex-wrap gap-2">
 		<Label for="perPage" class="flex items-center">
 			Filas por página
 			<Select
-				on:change={changePerPage}
+				onchange={changePerPage}
 				bind:value={perPage}
 				items={pageOptions}
 				id="perPage"
@@ -159,20 +144,15 @@
 			Mostrando <b>{start}</b> - <b>{end}</b> de <b>{total}</b>
 		</span>
 
-		<Pagination
-			{pages}
-			onclick={(e) => goTo(Number(e.detail))}
-			on:previous={() => goTo(Math.max(1, currentPage - 1))}
-			on:next={() => goTo(Math.min(totalPages, currentPage + 1))}
-		>
-			<svelte:fragment slot="prev">
+		<PaginationNav {currentPage} {totalPages} onPageChange={goTo}>
+			{#snippet prevContent()}
 				<span class="sr-only">Anterior</span>
-				<ChevronLeftOutline class="w-2.5 h-2.5" />
-			</svelte:fragment>
-			<svelte:fragment slot="next">
+				<ArrowLeftOutline class="h-5 w-5" />
+			{/snippet}
+			{#snippet nextContent()}
 				<span class="sr-only">Siguiente</span>
-				<ChevronRightOutline class="w-2.5 h-2.5" />
-			</svelte:fragment>
-		</Pagination>
+				<ArrowRightOutline class="h-5 w-5" />
+			{/snippet}
+		</PaginationNav>
 	</div>
 </div>
