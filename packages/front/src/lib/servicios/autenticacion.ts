@@ -135,7 +135,28 @@ export async function obtenerUsuario(fetch: typeof window.fetch, cedula: string)
 	return data.data as Usuario;
 }
 
-export async function cambiarPassword(fetch: typeof window.fetch, newPassword: string) {
+export async function cambiarPassword(fetch: typeof window.fetch, currentPassword: string, newPassword: string) {
+	const response = await fetch(`${API}/change-password`, {
+		method: 'PATCH',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			current_password: currentPassword,
+			new_password: newPassword
+		})
+	});
+
+	const result = await response.json();
+
+	if (!result.ok) {
+		throw new Error(result.data.message);
+	}
+
+	return result.data;
+}
+
+export async function forzarCambioPassword(fetch: typeof window.fetch, newPassword: string) {
 	const response = await fetch(`${API}/force-password`, {
 		method: 'PATCH',
 		headers: {
