@@ -26,7 +26,7 @@ export type ErroresDocente = {
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const { rol } = await parent();
-	if (!['control', 'superusuario', 'coordinador'].includes(rol)) {
+	if (!['control', 'administrador', 'coordinador'].includes(rol)) {
 		redirect(302, '/' + rol);
 	}
 	try {
@@ -63,12 +63,9 @@ export const actions: Actions = {
 		try {
 			const { data }: { data: Usuario } = await crearUsuario(fetch, usuario);
 			usuario.id = data.id;
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al crear usuario:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 
 		const docente: DocenteReq = {
@@ -116,12 +113,9 @@ export const actions: Actions = {
 
 		try {
 			await actualizarUsuario(fetch, payload.id, usuario);
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al editar usuario:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 
 		const docente: DocenteReq = {
@@ -158,12 +152,9 @@ export const actions: Actions = {
 				message: 'Docente eliminado exitosamente',
 				invalidate: true
 			};
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al eliminar docente:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	}
 };

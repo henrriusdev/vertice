@@ -1,24 +1,19 @@
 <script lang="ts">
+	import type { Pago } from '$lib';
 	import DataTable from '$lib/componentes/DataTable.svelte';
 	import { Button, Modal } from 'flowbite-svelte';
 	import { EyeOutline } from 'flowbite-svelte-icons';
 	import type { PageData } from './$types';
-	import type { Pago } from '$lib';
 
 	let { data } = $props<{ data: PageData }>();
 	const { nombre, pagos } = data;
 
-  let selectedPago: Pago | null = $state(null);
+	let selectedPago: Pago | null = $state(null);
 	let open = $state(false);
 
 	function mostrarPago(pago: Pago) {
 		selectedPago = pago;
 		open = true;
-	}
-
-	function cerrarModal() {
-		open = false;
-		selectedPago = null;
 	}
 </script>
 
@@ -29,7 +24,7 @@
 {#if pagos.length > 0}
 	{#snippet actions(row: Pago)}
 		<div class="flex gap-2">
-			<Button pill size="xs" color="light" class="p-1!"  onclick={() => mostrarPago(row)}>
+			<Button pill size="xs" color="light" class="p-1!" onclick={() => mostrarPago(row)}>
 				<EyeOutline class="w-5 h-5" />
 			</Button>
 		</div>
@@ -40,9 +35,9 @@
 {/if}
 
 <Modal bind:open size="sm">
-	<div slot="header" class="text-lg font-semibold text-gray-900">
-		Información del Pago
-	</div>
+	{#snippet header()}
+		<div class="text-lg font-semibold text-gray-900">Información del Pago</div>
+	{/snippet}
 
 	{#if selectedPago}
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
@@ -59,7 +54,7 @@
 			</div>
 		</div>
 
-		{#if selectedPago.metodo === "Efectivo" && selectedPago.billetes}
+		{#if selectedPago.metodo === 'Efectivo' && selectedPago.billetes}
 			<div class="mt-4">
 				<h3 class="text-sm font-semibold mb-2">Billetes asociados</h3>
 				<ul class="list-disc list-inside text-sm">

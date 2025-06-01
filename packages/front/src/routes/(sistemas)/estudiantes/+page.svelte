@@ -1,12 +1,21 @@
 <script lang="ts">
-	import {cedulaMask, DataTable, Datepicker, maxYearDate, nota} from '$lib';
-	import {imask} from '@imask/svelte';
-	import {Button, Checkbox, Input, Label, Modal, Select, TableSearch, Textarea} from 'flowbite-svelte';
-	import {EyeOutline, PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
-	import type {Estudiante} from '../../../app';
-	import {resolver} from '$lib/utilidades/resolver';
-	import type {SubmitFunction} from '@sveltejs/kit';
-	import {enhance} from '$app/forms';
+	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
+	import { imask } from '@imask/svelte';
+	import {
+		Button,
+		Checkbox,
+		Input,
+		Label,
+		Modal,
+		Select,
+		TableSearch,
+		Textarea
+	} from 'flowbite-svelte';
+	import { EyeOutline, PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import type { Estudiante } from '../../../app';
+	import { resolver } from '$lib/utilidades/resolver';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
 
 	// Datos de la página
 	let { data } = $props();
@@ -17,32 +26,32 @@
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
 	let estudianteActual: Partial<{
-			id: number
-			cedula: string
-			nombre: string
-			correo: string
-			activo: boolean,
-			semestre: number,
-			carrera: number,
-			promedio: number,
-			direccion: string,
-			fecha_nac: Date | string,
-			sexo: 'M' | 'F' | '',
-			usuario?: {
-				id: number
-			}
-		}> = $state({
-			cedula: '',
-			nombre: '',
-			correo: '',
-			activo: true,
-			semestre: 1,
-			carrera: 1,
-			promedio: 0,
-			direccion: '',
-			fecha_nac: maxYearDate(),
-			sexo: 'M'
-		});
+		id: number;
+		cedula: string;
+		nombre: string;
+		correo: string;
+		activo: boolean;
+		semestre: number;
+		carrera: number;
+		promedio: number;
+		direccion: string;
+		fecha_nac: Date | string;
+		sexo: 'M' | 'F' | '';
+		usuario?: {
+			id: number;
+		};
+	}> = $state({
+		cedula: '',
+		nombre: '',
+		correo: '',
+		activo: true,
+		semestre: 1,
+		carrera: 1,
+		promedio: 0,
+		direccion: '',
+		fecha_nac: maxYearDate(),
+		sexo: 'M'
+	});
 
 	$effect(() => {
 		if (!modalVisible) {
@@ -63,7 +72,7 @@
 		}
 	});
 
-	let estudiantes: Estudiante[] = $state(data.estudiantes)
+	let estudiantes: Estudiante[] = $state(data.estudiantes);
 	let estudiantesFiltrados = $derived(
 		estudiantes.filter(
 			(est) =>
@@ -76,7 +85,12 @@
 
 	// Función para abrir el modal en modo edición
 	function editarEstudiante(estudiante: any) {
-		estudianteActual = { ...estudiante, carrera: data.carreras.find((car) => car.nombre === estudiante.carrera)?.id, fecha_nac: new Date(estudiante.fecha_nacimiento), fecha_nacimiento: undefined };
+		estudianteActual = {
+			...estudiante,
+			carrera: data.carreras.find((car) => car.nombre === estudiante.carrera)?.id,
+			fecha_nac: new Date(estudiante.fecha_nacimiento),
+			fecha_nacimiento: undefined
+		};
 		console.log('estudianteActual', estudianteActual);
 		isEditing = true;
 		modalVisible = true;
@@ -119,7 +133,7 @@
 	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac as string));
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(() => modalVisible = false);
+		return resolver(() => (modalVisible = false));
 	};
 </script>
 
@@ -127,10 +141,10 @@
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Estudiantes</h1>
 		{#if data.rol !== 'coordinador'}
-		<Button color="blue" onclick={crearEstudiante}>
-			<PlusOutline class="mr-2 h-5 w-5" />
-			Registrar
-		</Button>
+			<Button color="blue" onclick={crearEstudiante}>
+				<PlusOutline class="mr-2 h-5 w-5" />
+				Registrar
+			</Button>
 		{/if}
 	</div>
 
@@ -138,30 +152,26 @@
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
 	</div>
 
-	<div class="overflow-x-auto">
-		<div class="w-max min-w-full">
-			{#snippet actions(row: Estudiante)}
-				<div class="flex gap-2">
+	{#snippet actions(row: Estudiante)}
+	<div class="flex gap-2">
 		{#if data.rol !== 'coordinador'}
-					<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
-						<PenOutline class="w-5 h-5" />
-					</Button>
-					<form action="?/delete" method="POST">
-						<input type="hidden" name="cedula" value={row.cedula} />
-						<Button pill class="p-1.5!" size="xs" color="red" type="submit">
-							<TrashBinOutline class="w-5 h-5" />
-						</Button>
-					</form>
-					{:else}
-					<Button pill size="xs" color="light" class="p-1!" >
+			<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
+				<PenOutline class="w-5 h-5" />
+			</Button>
+			<form action="?/delete" method="POST">
+				<input type="hidden" name="cedula" value={row.cedula} />
+				<Button pill class="p-1.5!" size="xs" color="red" type="submit">
+					<TrashBinOutline class="w-5 h-5" />
+				</Button>
+			</form>
+		{:else}
+			<Button pill size="xs" color="light" class="p-1!">
 				<EyeOutline class="w-5 h-5" />
 			</Button>
-					{/if}
-				</div>
-			{/snippet}
-			<DataTable data={estudiantesFiltrados} {actions}></DataTable>
-		</div>
+		{/if}
 	</div>
+{/snippet}
+<DataTable data={estudiantesFiltrados} {actions}></DataTable>
 
 	<Modal
 		title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}
@@ -278,7 +288,7 @@
 					<Label for="edad" class="mb-2">Edad</Label>
 					<Input id="edad" name="edad" type="number" value={edad} readonly />
 				</div>
-				<div class={!isEditing ? "md:col-span-5" : "md:col-span-4 row-span-2"}>
+				<div class={!isEditing ? 'md:col-span-5' : 'md:col-span-4 row-span-2'}>
 					<Label for="direccion" class="mb-2">Dirección</Label>
 					<Textarea
 						id="direccion"

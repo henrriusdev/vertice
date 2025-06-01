@@ -10,10 +10,9 @@
 	import { slide } from 'svelte/transition';
 	import type { MateriaDisponible } from '../../../../app';
 	import type { PageData } from './$types';
-	import {GrillaHorario} from '$lib';
+	import { GrillaHorario } from '$lib';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
-
 
 	// Tipos
 	type HorarioMateria = {
@@ -94,11 +93,11 @@
 				editable: true
 			});
 		});
-		replaceMateriaColor()
+		replaceMateriaColor();
 		verificarConflictos();
 	}
 
-	function replaceMateriaColor(){
+	function replaceMateriaColor() {
 		for (let i = 0; i < materias.length; i++) {
 			let m = materias.find((mat) => mat.id === materias[i].id);
 			materias[i].color = m?.color;
@@ -154,7 +153,7 @@
 	}
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(() => isLoading = false);
+		return resolver(() => (isLoading = false));
 	};
 </script>
 
@@ -162,7 +161,7 @@
 <div class="container mx-auto p-4 bg-white">
 	<h1 class="text-2xl font-bold text-center mb-6">Horario de clases</h1>
 
-	<GrillaHorario {materias} docente={false}/>
+	<GrillaHorario {materias} docente={false} />
 
 	<!-- Botones -->
 	<div class="flex flex-wrap justify-center gap-4 mt-6">
@@ -177,14 +176,17 @@
 			<Button
 				type="submit"
 				color="green"
-				disabled={materias.some((m) => m.conflicto) || !data.inscripcionAbierta || materias.length === 0 || isLoading}
+				disabled={materias.some((m) => m.conflicto) ||
+					!data.inscripcionAbierta ||
+					materias.length === 0 ||
+					isLoading}
 			>
-			{#if isLoading}
-				<Spinner class="me-3" size="4" color="gray" />
-				Cargando ...
+				{#if isLoading}
+					<Spinner class="me-3" size="4" color="gray" />
+					Cargando ...
 				{:else}
-				<CalendarWeekOutline class="mr-2 h-5 w-5" />
-				Registrar Horario
+					<CalendarWeekOutline class="mr-2 h-5 w-5" />
+					Registrar Horario
 				{/if}
 			</Button>
 		</form>
@@ -192,7 +194,9 @@
 
 	<!-- Modal Seleccionar Materias -->
 	<Modal bind:open={openModal} size="xl" class="min-h-[500px]">
-		<div slot="header" class="text-lg font-semibold">Seleccionar Materias</div>
+		{#snippet header()}
+			<div class="text-lg font-semibold">Seleccionar Materias</div>
+		{/snippet}
 
 		<div class="p-4 flex flex-wrap justify-start gap-4">
 			{#each materiasDisponibles as materia}
@@ -220,11 +224,8 @@
 									onclick={() => quitarMateriaPorID(materia.id)}>Quitar</Button
 								>
 							{:else}
-								<Button
-									size="xs"
-									class="mt-2"
-									type="button"
-									onclick={() => agregarMateria(materia)}>Agregar</Button
+								<Button size="xs" class="mt-2" type="button" onclick={() => agregarMateria(materia)}
+									>Agregar</Button
 								>
 							{/if}
 						</div>
@@ -233,9 +234,11 @@
 			{/each}
 		</div>
 
-		<div slot="footer" class="flex justify-end p-4">
-			<Button color="alternative" onclick={() => (openModal = false)}>Cerrar</Button>
-		</div>
+		{#snippet footer()}
+			<div class="flex justify-end p-4">
+				<Button color="alternative" onclick={() => (openModal = false)}>Cerrar</Button>
+			</div>
+		{/snippet}
 	</Modal>
 </div>
 

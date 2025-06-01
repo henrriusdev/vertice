@@ -5,7 +5,7 @@ import type { Configuracion } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, locals: { usuario } }) => {
-	if (!['superusuario', 'coordinador'].includes(usuario!.rol.nombre)) {
+	if (!['administrador', 'coordinador'].includes(usuario!.rol.nombre)) {
 		throw redirect(302, '/' + usuario!.rol.nombre);
 	}
 	const configuracion = await obtenerConfiguracion(fetch);

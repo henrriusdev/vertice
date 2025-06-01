@@ -5,7 +5,6 @@ import {
 	obtenerMaterias,
 	obtenerCarreras,
 	obtenerDocentes,
-	addToast
 } from '$lib';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -13,7 +12,7 @@ import type { MateriaReq } from '$lib/types';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const { rol } = await parent();
-	if (!['control', 'superusuario', 'coordinador'].includes(rol)) {
+	if (!['control', 'administrador', 'coordinador'].includes(rol)) {
 		redirect(302, '/' + rol);
 	}
 
@@ -30,49 +29,48 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 };
 
 export const actions: Actions = {
-	// Acción para crear una materia
-	create: async ({ request, fetch }) => {
-		const form = await request.formData();
-		const payload = Object.fromEntries(form) as unknown as MateriaReq;
-
-		const errores = validarPayload(payload);
-		if (Object.keys(errores).length > 0) {
-			return {
-				type: 'failure',
-				message: 'Errores en los datos del formulario'
-			};
-		}
-
-		const horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
-			dia: string;
-			inicio: string;
-			fin: string;
-		}[];
-
-		payload.horarios = horarios;
-		payload.prelacion = payload?.prelacion ?? '';
-
+	async crear({ request, fetch }) {
 		try {
-			await crearMateria(fetch, payload);
-			return {
-				type: 'success',
-				message: 'Materia creada exitosamente',
-				invalidate: true
+			const data = await request.formData();
+			const materia: MateriaReq = {
+				id: data.get('id')?.toString() || '',
+				nombre: data.get('nombre')?.toString() || '',
+				prelacion: data.get('prelacion')?.toString() || '',
+				unidad_credito: Number(data.get('unidad_credito')),
+				hp: Number(data.get('hp')),
+				ht: Number(data.get('ht')),
+				semestre: Number(data.get('semestre')),
+				id_carrera: data.get('id_carrera')?.toString() || '',
+				horarios: JSON.parse(data.get('horarios')?.toString() || '[]'),
+				ciclo: data.get('ciclo')?.toString() || '',
+				modalidad: data.get('modalidad')?.toString() || '',
+				maximo: Number(data.get('maximo')),
+				id_docente: data.get('id_docente')?.toString() || ''
 			};
-		} catch (error: any) {
-			console.error('Error al crear materia:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			await crearMateria(materia, fetch);
+			return { success: true, invalidate: true };
+		} catch (error) {
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	},
 
 	// Acción para editar una materia
 	edit: async ({ request, fetch }) => {
 		const form = await request.formData();
-		const payload = Object.fromEntries(form) as unknown as MateriaReq & {
-			id: string;
+		const payload: MateriaReq & { id: string } = {
+			id: form.get('id')?.toString() as string,
+			nombre: form.get('nombre')?.toString() as string,
+			prelacion: form.get('prelacion')?.toString() as string,
+			unidad_credito: Number(form.get('unidad_credito')),
+			hp: Number(form.get('hp')),
+			ht: Number(form.get('ht')),
+			semestre: Number(form.get('semestre')),
+			id_carrera: form.get('carrera')?.toString() || '',
+			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
+			ciclo: form.get('ciclo')?.toString() as string,
+			modalidad: form.get('modalidad')?.toString() as string,
+			maximo: Number(form.get('maximo')),
+			id_docente: form.get('docente')?.toString() || ''
 		};
 
 		const errores = validarPayload(payload);
@@ -83,15 +81,6 @@ export const actions: Actions = {
 			};
 		}
 
-		const horarios = JSON.parse(form.getAll('horarios') as unknown as string) as unknown as {
-			dia: string;
-			inicio: string;
-			fin: string;
-		}[];
-
-		payload.horarios = horarios;
-		payload.prelacion = payload?.prelacion ?? '';
-
 		try {
 			await actualizarMateria(fetch, payload.id, payload);
 			return {
@@ -99,12 +88,9 @@ export const actions: Actions = {
 				message: 'Materia actualizada exitosamente',
 				invalidate: true
 			};
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al editar materia:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { type: 'failure', message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	},
 
@@ -120,12 +106,9 @@ export const actions: Actions = {
 				message: 'Materia eliminada exitosamente',
 				invalidate: true
 			};
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al eliminar materia:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { type: 'failure', message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	}
 };

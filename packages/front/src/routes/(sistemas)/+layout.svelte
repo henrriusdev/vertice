@@ -118,13 +118,13 @@
 			titulo: 'Docentes',
 			icono: UsersOutline,
 			href: '/docentes',
-			roles: ['superusuario', 'coordinador', 'control']
+			roles: ['administrador', 'coordinador', 'control']
 		},
 		{
 			titulo: 'Estudiantes',
 			icono: UsersGroupOutline,
 			href: '/estudiantes',
-			roles: ['superusuario', 'caja', 'coordinador']
+			roles: ['administrador', 'caja', 'coordinador']
 		},
 		{
 			titulo: 'Materias',
@@ -135,26 +135,26 @@
 		{
 			titulo: 'Usuarios',
 			icono: UsersOutline,
-			href: '/superusuario/usuarios',
-			roles: ['superusuario']
+			href: '/administrador/usuarios',
+			roles: ['administrador']
 		},
 		{
 			titulo: 'Coordinadores',
 			icono: UserHeadsetOutline,
-			href: '/superusuario/coordinadores',
-			roles: ['superusuario']
+			href: '/administrador/coordinadores',
+			roles: ['administrador']
 		},
 		{
 			titulo: 'Carreras',
 			icono: BuildingOutline,
-			href: '/superusuario/carreras',
-			roles: ['superusuario']
+			href: '/administrador/carreras',
+			roles: ['administrador']
 		},
 		{
 			titulo: 'Trazabilidad',
 			icono: BookOpenOutline,
-			href: '/superusuario/trazabilidad',
-			roles: ['superusuario']
+			href: '/administrador/trazabilidad',
+			roles: ['administrador']
 		},
 		{
 			titulo: 'Pagos',
@@ -166,7 +166,7 @@
 			titulo: 'Configuración',
 			icono: CogOutline,
 			href: '/configuracion',
-			roles: ['superusuario', 'coordinador']
+			roles: ['administrador', 'coordinador']
 		},
 		{
 			titulo: 'Horario',

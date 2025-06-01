@@ -23,15 +23,13 @@
 		return peticiones.filter((p) => {
 			const matchEstado =
 				estado === 'Todas' || p.peticion.estado?.toLowerCase() === estado.toLowerCase();
-			const matchDocente =
-				docente === undefined || docente === '' || p.docente.cedula === docente;
+			const matchDocente = docente === undefined || docente === '' || p.docente.cedula === docente;
 			const matchEstudiante =
 				estudiante === undefined || estudiante === '' || p.estudiante?.cedula === estudiante;
 
 			return matchEstado && matchDocente && matchEstudiante;
 		});
 	});
-
 
 	const buscarValores = (key: string, value: any) => {
 		switch (key) {
@@ -51,7 +49,7 @@
 <div class="container mx-auto">
 	<h2 class="md:text-2xl text-xl font-bold mb-6">Peticiones de cambio de notas</h2>
 	{#snippet actions(row: PeticionGet)}
-		{#if ['control', 'superusuario'].includes(data.rol) && row.peticion.estado === 'Pendiente'}
+		{#if ['control', 'administrador'].includes(data.rol) && row.peticion.estado === 'Pendiente'}
 			<div class="flex gap-2">
 				<form method="post" use:enhance={handleSubmit} action="?/aprobar">
 					<input type="hidden" name="id" value={row.peticion.id} />
@@ -75,11 +73,11 @@
 			<Select
 				bind:value={estado}
 				items={[
-				{ value: 'Todas', name: 'Todas' },
-				{value: 'Aprobado', name: 'Aprobadas'},
-				{value: 'Pendiente', name: 'Pendientes'},
-				{value: 'Denegado', name: 'Denegadas'},
-			]}
+					{ value: 'Todas', name: 'Todas' },
+					{ value: 'Aprobado', name: 'Aprobadas' },
+					{ value: 'Pendiente', name: 'Pendientes' },
+					{ value: 'Denegado', name: 'Denegadas' }
+				]}
 			/>
 		</div>
 		<div>
@@ -87,9 +85,9 @@
 			<Select
 				bind:value={docente}
 				items={[
-				{ value: '', name: 'Todos' },
-				...data.docentes.map((d) => ({ value: d.cedula, name: d.nombre }))
-			]}
+					{ value: '', name: 'Todos' },
+					...data.docentes.map((d) => ({ value: d.cedula, name: d.nombre }))
+				]}
 			/>
 		</div>
 		<div>
@@ -97,12 +95,11 @@
 			<Select
 				bind:value={estudiante}
 				items={[
-				{ value: '', name: 'Todos' },
-				...data.estudiantes.map((d) => ({ value: d.cedula, name: d?.nombre ?? '' }))
-			]}
+					{ value: '', name: 'Todos' },
+					...data.estudiantes.map((d) => ({ value: d.cedula, name: d?.nombre ?? '' }))
+				]}
 			/>
 		</div>
-
 	</div>
 
 	<DataTable data={peticionesFiltradas} {actions} onSearch={buscarValores} />

@@ -93,24 +93,20 @@
         <TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..."/>
     </div>
 
-    <div class="overflow-x-auto">
-        <div class="w-max min-w-full">
-            {#snippet actions(row: Docente)}
-                <div class="flex gap-2">
-                    <Button size="xs" color="light" onclick={() => editarDocente(row)}>
-                        <PenOutline class="w-4 h-4"/>
-                    </Button>
-                    <form action="?/delete" method="POST">
-                        <input type="hidden" name="cedula" value={row.cedula}/>
-                        <Button size="xs" color="red" type="submit">
-                            <TrashBinOutline class="w-4 h-4"/>
-                        </Button>
-                    </form>
-                </div>
-            {/snippet}
-            <DataTable data={docentesFiltrados} {actions}></DataTable>
-        </div>
+        {#snippet actions(row: Docente)}
+    <div class="flex gap-2">
+        <Button size="xs" color="light" onclick={() => editarDocente(row)}>
+            <PenOutline class="w-4 h-4"/>
+        </Button>
+        <form action="?/delete" method="POST">
+            <input type="hidden" name="cedula" value={row.cedula}/>
+            <Button size="xs" color="red" type="submit">
+                <TrashBinOutline class="w-4 h-4"/>
+            </Button>
+        </form>
     </div>
+{/snippet}
+<DataTable data={docentesFiltrados} {actions}></DataTable>
 
     <Modal title={isEditing ? 'Editar Docente' : 'Nuevo Docente'} bind:open={modalVisible} size="lg">
         <form action={isEditing ? '?/edit' : '?/create'} method="POST" bind:this={formEl}>

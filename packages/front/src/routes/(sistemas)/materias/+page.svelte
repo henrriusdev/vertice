@@ -11,7 +11,6 @@
 		PenOutline,
 		PlusOutline,
 		TrashBinOutline,
-
 		UsersGroupOutline
 	} from 'flowbite-svelte-icons';
 	import type { Horario, Materia } from '../../../app';
@@ -146,7 +145,7 @@
 	}
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(() => showModal = false);
+		return resolver(() => (showModal = false));
 	};
 </script>
 
@@ -194,17 +193,18 @@
 	<div>
 		<Label>Búsqueda o condición</Label>
 		<Input bind:value={searchTerm} placeholder="Nombre, código o expresión...">
-			<Button
-				slot="right"
-				color="primary"
-				size="xs"
-				title="Ayuda"
-				outline
-				class="p-1.5!"
-				onclick={() => (showAyuda = true)}
-			>
-				<InfoCircleOutline class="w-7 h-7" />
-			</Button>
+			{#snippet right()}
+				<Button
+					color="primary"
+					size="xs"
+					title="Ayuda"
+					outline
+					class="p-1.5!"
+					onclick={() => (showAyuda = true)}
+				>
+					<InfoCircleOutline class="w-7 h-7" />
+				</Button>
+			{/snippet}
 		</Input>
 	</div>
 </div>
@@ -212,19 +212,25 @@
 {#snippet action(row: Materia)}
 	<div class="flex justify-between items-center">
 		{#if data.rol.toLowerCase() === 'coordinador'}
-		<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
-			<PenOutline class="w-5 h-5" />
-		</Button>
-		<form action="?/delete" method="POST">
-			<input type="hidden" name="id" value={row.id} />
-			<Button pill class="p-1.5!" size="xs" color="red" type="submit">
-				<TrashBinOutline class="w-5 h-5" />
+			<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
+				<PenOutline class="w-5 h-5" />
 			</Button>
-		</form>
-		{:else if ['control','superusuario','superusuario'].includes(data.rol.toLowerCase())}
-			<Button pill class="p-1.5!" size="xs" color="primary" onclick={() => goto(`/materias/${row.id}`)}>
-			<UsersGroupOutline class="w-5 h-5" />
-		</Button>
+			<form action="?/delete" method="POST">
+				<input type="hidden" name="id" value={row.id} />
+				<Button pill class="p-1.5!" size="xs" color="red" type="submit">
+					<TrashBinOutline class="w-5 h-5" />
+				</Button>
+			</form>
+		{:else if ['control', 'superusuario', 'superusuario'].includes(data.rol.toLowerCase())}
+			<Button
+				pill
+				class="p-1.5!"
+				size="xs"
+				color="primary"
+				onclick={() => goto(`/materias/${row.id}`)}
+			>
+				<UsersGroupOutline class="w-5 h-5" />
+			</Button>
 		{/if}
 		<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
 			<EyeOutline class="w-5 h-5" />
@@ -236,7 +242,9 @@
 
 <!-- Modal de creación/edición -->
 <Modal bind:open={showModal} size="lg">
-	<div slot="header">{editMode ? 'Editar Materia' : 'Crear Materia'}</div>
+	{#snippet header()}
+		<div>{editMode ? 'Editar Materia' : 'Crear Materia'}</div>
+	{/snippet}
 	<form
 		method="POST"
 		use:enhance={handleSubmit}
@@ -357,15 +365,20 @@
 			<input type="hidden" name="horarios" value={JSON.stringify(form.horarios)} />
 		</div>
 	</form>
-	<div slot="footer">
-		<Button type="button" color="alternative" onclick={() => (showModal = false)}>Cancelar</Button>
-		<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
-			>{editMode ? 'Actualizar' : 'Guardar'}</Button
-		>
-	</div>
+	{#snippet footer()}
+		<div>
+			<Button type="button" color="alternative" onclick={() => (showModal = false)}>Cancelar</Button
+			>
+			<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
+				>{editMode ? 'Actualizar' : 'Guardar'}</Button
+			>
+		</div>
+	{/snippet}
 </Modal>
 <Modal bind:open={showHorario} size="md">
-	<h3 class="text-2xl font-bold" slot="header">Horario de la materia seleccionada</h3>
+	{#snippet header()}
+		<h3 class="text-2xl font-bold">Horario de la materia seleccionada</h3>
+	{/snippet}
 	<DataTable
 		data={horarios.map((h) => ({
 			dia: h.dia,
@@ -375,7 +388,9 @@
 	/>
 </Modal>
 <Modal bind:open={showAyuda} size="md">
-	<h3 slot="header" class="text-lg font-bold">Guía de expresiones</h3>
+	{#snippet header()}
+		<h3 class="text-lg font-bold">Guía de expresiones</h3>
+	{/snippet}
 	<ul class="list-disc list-inside space-y-1">
 		<li><code>ht &gt; 4</code> → Horas teóricas mayores a 4</li>
 		<li><code>hp &lt;= 5</code> → Horas prácticas menores o iguales a 5</li>
@@ -383,7 +398,9 @@
 		<li><code>semestre == 9</code> → Solo materias del 9° semestre</li>
 		<li><code>nombre == 'mate'</code> → Nombre contiene "mate"</li>
 	</ul>
-	<div slot="footer">
-		<Button onclick={() => (showAyuda = false)}>Cerrar</Button>
-	</div>
+	{#snippet footer()}
+		<div>
+			<Button onclick={() => (showAyuda = false)}>Cerrar</Button>
+		</div>
+	{/snippet}
 </Modal>

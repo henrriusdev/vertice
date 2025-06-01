@@ -55,10 +55,10 @@
 		};
 	};
 
-	const handleFileUpload: SubmitFunction = ({formData}) => {
-		formData.set("folder", data.materia.materia.id)
-		formData.set("ciclo", data.materia.ciclo)
-		formData.set("file", archivosDrop[0], archivosDrop[0].name)
+	const handleFileUpload: SubmitFunction = ({ formData }) => {
+		formData.set('folder', data.materia.materia.id);
+		formData.set('ciclo', data.materia.ciclo);
+		formData.set('file', archivosDrop[0], archivosDrop[0].name);
 		return async ({ update }) => {
 			await update();
 			dropVisible = false;
@@ -66,9 +66,8 @@
 	};
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(() => mostrarFormulario = false);
+		return resolver(() => (mostrarFormulario = false));
 	};
-
 
 	$effect(() => {
 		if (estudiantes.length) {
@@ -127,18 +126,14 @@
 			window.removeEventListener('drop', handleDrop);
 		};
 	});
-
 </script>
 
 <div class="container mx-auto p-4">
 	<div class="flex justify-between items-center mb-4">
-		<h1 class="text-3xl font-bold">Notas de estudiantes en <span class="text-blue-600">{data.materia.materia.nombre}</span></h1>
-		<form
-			method="POST"
-			action="?/notas"
-			use:enhance={handleSubmit}
-			class="space-y-6"
-		>
+		<h1 class="text-3xl font-bold">
+			Notas de estudiantes en <span class="text-blue-600">{data.materia.materia.nombre}</span>
+		</h1>
+		<form method="POST" action="?/notas" use:enhance={handleSubmit} class="space-y-6">
 			<Button color="primary" size="lg" class="w-full" type="submit">
 				<FileLinesOutline class="mr-2 h-5 w-5" />
 				Descargar Reporte
@@ -182,8 +177,7 @@
 		enctype="multipart/form-data"
 		class="hidden"
 		action="?/subir"
-	>
-	</form>
+	></form>
 
 	<Modal bind:open={dropVisible} size="lg">
 		<h3 class="text-2xl font-bold py-60 text-center">ARRASTRA AQUÍ</h3>
@@ -192,10 +186,11 @@
 	<DataTable data={estudiantes} {actions} />
 
 	<Modal bind:open={mostrarFormulario} size="md">
-		<h3 class="font-semibold mb-3 text-lg" slot="header">
-			Asignación de Notas {esPeticion ? '(Petición)' : ''}
-		</h3>
-
+		{#snippet header()}
+			<h3 class="font-semibold mb-3 text-lg">
+				Asignación de Notas {esPeticion ? '(Petición)' : ''}
+			</h3>
+		{/snippet}
 		<form
 			bind:this={form}
 			use:enhance={enviarCambioNotas}
@@ -209,18 +204,18 @@
 				bind:value={corte}
 				placeholder="Corte"
 				items={data.materia.materia.estudiantes[0].notas
-							.map((n, i) => ({
-								value: i + 1,
-								nota: n,
-								name: 'Nota ' + (i + 1)
-							}))
-							.filter((nota) =>
-								esPeticion
-									? nota.nota !== 0
-									: data.rol.toLowerCase() === 'docente'
-										? nota.nota === 0
-										: true
-							)}
+					.map((n, i) => ({
+						value: i + 1,
+						nota: n,
+						name: 'Nota ' + (i + 1)
+					}))
+					.filter((nota) =>
+						esPeticion
+							? nota.nota !== 0
+							: data.rol.toLowerCase() === 'docente'
+								? nota.nota === 0
+								: true
+					)}
 			></Select>
 
 			<input
@@ -238,15 +233,17 @@
 			{/if}
 		</form>
 
-		<div class="w-full flex justify-end items-center gap-2" slot="footer">
-			<Button color="red" onclick={() => (mostrarFormulario = false)}>Cancelar</Button>
-			<Button
-				onclick={() => {
-					if (corte && nota !== '') {
-						form?.requestSubmit();
-					}
-				}}>Editar</Button
-			>
-		</div>
+		{#snippet footer()}
+			<div class="w-full flex justify-end items-center gap-2">
+				<Button color="red" onclick={() => (mostrarFormulario = false)}>Cancelar</Button>
+				<Button
+					onclick={() => {
+						if (corte && nota !== '') {
+							form?.requestSubmit();
+						}
+					}}>Editar</Button
+				>
+			</div>
+		{/snippet}
 	</Modal>
 </div>

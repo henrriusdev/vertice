@@ -28,10 +28,9 @@ type ErroresEstudiante = {
 	activo?: string;
 };
 
-
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const { rol } = await parent();
-	if (!['caja', 'superusuario', 'coordinador'].includes(rol)) {
+	if (!['caja', 'administrador', 'coordinador'].includes(rol)) {
 		redirect(302, '/'+rol);
 	}
 	try {
@@ -53,7 +52,7 @@ export const actions: Actions = {
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, false);
 		if (Object.keys(errores).length > 0) {
 			return {
-				type: 'failure',
+				success: false,
 				message: 'Errores en los datos del formulario'
 			};
 		}
@@ -70,12 +69,9 @@ export const actions: Actions = {
 		try {
 			const { data }: { data: Usuario } = await crearUsuario(fetch, usuario);
 			usuario.id = data.id;
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al crear usuario:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 
 		const estudiante: EstudianteReq = {
@@ -92,16 +88,13 @@ export const actions: Actions = {
 		try {
 			await crearEstudiante(fetch, estudiante);
 			return {
-				type: 'success',
+				success: true,
 				message: 'Estudiante creado exitosamente',
 				invalidate: true
 			};
 		} catch (e: any) {
 			console.error('Error al crear estudiante:', e);
-			return {
-				type: 'failure',
-				message: e.message
-			};
+			return { success: false, message: e instanceof Error ? e.message : 'Error desconocido' };
 		}
 	},
 
@@ -112,7 +105,7 @@ export const actions: Actions = {
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, true);
 		if (Object.keys(errores).length > 0) {
 			return {
-				type: 'failure',
+				success: false,
 				message: 'Errores en los datos del formulario'
 			};
 		}
@@ -127,12 +120,9 @@ export const actions: Actions = {
 
 		try {
 			await actualizarUsuario(fetch, payload.id, usuario);
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al editar usuario:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 
 		const estudiante: EstudianteReq = {
@@ -149,16 +139,13 @@ export const actions: Actions = {
 		try {
 			await actualizarEstudiante(fetch, payload.id_estudiante, estudiante);
 			return {
-				type: 'success',
+				success: true,
 				message: 'Estudiante actualizado exitosamente',
 				invalidate: true
 			};
 		} catch (e: any) {
 			console.error('Error al actualizar estudiante:', e);
-			return {
-				type: 'failure',
-				message: e.message
-			};
+			return { success: false, message: e instanceof Error ? e.message : 'Error desconocido' };
 		}
 	},
 
@@ -169,16 +156,13 @@ export const actions: Actions = {
 		try {
 			await eliminarEstudiante(fetch, cedula);
 			return {
-				type: 'success',
+				success: true,
 				message: 'Estudiante eliminado exitosamente',
 				invalidate: true
 			};
-		} catch (error: any) {
+		} catch (error) {
 			console.error('Error al eliminar estudiante:', error);
-			return {
-				type: 'failure',
-				message: error.message
-			};
+			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	}
 };

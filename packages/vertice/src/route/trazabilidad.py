@@ -38,7 +38,7 @@ def superuser_required():
             except Exception:
                 return jsonify({"ok": False, "status": 401, "data": {"message": "Usuario no encontrado"}}), 401
 
-            if usuario.rol.nombre.lower() != "superusuario":
+            if usuario.rol.nombre.lower() != "administrador":
                 return jsonify({"ok": False, "status": 403, "data": {"message": "Acceso denegado"}}), 403
 
             return await fn(*args, **kwargs)
