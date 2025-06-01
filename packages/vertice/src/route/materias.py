@@ -15,6 +15,8 @@ from src.middleware.sesion import unica_sesion_requerida
 mat = Blueprint('materia_blueprint', __name__)
 
 @mat.route('/')
+@jwt_required()
+@unica_sesion_requerida
 async def listar_materias():
     usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     await add_trazabilidad({"accion": "Obtener todas las Materias", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
