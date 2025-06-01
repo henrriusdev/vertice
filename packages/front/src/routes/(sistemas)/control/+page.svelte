@@ -133,66 +133,8 @@
 			<Chart options={promediosOptions} />
 		</Card>
 
-		<!-- Últimas sesiones -->
-		<Card class="col-span-2 p-4 max-w-full">
-			<Heading tag="h3" class="mb-4">Actividad Reciente</Heading>
-			{#if data.sesiones?.length > 0}
-				<Table striped={true}>
-					<TableHead>
-						<TableHeadCell>Usuario</TableHeadCell>
-						<TableHeadCell>Fecha</TableHeadCell>
-						<TableHeadCell>Estado</TableHeadCell>
-					</TableHead>
-					<TableBody>
-						{#each data.sesiones as sesion}
-							<TableBodyRow>
-								<TableBodyCell>{sesion.usuario}</TableBodyCell>
-								<TableBodyCell>{sesion.fecha}</TableBodyCell>
-								<TableBodyCell>
-									<Badge color={sesion.estado === 'activa' ? 'green' : 'gray'}>
-										{sesion.estado}
-									</Badge>
-								</TableBodyCell>
-							</TableBodyRow>
-						{/each}
-					</TableBody>
-				</Table>
-			{:else}
-				<Alert color="blue">No hay sesiones registradas</Alert>
-			{/if}
-		</Card>
-
-		<!-- Últimos pagos -->
-		<Card class="col-span-2 p-4 max-w-full">
-			<Heading tag="h3" class="mb-4">Últimos Pagos</Heading>
-			{#if data.pagos?.length > 0}
-				<Table striped={true}>
-					<TableHead>
-						<TableHeadCell>Estudiante</TableHeadCell>
-						<TableHeadCell>Monto</TableHeadCell>
-						<TableHeadCell>Estado</TableHeadCell>
-					</TableHead>
-					<TableBody>
-						{#each data.pagos as pago}
-							<TableBodyRow>
-								<TableBodyCell>{pago.estudiante}</TableBodyCell>
-								<TableBodyCell>${pago.monto}</TableBodyCell>
-								<TableBodyCell>
-									<Badge color={pago.estado === 'aprobado' ? 'green' : 'yellow'}>
-										{pago.estado}
-									</Badge>
-								</TableBodyCell>
-							</TableBodyRow>
-						{/each}
-					</TableBody>
-				</Table>
-			{:else}
-				<Alert color="blue">No hay pagos registrados</Alert>
-			{/if}
-		</Card>
-
 		<!-- Peticiones pendientes -->
-		<Card class="col-span-2 p-4 max-w-full">
+		<Card class="col-span-6 p-4 max-w-full">
 			<Heading tag="h3" class="mb-4">Peticiones Pendientes</Heading>
 			{#if data.peticiones?.length > 0}
 				<Table striped={true}>

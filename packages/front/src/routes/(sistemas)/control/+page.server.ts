@@ -1,12 +1,10 @@
-import type { PageServerLoad } from './$types';
-import type { PageData } from './types';
-import { obtenerEstudiantes } from '$lib/servicios/estudiantes';
-import { obtenerDocentes } from '$lib/servicios/docentes';
-import { obtenerMaterias } from '$lib/servicios/materias';
 import { obtenerCarreras } from '$lib/servicios/carreras';
+import { obtenerDocentes } from '$lib/servicios/docentes';
+import { obtenerEstudiantes } from '$lib/servicios/estudiantes';
+import { obtenerMaterias } from '$lib/servicios/materias';
 import { obtenerPagosPorDia } from '$lib/servicios/pagos';
 import { obtenerPeticiones } from '$lib/servicios/peticiones';
-import { filtrarTrazabilidad } from '$lib/servicios/trazabilidad';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
     // Obtener datos para estadísticas
@@ -28,23 +26,18 @@ export const load = (async ({ fetch }) => {
     // Calcular distribución por carrera
     const distribucionCarreras = carreras.map(carrera => ({
         nombre: carrera.nombre,
-        estudiantes: estudiantes.filter(e => e.carrera.id === carrera.id).length
+        estudiantes: estudiantes.filter(e => e.carrera === carrera.nombre).length
     }));
 
     // Calcular promedios por carrera
     const promediosCarreras = carreras.map(carrera => {
-        const estudiantesCarrera = estudiantes.filter(e => e.carrera.id === carrera.id);
+        const estudiantesCarrera = estudiantes.filter(e => e.carrera === carrera.nombre);
         const promedio = estudiantesCarrera.reduce((acc, e) => acc + (e.promedio || 0), 0) / estudiantesCarrera.length;
         return {
             nombre: carrera.nombre,
             promedio: promedio || 0
         };
     });
-
-    // Obtener últimas sesiones (trazabilidad)
-    const sesiones = await filtrarTrazabilidad({
-        busqueda: 'sesion'
-    }, fetch);
 
     // Obtener últimos pagos
     const pagos = await obtenerPagosPorDia(fetch, 5);
@@ -56,20 +49,15 @@ export const load = (async ({ fetch }) => {
         estadisticas,
         distribucionCarreras,
         promediosCarreras,
-        sesiones: sesiones.slice(0, 5).map(s => ({
-            usuario: 'Usuario',
-            fecha: s.fecha,
-            estado: 'activa'
-        })),
         pagos: Object.entries(pagos).map(([fecha, monto]) => ({
             estudiante: fecha,
             monto: Number(monto),
             estado: 'aprobado' as const
         })).slice(0, 5),
-        peticiones: peticiones.slice(0, 5).map(p => ({
+        peticiones: peticiones.slice(0, 5).filter(p => p.peticion.estado === 'Pendiente').map(p => ({
             estudiante: p.estudiante.nombre,
             tipo: p.peticion.campo,
             estado: p.peticion.estado
         }))
-    } satisfies PageData;
+    };
 }) satisfies PageServerLoad;
