@@ -15,7 +15,7 @@ async def init_db():
     
     # Roles por defecto
     roles = [
-        "superusuario",
+        "administrador",
         "caja",
         "control",
         "coordinacion",
@@ -44,7 +44,7 @@ async def init_db():
 
     # Superusuario
     print("Creando superusuario...")
-    rol_super = await Rol.get(nombre="superusuario")
+    rol_super = await Rol.get(nombre="administrador")
     obj, created = await Usuario.get_or_create(
         correo="admin@admin.com",  # clave única real
         defaults={
