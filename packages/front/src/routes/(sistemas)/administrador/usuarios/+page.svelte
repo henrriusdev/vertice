@@ -146,24 +146,20 @@
         <TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..."/>
     </div>
 
-    <div class="overflow-x-auto">
-        <div class="w-max min-w-full">
-            {#snippet actions(row: Usuario)}
-                <div class="flex gap-2">
-                    <Button size="xs" color="light" onclick={() => editarUsuario(row)}>
-                        <PenOutline class="w-4 h-4"/>
-                    </Button>
-                    <form action="?/delete" method="POST">
-                        <input type="hidden" name="cedula" value={row.cedula}/>
-                        <Button size="xs" color="red" type="submit">
-                            <TrashBinOutline class="w-4 h-4"/>
-                        </Button>
-                    </form>
-                </div>
-            {/snippet}
-            <DataTable data={usuariosFiltrados} {actions}></DataTable>
-        </div>
+        {#snippet actions(row: Usuario)}
+    <div class="flex gap-2">
+        <Button size="xs" color="light" onclick={() => editarUsuario(row)}>
+            <PenOutline class="w-4 h-4"/>
+        </Button>
+        <form action="?/delete" method="POST">
+            <input type="hidden" name="cedula" value={row.cedula}/>
+            <Button size="xs" color="red" type="submit">
+                <TrashBinOutline class="w-4 h-4"/>
+            </Button>
+        </form>
     </div>
+{/snippet}
+<DataTable data={usuariosFiltrados} {actions}></DataTable>
 
     <Modal
             title={isEditing ? 'Editar Usuario' : 'Nuevo Usuario'}

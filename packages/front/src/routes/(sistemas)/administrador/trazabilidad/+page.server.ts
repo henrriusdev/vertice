@@ -39,7 +39,7 @@ export const actions: Actions = {
 		}).toString();
 
 		// Redirigir a la misma página con los parámetros de búsqueda
-		const location = `/superusuario/trazabilidad?${query}`;
+		const location = `/administrador/trazabilidad?${query}`;
 		return { success: true, invalidate: true, bypasstoast: true, location };
 	},
 
