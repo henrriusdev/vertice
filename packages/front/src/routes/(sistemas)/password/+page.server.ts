@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { cambiarPassword } from '$lib/servicios/autenticacion';
+import { forzarCambioPassword } from '$lib/servicios/autenticacion';
 
 export const actions: Actions = {
 	default: async ({ request, locals, fetch, url }) => {
@@ -12,7 +12,7 @@ export const actions: Actions = {
 			const data = await request.formData();
 			const newPassword = data.get('new_password') as string;
 
-			await cambiarPassword(fetch, newPassword);
+			await forzarCambioPassword(fetch, newPassword);
 
 			return {
 				invalidate: true,

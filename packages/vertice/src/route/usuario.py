@@ -240,26 +240,60 @@ async def delete(cedula):
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 
-@usr.patch('/force-password')
+@usr.patch('/change-password')
 @jwt_required()
 @unica_sesion_requerida
-async def force_password():
+async def change_password():
     try:
         claims = get_jwt()
         correo = claims.get('sub')
-        
-        data = request.json
-        new_password = data.get('new_password')
+        datos = request.json
 
-        if not new_password:
-            return jsonify({"ok": False, "status": 400, "data": {"message": "Nueva contraseña es requerida"}}), 400
+        if not datos.get('current_password') or not datos.get('new_password'):
+            return jsonify({"ok": False, "status": 400, "data": {"message": "Contraseña actual y nueva son requeridas"}}), 400
+
+        usuario = await get_usuario_por_correo(correo)
+        if not usuario:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
+
+        # Validar contraseña actual
+        if not usuario.check_password(datos.get("current_password")):
+            return jsonify({"ok": False, "status": 401, "data": {"message": "Contraseña actual incorrecta"}}), 401
+
+        # Cambiar contraseña
+        usuario.password = generate_password_hash(datos.get("new_password"), method="pbkdf2:sha256", salt_length=16)
+        await usuario.save()
+
+        await add_trazabilidad({
+            'accion': f"Cambio de contraseña del usuario: {usuario.nombre}",
+            'usuario': usuario,
+            'fecha': datetime.now(),
+            'modulo': "Usuarios",
+            'nivel_alerta': 2
+        })
+
+        return jsonify({"ok": True, "status": 200, "data": "Contraseña actualizada correctamente"})
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+@usr.post('/force-password')
+async def force_password():
+    try:
+        datos = request.json
+        correo = datos.get('correo')
+        password = datos.get('password')
+
+        if not correo or not password:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "Correo y contraseña son requeridos"}}), 400
 
         usuario = await get_usuario_por_correo(correo)
         if not usuario:
             return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
 
         # Actualizar la contraseña
-        usuario.password = generate_password_hash(new_password, method="pbkdf2:sha256", salt_length=16)
+        usuario.password = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)
         usuario.cambiar_clave = False
         await usuario.save()
 

@@ -175,3 +175,22 @@ export async function forzarCambioPassword(fetch: typeof window.fetch, newPasswo
 
 	return result.data;
 }
+
+export async function recuperarContrasena(
+	fetch: typeof window.fetch,
+	correo: string,
+	password: string
+) {
+	const res = await fetch(`${API}/force-password`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ correo, password })
+	});
+
+	if (!res.ok) {
+		const err = await res.json();
+		throw new Error(err?.data?.message ?? 'Error al cambiar contraseña');
+	}
+
+	return await res.json();
+}

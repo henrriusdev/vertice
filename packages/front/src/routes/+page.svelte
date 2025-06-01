@@ -32,27 +32,24 @@
 
 		<div>
 			<Label for="correo">Correo</Label>
-			<Input id="correo" name="correo" type="email" placeholder="usuario@ejemplo.com" required>
-				<UserSolid slot="left" />
-			</Input>
+			<Input id="correo" name="correo" type="email" placeholder="usuario@ejemplo.com" required />
 		</div>
 
 		<div>
 			<Label for="password">Contraseña</Label>
-			<Input
-				id="password"
-				bind:value={password}
-				type={visible ? 'text' : 'password'}
-				name="password"
-				required
-			>
-				<LockSolid slot="left" />
+			<div class="relative">
+				<Input
+					id="password"
+					bind:value={password}
+					type={visible ? 'text' : 'password'}
+					name="password"
+					required
+				/>
 				<Button
-					slot="right"
 					type="button"
 					outline
 					size="xs"
-					class="!p-2"
+					class="absolute right-2 top-1/2 -translate-y-1/2 !p-2"
 					onclick={toggleVisibility}
 				>
 					{#if visible}
@@ -61,10 +58,16 @@
 						<EyeSolid />
 					{/if}
 				</Button>
-			</Input>
+			</div>
 		</div>
 
 		<Button type="submit" color="blue" class="w-full">Entrar</Button>
+
+		<div class="text-center">
+			<a href="/recuperar" class="text-sm text-blue-600 hover:underline dark:text-blue-500">
+				¿Olvidaste tu contraseña?
+			</a>
+		</div>
 	</form>
 </div>
 

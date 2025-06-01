@@ -126,6 +126,7 @@ export type Usuario = {
 	activo: boolean;
 	fecha_creacion: string;
 	cambiar_clave: boolean;
+	pregunta_configurada: boolean;
 	rol: { id: number; nombre: string };
 };
 

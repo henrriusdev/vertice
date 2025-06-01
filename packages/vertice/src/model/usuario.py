@@ -10,6 +10,7 @@ class Usuario(Model):
     
     activo = fields.BooleanField(default=True)  # ✅ Permitir bloquear/reactivar
     fecha_creacion = fields.DatetimeField(auto_now_add=True)  # ✅ Fecha de creación
+    pregunta_configurada = fields.BooleanField(default=False)  # ✅ Indica si tiene pregunta de seguridad
 
     rol = fields.ForeignKeyField("models.Rol", related_name="usuarios")
     
@@ -24,6 +25,7 @@ class Usuario(Model):
             "activo": self.activo,
             "fecha_creacion": self.fecha_creacion.strftime("%d/%m/%Y") if self.fecha_creacion else None,
             "cambiar_clave": cambiar_clave,
+            "pregunta_configurada": self.pregunta_configurada,
             "rol": {
                 "id": self.rol.id if self.rol else None,
                 "nombre": self.rol.nombre if self.rol else None,
