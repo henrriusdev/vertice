@@ -15,6 +15,7 @@ from src.service.estudiantes import (
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
+from src.service.coordinadores import get_coordinador_by_usuario
 from src.middleware.sesion import unica_sesion_requerida
 
 est = Blueprint('students_blueprint', __name__)
@@ -24,13 +25,25 @@ est = Blueprint('students_blueprint', __name__)
 @unica_sesion_requerida
 async def list_students():
     claims = get_jwt()
-    data = await get_students()
+    correo = claims.get('sub')
+    rol = claims.get('rol')
+    carrera_id = None
+    print(rol)
+    if rol == 'coordinador' and correo is not None:
+        usuario = await get_usuario_por_correo(correo)
+        print(usuario)
+        if usuario:
+            coordinador = await get_coordinador_by_usuario(usuario.id)
+            print(coordinador)
+            if coordinador:
+                carrera_id = coordinador.carrera_id
     await add_trazabilidad({
         "accion": "Obtener todos los estudiantes",
         "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 1
     })
+    data = await get_students(carrera_id=carrera_id)
     return jsonify({"ok": True, "status": 200, "data": data})
 
 

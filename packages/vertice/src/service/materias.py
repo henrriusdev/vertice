@@ -4,9 +4,12 @@ from src.model.configuracion import Configuracion
 from src.model.matricula import Matricula
 from src.model.estudiante import Estudiante
 
-async def get_materias():
+async def get_materias(carrera_id=None):
     try:
-        materias = await Materia.all().prefetch_related("id_carrera")
+        if carrera_id is not None:
+            materias = await Materia.filter(id_carrera_id=carrera_id).prefetch_related("id_carrera")
+        else:
+            materias = await Materia.all().prefetch_related("id_carrera")
         join = {"materias": []}
 
         for m in materias:

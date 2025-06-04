@@ -8,9 +8,12 @@ from src.model.configuracion import Configuracion
 from src.model.pago import Pago
 from tortoise.exceptions import DoesNotExist
 
-async def get_students():
+async def get_students(carrera_id=None):
     try:
-        estudiantes = await Estudiante.all().prefetch_related("usuario", "carrera").order_by("usuario__cedula")
+        if carrera_id is not None:
+            estudiantes = await Estudiante.filter(carrera_id=carrera_id).prefetch_related("usuario", "carrera").order_by("usuario__cedula")
+        else:
+            estudiantes = await Estudiante.all().prefetch_related("usuario", "carrera").order_by("usuario__cedula")
         return [
             {
                 "cedula": e.usuario.cedula,

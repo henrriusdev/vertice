@@ -10,6 +10,7 @@ from src.service.materias import (
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
 from src.middleware.sesion import unica_sesion_requerida
+from src.service.coordinadores import get_coordinador_by_usuario
 
 
 mat = Blueprint('materia_blueprint', __name__)
@@ -17,10 +18,24 @@ mat = Blueprint('materia_blueprint', __name__)
 @mat.route('/')
 @jwt_required()
 @unica_sesion_requerida
-async def listar_materias():
-    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
-    await add_trazabilidad({"accion": "Obtener todas las Materias", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 1})
-    data = await get_materias()
+async def get_all_materias():
+    claims = get_jwt()
+    correo = claims.get('sub')
+    rol = claims.get('rol')
+    carrera_id = None
+    if rol == 'coordinador' and correo is not None:
+        usuario = await get_usuario_por_correo(correo)
+        if usuario:
+            coordinador = await get_coordinador_by_usuario(usuario.id)
+            if coordinador:
+                carrera_id = coordinador.carrera_id
+    await add_trazabilidad({
+        "accion": "Obtener Materias",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "modulo": "Materias",
+        "nivel_alerta": 1
+    })
+    data = await get_materias(carrera_id=carrera_id)
     return jsonify({"ok": True, "status": 200, "data": data})
 
 

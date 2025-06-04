@@ -29,7 +29,7 @@ async def login_usuario():
 
         claims = {
             'sub': usuario.correo,
-            'rol': usuario.rol.nombre[0].upper(),
+            'rol': usuario.rol.nombre,
             'nombre': usuario.nombre
         }
 
@@ -279,14 +279,16 @@ async def change_password():
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 @usr.post('/force-password')
+@jwt_required()
 async def force_password():
     try:
+        claims = get_jwt()
+        correo = claims.get('sub')
         datos = request.json
-        correo = datos.get('correo')
         password = datos.get('password')
 
-        if not correo or not password:
-            return jsonify({"ok": False, "status": 400, "data": {"message": "Correo y contraseña son requeridos"}}), 400
+        if not password:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "La nueva contraseña es requerida"}}), 400
 
         usuario = await get_usuario_por_correo(correo)
         if not usuario:

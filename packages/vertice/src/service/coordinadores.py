@@ -36,8 +36,19 @@ async def get_coordinador(id: int):
             "nombre": c.usuario.nombre,
             "correo": c.usuario.correo,
             "telefono": c.telefono,
-            "carrera": c.carrera.nombre
+            "carrera": c.carrera.nombre,
+            "carrera_id": c.carrera.id
         }
+    except DoesNotExist:
+        return None
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def get_coordinador_by_usuario(usuario_id: int):
+    try:
+        c = await Coordinador.get(usuario_id=usuario_id).prefetch_related("carrera")
+        return c
     except DoesNotExist:
         return None
     except Exception as ex:
