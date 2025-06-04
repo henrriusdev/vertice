@@ -153,25 +153,25 @@
 	</div>
 
 	{#snippet actions(row: Estudiante)}
-	<div class="flex gap-2">
-		{#if data.rol !== 'coordinador'}
-			<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
-				<PenOutline class="w-5 h-5" />
-			</Button>
-			<form action="?/delete" method="POST">
-				<input type="hidden" name="cedula" value={row.cedula} />
-				<Button pill class="p-1.5!" size="xs" color="red" type="submit">
-					<TrashBinOutline class="w-5 h-5" />
+		<div class="flex gap-2">
+			{#if data.rol !== 'coordinador'}
+				<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
+					<PenOutline class="w-5 h-5" />
 				</Button>
-			</form>
-		{:else}
-			<Button pill size="xs" color="light" class="p-1!">
-				<EyeOutline class="w-5 h-5" />
-			</Button>
-		{/if}
-	</div>
-{/snippet}
-<DataTable data={estudiantesFiltrados} {actions}></DataTable>
+				<form action="?/delete" method="POST">
+					<input type="hidden" name="cedula" value={row.cedula} />
+					<Button pill class="p-1.5!" size="xs" color="red" type="submit">
+						<TrashBinOutline class="w-5 h-5" />
+					</Button>
+				</form>
+			{:else}
+				<Button pill size="xs" color="light" class="p-1!">
+					<EyeOutline class="w-5 h-5" />
+				</Button>
+			{/if}
+		</div>
+	{/snippet}
+	<DataTable data={estudiantesFiltrados} {actions}></DataTable>
 
 	<Modal
 		title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}

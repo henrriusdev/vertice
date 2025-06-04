@@ -44,20 +44,23 @@
 					type={visible ? 'text' : 'password'}
 					name="password"
 					required
-				/>
-				<Button
-					type="button"
-					outline
-					size="xs"
-					class="absolute right-2 top-1/2 -translate-y-1/2 !p-2"
-					onclick={toggleVisibility}
 				>
-					{#if visible}
-						<EyeSlashSolid />
-					{:else}
+					{#snippet right()}
+					<Button
+						type="button"
+						outline
+						size="xs"
+						class="!p-2"
+						onclick={toggleVisibility}
+					>
+						{#if visible}
+							<EyeSlashSolid />
+						{:else}
 						<EyeSolid />
 					{/if}
-				</Button>
+					</Button>
+					{/snippet}
+				</Input>
 			</div>
 		</div>
 

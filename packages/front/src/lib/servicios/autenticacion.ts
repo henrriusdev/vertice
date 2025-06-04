@@ -158,12 +158,12 @@ export async function cambiarPassword(fetch: typeof window.fetch, currentPasswor
 
 export async function forzarCambioPassword(fetch: typeof window.fetch, newPassword: string) {
 	const response = await fetch(`${API}/force-password`, {
-		method: 'PATCH',
+		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			new_password: newPassword
+			password: newPassword
 		})
 	});
 

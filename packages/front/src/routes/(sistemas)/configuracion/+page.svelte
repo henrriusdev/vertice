@@ -22,6 +22,7 @@
 			? toZonedTime(config.horario_fin, 'UTC')
 			: toZonedTime(parse('2025-05-15', 'yyyy-MM-dd', new Date()), 'UTC')
 	});
+	let filtroCarrera: number | null = $state(data.rol === 'coordinador' ? data.carrera_id : null);
 	let porcentajes = $state<number[]>(config?.porcentajes ?? [30, 30, 40]);
 	let cuotas = $state<Date[]>(
 		config?.cuotas

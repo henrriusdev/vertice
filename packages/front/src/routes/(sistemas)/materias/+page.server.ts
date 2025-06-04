@@ -18,6 +18,7 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 
 	try {
 		const data = await obtenerMaterias(fetch);
+		console.log(data.materias)
 		const carreras = await obtenerCarreras(fetch);
 		const docentes = await obtenerDocentes(fetch);
 

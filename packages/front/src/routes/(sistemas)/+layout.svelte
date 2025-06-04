@@ -264,11 +264,6 @@
 			}
 		}
 	});
-
-	// Función para cerrar sesión (redirige a la ruta de logout)
-	function cerrarSesion() {
-		goto('/logout');
-	}
 </script>
 
 <!-- Main layout container with fixed height and no overflow -->
@@ -352,7 +347,7 @@
 								</div>
 							</DropdownItem>
 							<DropdownDivider />
-							<DropdownItem onclick={cerrarSesion}>
+							<DropdownItem href="/logout">
 								<div class="flex items-center">
 									<ShieldCheckOutline class="w-5 h-5 mr-2" />
 									Cerrar Sesión

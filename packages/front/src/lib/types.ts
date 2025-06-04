@@ -92,6 +92,17 @@ export type FiltroTrazabilidad = {
 	rol?: string
 }
 
+// Tipos para dashboard de coordinador
+export type DistribucionCarrera = {
+	nombre: string;
+	estudiantes: number;
+};
+
+export type PromedioCarrera = {
+	nombre: string;
+	promedio: number;
+};
+
 // Interfaz para los parámetros de exportación
 export interface ExportacionParams {
 	formato: string

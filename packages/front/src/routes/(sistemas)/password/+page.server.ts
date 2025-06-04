@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 import { forzarCambioPassword } from '$lib/servicios/autenticacion';
 
 export const actions: Actions = {
-	default: async ({ request, locals, fetch, url }) => {
+	default: async ({ request, locals, fetch }) => {
 		if (!locals.usuario) {
 			throw redirect(302, '/');
 		}
@@ -14,11 +14,12 @@ export const actions: Actions = {
 
 			await forzarCambioPassword(fetch, newPassword);
 
+			const location = '/' + locals.usuario.rol.nombre.toLowerCase();
 			return {
 				invalidate: true,
 				type: 'success',
 				message: 'Contraseña actualizada correctamente',
-                location: url.pathname
+				location
 			};
 		} catch (e) {
 			console.error(e);

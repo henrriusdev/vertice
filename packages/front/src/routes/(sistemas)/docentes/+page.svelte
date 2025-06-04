@@ -56,6 +56,7 @@
     });
 
     let docentes: Docente[] = $state(data.docentes);
+    // Filtrar por carrera si es coordinador
     let docentesFiltrados = $derived(
         docentes.filter(
             (est) =>

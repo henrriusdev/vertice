@@ -57,12 +57,21 @@
 	let showHorario = $state(false);
 	let editMode = $state(false);
 	let selectedId = $state('');
-	let filtroCarrera: number | null = $state(null);
+	let filtroCarrera: number | null = $state(data.rol === 'coordinador' ? data.carrera_id : null);
 	let filtroDocente: number | null = $state(null);
 	let filtroSemestre = $state('');
 	let searchTerm = $state('');
 	let filtroQuery = $state('');
 	let showAyuda = $state(false);
+
+	// Opciones de prelación calculadas dinámicamente
+	let opcionesPrelacion = $derived.by(() => {
+		return data.materias
+			.filter(
+				(m) => m.id_carrera == form.id_carrera && m.semestre < form.semestre && m.id !== form.id
+			)
+			.map((m) => ({ value: m.id, name: m.nombre }));
+	});
 
 	const materiasFiltradas = $derived(
 		data.materias.filter((mat) => {
@@ -198,11 +207,10 @@
 					color="primary"
 					size="xs"
 					title="Ayuda"
-					outline
-					class="p-1.5!"
+					class="p-2!"
 					onclick={() => (showAyuda = true)}
 				>
-					<InfoCircleOutline class="w-7 h-7" />
+					<InfoCircleOutline class="w-6 h-6" />
 				</Button>
 			{/snippet}
 		</Input>
@@ -335,10 +343,11 @@
 				<Label for="prelacion" class="mb-2">Prelación</Label>
 				<MultiSelect
 					id="prelacion"
+					dropdownClass="z-[99999]!"
 					name="prelacion"
 					bind:value={form.prelacion}
-					class="input"
-					items={[]}
+					items={opcionesPrelacion}
+					placeholder="Seleccione las prelaciones"
 				/>
 			</div>
 		</div>
@@ -347,7 +356,7 @@
 			<h2 class="font-bold mb-2">Horarios</h2>
 			{#each form.horarios as h, i}
 				<div class="flex gap-2 mb-2">
-					<Select bind:value={h.dia} class="select">
+					<Select bind:value={h.dia} class="select min-w-[15%]">
 						{#each dias as d}
 							<option>{d}</option>
 						{/each}
