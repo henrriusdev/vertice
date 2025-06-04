@@ -8,6 +8,7 @@
     import {resolver} from '$lib/utilidades/resolver';
     import type {SubmitFunction} from '@sveltejs/kit';
     import {enhance} from '$app/forms';
+    import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 
     // Datos de la página
     let {data}: { data: PageData; form: ActionData } = $props<{
@@ -219,10 +220,13 @@
                 </div>
             </div>
             {#snippet footer()}
-                <Button color="blue" type="button" onclick={() => formEl?.requestSubmit()}>
-                    {isEditing ? 'Actualizar' : 'Guardar'}
-                </Button>
-                <Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
+                <div class="flex justify-between items-center w-full">
+                    <div>
+                        <Button type="button" color="alternative" onclick={() => (modalVisible = false)}>Cancelar</Button>
+                        <Button type="submit" color="primary" onclick={() => formEl?.requestSubmit()}>{isEditing ? 'Actualizar' : 'Guardar'}</Button>
+                    </div>
+                    <ToastContainer />
+                </div>
             {/snippet}
         </form>
     </Modal>

@@ -193,7 +193,7 @@
 	</div>
 
 	<!-- Modal Seleccionar Materias -->
-	<Modal bind:open={openModal} size="xl" class="min-h-[500px]">
+	<Modal bind:open={openModal} size="xl">
 		{#snippet header()}
 			<div class="text-lg font-semibold">Seleccionar Materias</div>
 		{/snippet}
@@ -209,7 +209,7 @@
 					<Popover
 						triggeredBy="#materia-{materia.id}"
 						placement="bottom"
-						class="w-64 text-sm"
+						class="w-64 z-50 text-sm"
 						transition={slide}
 					>
 						<div class="p-2">

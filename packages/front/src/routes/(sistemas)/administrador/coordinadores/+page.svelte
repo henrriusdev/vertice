@@ -2,6 +2,7 @@
 	import {cedulaMask, DataTable, telefono} from '$lib';
 	import {imask} from '@imask/svelte';
 	import {Button, Input, Label, Modal, Select, TableSearch} from 'flowbite-svelte';
+import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
 	import type {Coordinador} from '../../../../app';
 
@@ -174,10 +175,15 @@
 			</div>
 		</form>
 		{#snippet footer()}
-			<Button color="blue" type="button" onclick={() => formEl?.requestSubmit()}>
-				{isEditing ? 'Actualizar' : 'Guardar'}
-			</Button>
-			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
+			<div class="flex justify-between items-center w-full">
+				<div>
+					<Button type="button" color="alternative" onclick={() => (modalVisible = false)}>Cancelar</Button>
+					<Button type="submit" color="primary" onclick={() => formEl?.requestSubmit()}>
+						{isEditing ? 'Actualizar' : 'Guardar'}
+					</Button>
+				</div>
+				<ToastContainer />
+			</div>
 		{/snippet}
 	</Modal>
 </div>

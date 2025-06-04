@@ -30,55 +30,85 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 };
 
 export const actions: Actions = {
-	async crear({ request, fetch }) {
-		try {
-			const data = await request.formData();
-			const materia: MateriaReq = {
-				id: data.get('id')?.toString() || '',
-				nombre: data.get('nombre')?.toString() || '',
-				prelacion: data.get('prelacion')?.toString() || '',
-				unidad_credito: Number(data.get('unidad_credito')),
-				hp: Number(data.get('hp')),
-				ht: Number(data.get('ht')),
-				semestre: Number(data.get('semestre')),
-				id_carrera: data.get('id_carrera')?.toString() || '',
-				horarios: JSON.parse(data.get('horarios')?.toString() || '[]'),
-				ciclo: data.get('ciclo')?.toString() || '',
-				modalidad: data.get('modalidad')?.toString() || '',
-				maximo: Number(data.get('maximo')),
-				id_docente: data.get('id_docente')?.toString() || ''
+	create: async ({ request, fetch }) => {
+		const form = await request.formData();
+		// Helper function for safe number conversion
+		const safeNumber = (value: FormDataEntryValue | null, defaultValue = 0): number => {
+			if (!value) return defaultValue;
+			const num = Number(value);
+			return isNaN(num) ? defaultValue : num;
+		};
+
+		const payload: MateriaReq = {
+			id: form.get('id')?.toString() || '',
+			nombre: form.get('nombre')?.toString() || '',
+			prelacion: form.get('prelacion')?.toString() || '',
+			unidad_credito: safeNumber(form.get('unidad_credito')),
+			hp: safeNumber(form.get('hp')),
+			ht: safeNumber(form.get('ht')),
+			semestre: safeNumber(form.get('semestre'), 1),
+			id_carrera: safeNumber(form.get('id_carrera')).toString(),
+			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
+			ciclo: form.get('ciclo')?.toString() || '',
+			modalidad: form.get('modalidad')?.toString() || 'presencial',
+			maximo: safeNumber(form.get('maximo'), 30),
+			id_docente: safeNumber(form.get('id_docente')).toString()
+		};
+
+		const errores = validarPayload(payload);
+		if (Object.keys(errores).length > 0) {
+			const errorMessages = Object.values(errores).join(', ');
+			return {
+				type: 'failure',
+				message: errorMessages
 			};
-			await crearMateria(materia, fetch);
-			return { success: true, invalidate: true };
+		}
+
+		try {
+			await crearMateria(fetch, payload);
+			return {
+				type: 'success',
+				message: 'Materia creada exitosamente',
+				invalidate: true
+			};
 		} catch (error) {
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			console.error('Error al crear materia:', error);
+			return { type: 'failure', message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	},
 
 	// Acción para editar una materia
 	edit: async ({ request, fetch }) => {
 		const form = await request.formData();
+		// Helper function for safe number conversion
+		const safeNumber = (value: FormDataEntryValue | null, defaultValue = 0): number => {
+			if (!value) return defaultValue;
+			const num = Number(value);
+			return isNaN(num) ? defaultValue : num;
+		};
+
 		const payload: MateriaReq & { id: string } = {
 			id: form.get('id')?.toString() as string,
 			nombre: form.get('nombre')?.toString() as string,
 			prelacion: form.get('prelacion')?.toString() as string,
-			unidad_credito: Number(form.get('unidad_credito')),
-			hp: Number(form.get('hp')),
-			ht: Number(form.get('ht')),
-			semestre: Number(form.get('semestre')),
-			id_carrera: form.get('carrera')?.toString() || '',
+			unidad_credito: safeNumber(form.get('unidad_credito')),
+			hp: safeNumber(form.get('hp')),
+			ht: safeNumber(form.get('ht')),
+			semestre: safeNumber(form.get('semestre'), 1),
+			id_carrera: safeNumber(form.get('id_carrera')).toString(),
 			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
 			ciclo: form.get('ciclo')?.toString() as string,
 			modalidad: form.get('modalidad')?.toString() as string,
-			maximo: Number(form.get('maximo')),
-			id_docente: form.get('docente')?.toString() || ''
+			maximo: safeNumber(form.get('maximo'), 30),
+			id_docente: safeNumber(form.get('id_docente')).toString()
 		};
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
+			const errorMessages = Object.values(errores).join(', ');
 			return {
 				type: 'failure',
-				message: 'Errores en los datos del formulario'
+				message: errorMessages
 			};
 		}
 
@@ -120,9 +150,6 @@ function validarPayload(
 	const errores: Record<string, string> = {};
 	const camposBase: (keyof typeof payload)[] = [
 		'nombre',
-		'unidad_credito',
-		'hp',
-		'ht',
 		'semestre',
 		'id_carrera',
 		'modalidad',

@@ -43,12 +43,20 @@ async def get_materias(carrera_id=None):
 
 async def add_materia(materia: dict):
     try:
+        # Validate required fields
+        if not materia.get("id"):
+            raise ValueError("El código de la materia es requerido")
+        if not materia.get("nombre"):
+            raise ValueError("El nombre de la materia es requerido")
+        if not materia.get("id_carrera"):
+            raise ValueError("La carrera es requerida")
+
         existe = await Materia.filter(id=materia["id"]).exists()
         if existe:
             return "materia ya existe"
 
         horarios = []
-        if materia["horarios"]:
+        if materia.get("horarios"):
             for horario in materia["horarios"]:
                 horarios.append({
                     "dia": horario["dia"],
@@ -56,24 +64,46 @@ async def add_materia(materia: dict):
                     "hora_fin": horario["hora_fin"]
                 })
 
+        # Set default values for numeric fields
+        defaults = {
+            "unidad_credito": 0,
+            "hp": 0,
+            "ht": 0,
+            "semestre": 1,
+            "maximo": 30
+        }
+
+        # Safe conversion to integers with defaults
+        def safe_int(value, default):
+            if not value and value != 0:
+                return default
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return default
+        
+
+        # Create materia with safe conversions
         await Materia.create(
-            id=materia["id"],
-            nombre=materia["nombre"],
-            prelacion=materia["prelacion"] if materia["prelacion"] else "",
-            unidad_credito=materia["unidad_credito"],
-            hp=materia["hp"],
-            ht=materia["ht"],
-            semestre=materia["semestre"],
-            id_carrera_id=materia["id_carrera"],
-            id_docente_id=materia["id_docente"],
+            id=str(materia["id"]),
+            nombre=str(materia["nombre"]),
+            prelacion=str(materia.get("prelacion", "")),
+            unidad_credito=safe_int(materia.get("unidad_credito"), defaults["unidad_credito"]),
+            hp=safe_int(materia.get("hp"), defaults["hp"]),
+            ht=safe_int(materia.get("ht"), defaults["ht"]),
+            semestre=safe_int(materia.get("semestre"), defaults["semestre"]),
+            id_carrera_id=str(materia["id_carrera"]),
+            id_docente_id=str(materia.get("id_docente", "")),
             horarios=horarios,
-            modalidad=materia["modalidad"],
-            maximo=materia["maximo"]
+            modalidad=str(materia.get("modalidad", "presencial")),
+            maximo=safe_int(materia.get("maximo"), defaults["maximo"])
         )
 
         return 1
+    except ValueError as ve:
+        raise Exception(str(ve))
     except Exception as ex:
-        raise Exception(ex)
+        raise Exception(f"Error al crear materia: {str(ex)}")
 
 
 async def update_materia(materia: dict):

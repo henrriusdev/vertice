@@ -5,6 +5,7 @@
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Button, Input, Label, Modal, MultiSelect, Select } from 'flowbite-svelte';
+	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import {
 		EyeOutline,
 		InfoCircleOutline,
@@ -117,8 +118,8 @@
 				semestre: 1,
 				id_carrera: '',
 				ciclo: '',
-				modalidad: '',
-				maximo: 0,
+				modalidad: 'presencial',
+				maximo: 30,
 				id_docente: '',
 				horarios: []
 			};
@@ -309,6 +310,7 @@
 					items={data.carreras.map((c) => ({ value: c.id, name: c.nombre }))}
 					placeholder="Seleccione"
 				></Select>
+				<Input type="hidden" name="id_carrera" bind:value={form.id_carrera} />
 			</div>
 			<div>
 				<Label for="modalidad" class="mb-2">Modalidad</Label>
@@ -334,6 +336,7 @@
 					class="select"
 					items={data.docentes.map((d) => ({ value: d.id, name: d.nombre }))}
 				></Select>
+				<input type="hidden" name="id_docente" bind:value={form.id_docente} />
 			</div>
 			<div>
 				<Label for="maximo" class="mb-2">Máximo de estudiantes</Label>
@@ -375,12 +378,16 @@
 		</div>
 	</form>
 	{#snippet footer()}
-		<div>
-			<Button type="button" color="alternative" onclick={() => (showModal = false)}>Cancelar</Button
-			>
-			<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
-				>{editMode ? 'Actualizar' : 'Guardar'}</Button
-			>
+		<div class="flex justify-between items-center w-full">
+			<div>
+				<Button type="button" color="alternative" onclick={() => (showModal = false)}
+					>Cancellar</Button
+				>
+				<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
+					>{editMode ? 'Actualizar' : 'Guardar'}</Button
+				>
+			</div>
+			<ToastContainer />
 		</div>
 	{/snippet}
 </Modal>

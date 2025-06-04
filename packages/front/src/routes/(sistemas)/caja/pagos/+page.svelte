@@ -18,6 +18,7 @@
 		TableHeadCell,
 		Toggle
 	} from 'flowbite-svelte';
+	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -39,7 +40,7 @@
 	let currentCycleOnly = $state(true);
 	let reportType = $state('dia');
 	let paymentSelection = $state('todos');
-	let reportDate: Date | Date[] | null = $state(new Date());
+	let reportDate: Date | { from?: Date; to?: Date } | null = $state(new Date());
 
 	// Modal state
 	let showPaymentModal = $state(false);
@@ -245,8 +246,8 @@
 						formData.append('fecha', (reportDate as Date)?.toISOString().split('T')[0]);
 					}
 					if (reportType === 'fechas' || reportType === 'monto') {
-						formData.append('fi', (reportDate as Date[])[0].toISOString().split('T')[0]);
-						formData.append('ff', (reportDate as Date[])[1].toISOString().split('T')[0]);
+						formData.append('fi', (reportDate as any).from.toISOString().split('T')[0]);
+						formData.append('ff', (reportDate as any).to.toISOString().split('T')[0]);
 					}
 					return resolver(()=>{})
 				}}
@@ -267,11 +268,9 @@
 				<div>
 					<Label for="report-date" class="mb-2">Fecha de pagos</Label>
 					<Datepicker
-						id="report-date"
 						bind:value={reportDate}
-						dateRange={reportType === 'fecha'}
-						maxDate={new Date()}
-						placeholder="dd/mm/aaaa"
+						dateRange={reportType === 'fechas'}
+						maxYear={new Date().getFullYear()}
 					/>
 				</div>
 
@@ -417,7 +416,7 @@
 							<TableHeadCell>Monto</TableHeadCell>
 							<TableHeadCell>Acciones</TableHeadCell>
 						</TableHead>
-						<TableBody tableBodyClass="divide-y">
+						<TableBody class="divide-y">
 							{#each billetes as billete, i}
 								<TableBodyRow>
 									<TableBodyCell>{billete.serial}</TableBodyCell>
@@ -437,11 +436,16 @@
 
 		<!-- Modal Footer -->
 		{#snippet footer()}
-			<Button color="alternative" onclick={closePaymentModal}>Cancelar</Button>
-			<Button color="primary" onclick={() => form.requestSubmit()} disabled={!isFormValid}>
-				<CreditCardOutline class="mr-2 h-5 w-5" />
-				Realizar Pago
-			</Button>
+			<div class="flex justify-between items-center w-full">
+				<div>
+					<Button color="alternative" onclick={closePaymentModal}>Cancelar</Button>
+					<Button color="primary" onclick={() => form?.requestSubmit()} disabled={!isFormValid}>
+						<CreditCardOutline class="mr-2 h-5 w-5" />
+						Realizar Pago
+					</Button>
+				</div>
+				<ToastContainer />
+			</div>
 		{/snippet}
 	</Modal>
 </div>

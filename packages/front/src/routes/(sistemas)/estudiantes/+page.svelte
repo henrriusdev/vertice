@@ -16,6 +16,7 @@
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { enhance } from '$app/forms';
+	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 
 	// Datos de la página
 	let { data } = $props();
@@ -35,23 +36,12 @@
 		carrera: number;
 		promedio: number;
 		direccion: string;
-		fecha_nac: Date | string;
+		fecha_nac: Date;
 		sexo: 'M' | 'F' | '';
 		usuario?: {
 			id: number;
 		};
-	}> = $state({
-		cedula: '',
-		nombre: '',
-		correo: '',
-		activo: true,
-		semestre: 1,
-		carrera: 1,
-		promedio: 0,
-		direccion: '',
-		fecha_nac: maxYearDate(),
-		sexo: 'M'
-	});
+	}> = $state({});
 
 	$effect(() => {
 		if (!modalVisible) {
@@ -99,6 +89,7 @@
 	// Función para abrir el modal en modo creación
 	function crearEstudiante() {
 		estudianteActual = {
+			id: 0,
 			cedula: '',
 			nombre: '',
 			correo: '',
@@ -114,15 +105,16 @@
 		modalVisible = true;
 	}
 
-	function calcularEdad(fechaNacimiento: string): number {
+	function calcularEdad(fechaNacimiento: Date | null = null): number {
 		if (!fechaNacimiento) return 0;
 
 		const hoy = new Date();
-		const fechaNac = new Date(fechaNacimiento);
-		let edad = hoy.getFullYear() - fechaNac.getFullYear();
-		const mes = hoy.getMonth() - fechaNac.getMonth();
+		const nacimiento = fechaNacimiento;
 
-		if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+		let edad = hoy.getFullYear() - nacimiento.getFullYear();
+		const mes = hoy.getMonth() - nacimiento.getMonth();
+
+		if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
 			edad--;
 		}
 
@@ -130,7 +122,7 @@
 	}
 
 	// Actualizar edad cuando cambia la fecha de nacimiento
-	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac as string));
+	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac));
 
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => (modalVisible = false));
@@ -215,11 +207,9 @@
 				<div class="md:col-span-2">
 					<Label for="fecha_nac" class="mb-2">Fecha de Nacimiento</Label>
 					<Datepicker
-						id="fecha_nac"
 						maxYear={new Date().getFullYear() - 16}
 						bind:value={estudianteActual.fecha_nac}
 					/>
-					<input type="hidden" name="fecha_nac" value={estudianteActual?.fecha_nac} />
 				</div>
 				<div class="md:col-span-2">
 					<Label for="correo" class="mb-2">Correo Electrónico</Label>
@@ -307,10 +297,17 @@
 			</div>
 		</form>
 		{#snippet footer()}
-			<Button color="blue" type="button" onclick={() => formEl?.requestSubmit()}>
-				{isEditing ? 'Actualizar' : 'Guardar'}
-			</Button>
-			<Button color="light" onclick={() => (modalVisible = false)}>Cancelar</Button>
+			<div class="flex justify-between items-center w-full">
+				<div>
+					<Button type="button" color="alternative" onclick={() => (modalVisible = false)}
+						>Cancelar</Button
+					>
+					<Button type="submit" color="primary" onclick={() => formEl && formEl.requestSubmit()}
+						>{isEditing ? 'Actualizar' : 'Guardar'}</Button
+					>
+				</div>
+				<ToastContainer />
+			</div>
 		{/snippet}
 	</Modal>
 </div>

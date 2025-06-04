@@ -1,6 +1,7 @@
 <script lang="ts">
     import {DataTable} from '$lib';
     import {Button, ButtonGroup, Helper, Input, Label, Modal, TableSearch} from 'flowbite-svelte';
+import ToastContainer from '$lib/componentes/ToastContainer.svelte';
     import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
     import type {Carrera} from '../../../../app';
     import type {PageData} from './$types';
@@ -25,7 +26,7 @@
     // Filtrar estudiantes por término de búsqueda
     let carrerasFiltradas = $derived(
         data.carreras.filter(
-            (car) =>
+            (car: Carrera) =>
                 car.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 car.id.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -109,10 +110,13 @@
                                 value={estudianteActual.nombre}
                                 required
                         />
-                        <Button type="submit">Guardar</Button>
+                        <Button type="submit">{isEditing ? 'Actualizar' : 'Guardar'}</Button>
                     </ButtonGroup>
                 </div>
             </div>
         </form>
+        {#snippet footer()}
+            <ToastContainer />
+        {/snippet}
     </Modal>
 </div>

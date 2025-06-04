@@ -1,7 +1,6 @@
 import {
 	actualizarEstudiante,
 	actualizarUsuario,
-	addToast,
 	crearEstudiante,
 	crearUsuario,
 	eliminarEstudiante,
@@ -10,9 +9,9 @@ import {
 	type EstudianteReq
 } from '$lib';
 import { redirect } from '@sveltejs/kit';
+import { format } from 'date-fns';
 import type { Usuario } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
-import { format } from 'date-fns';
 
 type ErroresEstudiante = {
 	cedula?: string;
@@ -44,7 +43,6 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 };
 
 export const actions: Actions = {
-	// Acción para crear un usuario y un estudiante
 	create: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as EstudianteReq &
 			(Usuario & { password: string });
@@ -92,7 +90,7 @@ export const actions: Actions = {
 				message: 'Estudiante creado exitosamente',
 				invalidate: true
 			};
-		} catch (e: any) {
+		} catch (e) {
 			console.error('Error al crear estudiante:', e);
 			return { success: false, message: e instanceof Error ? e.message : 'Error desconocido' };
 		}

@@ -9,7 +9,7 @@
 
 	import { toasts } from '$lib';
 
-	let { position } = $props<{ position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }>();
+	let { position = 'bottom-right' } = $props<{ position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' }>();
 </script>
 
 {#each $toasts as toast (toast.id)}

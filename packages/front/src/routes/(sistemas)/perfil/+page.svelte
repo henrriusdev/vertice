@@ -141,9 +141,9 @@
 									color={isPasswordValid ? 'green' : undefined}
 								/>
 							</div>
-							<Button type="submit" class="w-full" disabled={!isPasswordValid || loading}>
-								{loading ? 'Cambiando...' : 'Cambiar Contraseña'}
-							</Button>
+								<Button type="submit" class="w-full" disabled={!isPasswordValid || loading}>
+									{loading ? 'Cambiando...' : 'Cambiar Contraseña'}
+								</Button>
 						</div>
 					</form>
 				</Card>
@@ -181,9 +181,9 @@
 									bind:value={currentPasswordSQ}
 								/>
 							</div>
-							<Button type="submit" class="w-full" disabled={!canSubmitQuestion || loading}>
-								{loading ? 'Configurando...' : 'Configurar Pregunta'}
-							</Button>
+								<Button type="submit" class="w-full" disabled={!canSubmitQuestion || loading}>
+									{loading ? 'Configurando...' : 'Configurar Pregunta'}
+								</Button>
 						</div>
 					</form>
 				</Card>
