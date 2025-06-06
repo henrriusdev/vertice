@@ -42,9 +42,10 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 			coordinadoresFiltrados =
 				data?.coordinadores.filter(
 					(est) =>
+						(est?.cedula?.includes(searchTerm) ||
 						est?.telefono?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 						est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
+						est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()))
 				) ?? [];
 		}
 	});
@@ -53,9 +54,10 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	let coordinadoresFiltrados = $derived(
 		coordinadores.filter(
 			(est) =>
+				(est?.cedula?.includes(searchTerm) ||
 				est?.telefono?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
+				est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()))
 		) ?? []
 	);
 

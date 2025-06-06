@@ -99,8 +99,8 @@
 			{#each paginated as row}
 				<TableBodyRow>
 					{#each headers.length ? headers : Object.keys(row) as h}
-						{#if h === 'rol'}
-							<TableBodyCell class="capitalize">{row[h].nombre}</TableBodyCell>
+						{#if ['rol', 'nombre'].includes(h)}
+							<TableBodyCell class="capitalize">{row[h]}</TableBodyCell>
 						{:else if (h.includes('id_') && row[h]) || typeof row[h] === 'object'}
 							<TableBodyCell>{onSearch(h, row[h])}</TableBodyCell>
 						{:else}
