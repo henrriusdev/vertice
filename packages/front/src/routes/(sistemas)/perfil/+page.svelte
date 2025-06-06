@@ -3,36 +3,42 @@
 	import { PREGUNTAS_SEGURIDAD } from '$lib/servicios/pregunta-seguridad';
 	import { resolver } from '$lib/utilidades/resolver.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import { Avatar, Button, Card, Input, Label, Select } from 'flowbite-svelte';
+	import { Avatar, Button, Card, Input, Label, Modal, Select } from 'flowbite-svelte';
 	import { EnvelopeOutline, ShieldCheckOutline } from 'flowbite-svelte-icons';
 
-	
 	// Props
 	let { data } = $props();
 
 	let usuario = $derived(data.usuario);
-	
 
 	// Estado
-	let selectedPregunta = $state('');
+	let passwordModal = $state(false);
+	let securityQuestionsModal = $state(false);
 	let currentPassword = $state('');
 	let newPassword = $state('');
 	let confirmPassword = $state('');
-	let securityAnswer = $state('');
-	let currentPasswordSQ = $state('');
 	let loading = $state(false);
+
+	// Preguntas de seguridad
+	let securityQuestions = $state([
+		{ pregunta: '', respuesta: '' },
+		{ pregunta: '', respuesta: '' },
+		{ pregunta: '', respuesta: '' }
+	]);
 
 	// Estado derivado
 	let isPasswordValid = $derived(newPassword === confirmPassword && newPassword.length > 0);
-	let canSubmitQuestion = $derived(selectedPregunta && securityAnswer && currentPasswordSQ);
+	let canSubmitPassword = $derived(isPasswordValid);
+	let canSubmitQuestions = $derived(securityQuestions.every((q) => q.pregunta && q.respuesta));
 
 	const handleSubmit: SubmitFunction = () => {
 		loading = true;
 		return resolver(() => {
 			loading = false;
+			passwordModal = false;
+			securityQuestionsModal = false;
 		});
 	};
-	
 </script>
 
 <div class="h-full bg-gray-50">
@@ -99,95 +105,114 @@
 								</div>
 							</div>
 						</div>
+						<!-- Botones de acción -->
+						<div class="flex flex-col md:flex-row gap-4">
+							<Button onclick={() => (passwordModal = true)} class="w-full">
+								Cambio de contraseña
+							</Button>
+							<Button onclick={() => (securityQuestionsModal = true)} class="w-full">
+								Preguntas de seguridad
+							</Button>
+						</div>
 					</div>
 				</div>
 			</Card>
 
-			<div class="grid md:grid-cols-2 gap-8">
-				<!-- Cambiar Contraseña -->
-				<Card class="p-6 shadow-lg">
-					<h2 class="text-xl font-semibold mb-4">Cambiar Contraseña</h2>
-					<form method="POST" action="?/cambiarPassword" use:enhance={handleSubmit}>
-						<div class="space-y-4">
-							<div>
-								<Label for="currentPassword" class="space-y-2">Contraseña Actual</Label>
-								<Input
-									type="password"
-									name="currentPassword"
-									id="currentPassword"
-									required
-									bind:value={currentPassword}
-								/>
-							</div>
-							<div>
-								<Label for="newPassword" class="space-y-2">Nueva Contraseña</Label>
-								<Input
-									type="password"
-									name="newPassword"
-									id="newPassword"
-									required
-									bind:value={newPassword}
-									color={isPasswordValid ? 'green' : undefined}
-								/>
-							</div>
-							<div>
-								<Label for="confirmPassword" class="space-y-2">Confirmar Nueva Contraseña</Label>
-								<Input
-									type="password"
-									name="confirmPassword"
-									id="confirmPassword"
-									required
-									bind:value={confirmPassword}
-									color={isPasswordValid ? 'green' : undefined}
-								/>
-							</div>
-								<Button type="submit" class="w-full" disabled={!isPasswordValid || loading}>
-									{loading ? 'Cambiando...' : 'Cambiar Contraseña'}
-								</Button>
+			<!-- Modal de cambio de contraseña -->
+			<Modal bind:open={passwordModal} size="md" autoclose={false}>
+				<form method="POST" action="?/cambiarPassword" use:enhance={handleSubmit} class="space-y-6">
+					<h3 class="text-xl font-medium">Cambiar Contraseña</h3>
+					<div class="space-y-4">
+						<div>
+							<Label for="currentPassword" class="space-y-2">Contraseña Actual</Label>
+							<Input
+								type="password"
+								name="currentPassword"
+								id="currentPassword"
+								required
+								bind:value={currentPassword}
+							/>
 						</div>
-					</form>
-				</Card>
+						<div>
+							<Label for="newPassword" class="space-y-2">Nueva Contraseña</Label>
+							<Input
+								type="password"
+								name="newPassword"
+								id="newPassword"
+								required
+								bind:value={newPassword}
+							/>
+						</div>
+						<div>
+							<Label for="confirmPassword" class="space-y-2">Confirmar Contraseña</Label>
+							<Input
+								type="password"
+								name="confirmPassword"
+								id="confirmPassword"
+								required
+								bind:value={confirmPassword}
+							/>
+						</div>
+						<div class="flex justify-end gap-4">
+							<Button color="alternative" onclick={() => (passwordModal = false)}>Cancelar</Button>
+							<Button type="submit" disabled={!canSubmitPassword || loading}>
+								{loading ? 'Guardando...' : 'Cambiar Contraseña'}
+							</Button>
+						</div>
+					</div>
+				</form>
+			</Modal>
 
-				<!-- Configurar Pregunta de Seguridad -->
-				<Card class="p-6 shadow-lg">
-					<h2 class="text-xl font-semibold mb-4">Pregunta de Seguridad</h2>
-					<form method="POST" action="?/configurarPregunta" use:enhance={handleSubmit}>
-						<div class="space-y-4">
-							<div>
-								<Label for="pregunta" class="space-y-2">Selecciona una Pregunta</Label>
-								<Select name="pregunta" id="pregunta" bind:value={selectedPregunta} required>
-									{#each PREGUNTAS_SEGURIDAD as pregunta}
+			<!-- Modal de preguntas de seguridad -->
+			<Modal bind:open={securityQuestionsModal} size="md" autoclose={false}>
+				<form
+					method="POST"
+					action="?/configurarPregunta"
+					use:enhance={handleSubmit}
+					class="space-y-6"
+				>
+					<h3 class="text-xl font-medium">Configurar Preguntas de Seguridad</h3>
+					<div class="space-y-4">
+						{#each securityQuestions as question, i}
+							<div class="space-y-4">
+								<div>
+									<Label for="pregunta{i}" class="space-y-2">Pregunta {i + 1}</Label>
+									<Select
+										name="pregunta{i}"
+										id="pregunta{i}"
+										bind:value={question.pregunta}
+										required
+									>
+										{#each PREGUNTAS_SEGURIDAD.filter(p => 
+										!securityQuestions.some((q, index) => index !== i && q.pregunta === p)
+									) as pregunta}
 										<option value={pregunta}>{pregunta}</option>
 									{/each}
-								</Select>
+									</Select>
+								</div>
+								<div>
+									<Label for="respuesta{i}" class="space-y-2">Respuesta {i + 1}</Label>
+									<Input
+										type="text"
+										name="respuesta{i}"
+										id="respuesta{i}"
+										bind:value={question.respuesta}
+										required
+									/>
+								</div>
 							</div>
-							<div>
-								<Label for="respuesta" class="space-y-2">Respuesta</Label>
-								<Input
-									type="text"
-									name="respuesta"
-									id="respuesta"
-									required
-									bind:value={securityAnswer}
-								/>
-							</div>
-							<div>
-								<Label for="currentPasswordSQ" class="space-y-2">Contraseña Actual</Label>
-								<Input
-									type="password"
-									name="currentPassword"
-									id="currentPasswordSQ"
-									required
-									bind:value={currentPasswordSQ}
-								/>
-							</div>
-								<Button type="submit" class="w-full" disabled={!canSubmitQuestion || loading}>
-									{loading ? 'Configurando...' : 'Configurar Pregunta'}
-								</Button>
+						{/each}
+						<div class="flex justify-end gap-4">
+							<Button color="alternative" onclick={() => (securityQuestionsModal = false)}
+								>Cancelar</Button
+							>
+							<Button type="submit" disabled={!canSubmitQuestions || loading}>
+								{loading ? 'Guardando...' : 'Guardar Preguntas'}
+							</Button>
 						</div>
-					</form>
-				</Card>
-			</div>
+					</div>
+				</form>
+			</Modal>
 		</div>
 	</div>
 </div>

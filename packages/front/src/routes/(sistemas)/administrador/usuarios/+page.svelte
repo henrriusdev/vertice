@@ -219,15 +219,15 @@
                     />
                 </div>
             </div>
-            {#snippet footer()}
-                <div class="flex justify-between items-center w-full">
-                    <div>
-                        <Button type="button" color="alternative" onclick={() => (modalVisible = false)}>Cancelar</Button>
-                        <Button type="submit" color="primary" onclick={() => formEl?.requestSubmit()}>{isEditing ? 'Actualizar' : 'Guardar'}</Button>
-                    </div>
-                    <ToastContainer />
-                </div>
-            {/snippet}
         </form>
+        {#snippet footer()}
+            <div class="flex justify-between items-center w-full">
+                <div>
+                    <Button type="button" color="alternative" onclick={() => (modalVisible = false)}>Cancelar</Button>
+                    <Button type="submit" color="primary" onclick={() => formEl?.requestSubmit()}>{isEditing ? 'Actualizar' : 'Guardar'}</Button>
+                </div>
+                <ToastContainer />
+            </div>
+        {/snippet}
     </Modal>
 </div>

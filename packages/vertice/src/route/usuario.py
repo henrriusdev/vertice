@@ -279,12 +279,10 @@ async def change_password():
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 @usr.post('/force-password')
-@jwt_required()
 async def force_password():
     try:
-        claims = get_jwt()
-        correo = claims.get('sub')
         datos = request.json
+        correo = datos.get('correo')
         password = datos.get('password')
 
         if not password:

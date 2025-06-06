@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Datepicker } from '$lib';
-	import { Input, Button, Label, Select, Card, NumberInput } from 'flowbite-svelte';
+	import { Input, Button, Label, Select, Card } from 'flowbite-svelte';
 	import { format, parse } from 'date-fns';
 	import { toZonedTime } from 'date-fns-tz';
 	import { enhance } from '$app/forms';
@@ -91,7 +91,7 @@
 
 			<div>
 				<Label for="num_cuotas">Número de cuotas</Label>
-				<NumberInput id="num_cuotas" name="num_cuotas" min={1} max={12} bind:value={num_cuotas} />
+				<Input type="number"  id="num_cuotas" name="num_cuotas" min={1} max={12} bind:value={num_cuotas} />
 			</div>
 
 			<div>
@@ -113,7 +113,7 @@
 			<p class="text-sm text-gray-500">Entre todos los porcentajes se debe sumar 100%</p>
 			<div class="grid md:grid-cols-3 gap-2">
 				{#each Array(num_porcentaje) as _, i}
-					<NumberInput
+					<Input type="number" 
 						min={0}
 						max={100}
 						inputmode="numeric"

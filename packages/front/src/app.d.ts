@@ -192,6 +192,12 @@ export interface Nota {
 	promedio: number;
 }
 
+export interface PreguntaSeguridad{
+	pregunta: string
+	respuesta: string;
+	orden: number;
+}
+
 declare global {
 	namespace App {
 		interface Locals {

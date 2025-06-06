@@ -11,24 +11,23 @@ export const PREGUNTAS_SEGURIDAD = [
 
 export async function configurarPreguntaSeguridad(
     fetch: typeof window.fetch,
-    pregunta: string,
-    respuesta: string
+    preguntas: Array<{ pregunta: string; respuesta: string }>
 ) {
     const res = await fetch(`${API}/configurar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pregunta, respuesta })
+        body: JSON.stringify(preguntas)
     });
 
     if (!res.ok) {
         const err = await res.json();
-        throw new Error(err?.data?.message ?? 'Error al configurar pregunta');
+        throw new Error(err?.data?.message ?? 'Error al configurar preguntas');
     }
 
     return await res.json();
 }
 
-export async function obtenerPreguntaSeguridad(
+export async function obtenerPreguntasSeguridad(
     fetch: typeof window.fetch,
     correo: string
 ) {
@@ -36,21 +35,23 @@ export async function obtenerPreguntaSeguridad(
     
     if (!res.ok) {
         const err = await res.json();
-        throw new Error(err?.data?.message ?? 'Error al obtener pregunta');
+        throw new Error(err?.data?.message ?? 'Error al obtener preguntas');
     }
 
     return await res.json();
 }
 
+
 export async function verificarPreguntaSeguridad(
     fetch: typeof window.fetch,
     correo: string,
-    respuesta: string
+    respuesta: string,
+    orden: number
 ) {
     const res = await fetch(`${API}/verificar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo, respuesta })
+        body: JSON.stringify({ correo, respuesta, orden })
     });
 
     if (!res.ok) {

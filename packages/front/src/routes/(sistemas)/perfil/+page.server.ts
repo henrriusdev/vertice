@@ -47,33 +47,36 @@ export const actions: Actions = {
 
 	configurarPregunta: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const pregunta = data.get('pregunta') as string;
-		const respuesta = data.get('respuesta') as string;
-		const password = data.get('currentPassword') as string;
+		const preguntas = [];
 
-		if (!pregunta || !respuesta || !password) {
-			return {
-				type: 'failure',
-				message: 'Todos los campos son requeridos'
+		// Recolectar las 3 preguntas y respuestas
+		for (let i = 0; i < 3; i++) {
+			const pregunta = data.get(`pregunta${i}`) as string;
+			const respuesta = data.get(`respuesta${i}`) as string;
+
+			if (!pregunta || !respuesta) {
+				return {
+					type: 'failure',
+					message: 'Todas las preguntas y respuestas son requeridas'
+				}
 			}
+
+			preguntas.push({ pregunta, respuesta });
 		}
 
 		try {
-			// Primero verificamos la contraseña actual
-			await cambiarPassword(fetch, password, password);
-			
-			// Si la contraseña es correcta, configuramos la pregunta
-			await configurarPreguntaSeguridad(fetch, pregunta, respuesta);
+			// Configurar todas las preguntas en un solo request
+			await configurarPreguntaSeguridad(fetch, preguntas);
 
 			return {
 				type: 'success',
-				message: 'Pregunta de seguridad configurada correctamente'
+				message: 'Preguntas de seguridad configuradas correctamente'
 			};
 		} catch (e) {
 			console.error(e);
 			return {
 				type: 'failure',
-				message: e instanceof Error ? e.message : 'Error al configurar la pregunta de seguridad'
+				message: e instanceof Error ? e.message : 'Error al configurar las preguntas de seguridad'
 			};
 		}
 	}
