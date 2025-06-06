@@ -267,7 +267,7 @@
 </script>
 
 <!-- Main layout container with fixed height and no overflow -->
-<div class="flex w-full h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+<div class="flex flex-row-reverse w-full h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
 	<!-- Sidebar - fixed height with its own scrollbar -->
 	<Sidebar
 		activeUrl={rutaActual}
@@ -373,21 +373,21 @@
 	<div class="flex flex-col flex-1 h-screen overflow-hidden">
 		<!-- Navbar - fixed at top -->
 		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
-			<div class="flex items-center justify-start">
-				<Button color="light" class="mr-2 md:mr-4 !p-2" size="xs" onclick={toggleSidebar}>
+			<div class="flex items-center justify-between w-full">
+				<Breadcrumb aria-label="Migas de pan" class="hidden md:flex">
+					{#each migasDePan as miga, index}
+					<BreadcrumbItem href={miga.href} home={index === 0}>
+						{mapeoRutas[miga.href] || miga.titulo}
+					</BreadcrumbItem>
+					{/each}
+				</Breadcrumb>
+				<Button color="light" class="!p-2" size="xs" onclick={toggleSidebar}>
 					{#if sidebarOpen}
 						<ChevronLeftOutline class="w-5 h-5" />
 					{:else}
 						<ChevronRightOutline class="w-5 h-5" />
 					{/if}
 				</Button>
-				<Breadcrumb aria-label="Migas de pan" class="hidden md:flex">
-					{#each migasDePan as miga, index}
-						<BreadcrumbItem href={miga.href} home={index === 0}>
-							{mapeoRutas[miga.href] || miga.titulo}
-						</BreadcrumbItem>
-					{/each}
-				</Breadcrumb>
 			</div>
 		</Navbar>
 
