@@ -111,7 +111,7 @@
 <DataTable data={docentesFiltrados} {actions}></DataTable>
 
     <Modal title={isEditing ? 'Editar Docente' : 'Nuevo Docente'} bind:open={modalVisible} size="lg">
-        <form action={isEditing ? '?/edit' : '?/create'} method="POST" bind:this={formEl}>
+        <form action={isEditing ? '?/edit' : '?/create'} method="POST" bind:this={formEl} class="min-h-[520px]">
             {#if isEditing}
                 <input type="hidden" name="id_docente" value={docenteActual!.id}/>
                 <input type="hidden" name="id" value={docenteActual!?.usuario}/>
@@ -172,14 +172,15 @@
                             required
                     />
                 </div>
-                <div class="md:col-span-2">
-                    <Label for="fecha_ingreso" class="mb-2">Fecha e ingreso</Label>
+                <div class="md:col-span-2 z-50">
+                    <Label for="fecha_ingreso" class="mb-2">Fecha de ingreso</Label>
                     <Datepicker
                             id="fecha_ingreso"
                             name="fecha_ingreso"
                             maxDate={new Date()}
                             bind:value={docenteActual.fecha_ingreso}
                     />
+                    <input type="hidden" name="fecha_ingreso" value={docenteActual.fecha_ingreso?.toISOString().split('T')[0] ?? ''}/>
                 </div>
             </div>
         </form>
