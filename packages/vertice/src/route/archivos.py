@@ -241,7 +241,7 @@ async def exportar_archivo_trazabilidad():
     try:
         data = request.json
         formato = data.get("formato")
-        if formato not in {"pdf", "csv", "excel"}:
+        if formato not in {"pdf", "csv", "xlsx"}:
             return jsonify({
                 "ok": False,
                 "status": 400,
@@ -298,7 +298,7 @@ async def generar_archivo_trazabilidad(data: list[dict], formato: str, filtros=N
         df.to_csv(buffer, index=False)
         return buffer.getvalue(), nombre, "text/csv"
 
-    if formato == "excel":
+    if formato == "xlsx":
         buffer = BytesIO()
         with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False)
