@@ -64,7 +64,7 @@ export async function logout(fetch: typeof window.fetch, token: string): Promise
 
 export async function crearUsuario(
 	fetch: typeof window.fetch,
-	usuario: Partial<Usuario & { password: string }>
+	usuario: Partial<Usuario>
 ) {
 	const res = await fetch(`${API}/register`, {
 		method: 'POST',

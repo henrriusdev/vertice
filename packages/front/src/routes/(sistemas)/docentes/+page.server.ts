@@ -10,6 +10,7 @@ import {
 import { redirect } from '@sveltejs/kit';
 import type { Usuario } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
+import { format } from 'date-fns';
 
 export type ErroresDocente = {
 	cedula?: string;
@@ -46,9 +47,12 @@ export const actions: Actions = {
 		
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, false);
 		if (Object.keys(errores).length > 0) {
+			const errorString = Object.entries(errores)
+				.map(([campo, mensaje]) => `${campo}: ${mensaje}`)
+				.join(', ');
 			return {
 				type: 'failure',
-				message: 'Errores en los datos del formulario'
+				message: errorString
 			};
 		}
 		const usuario: Partial<Usuario & { rol_id: number }> = {
@@ -71,7 +75,7 @@ export const actions: Actions = {
 		const docente: DocenteReq = {
 			titulo: payload.titulo,
 			especialidad: payload.especialidad,
-			fecha_ingreso: payload.fecha_ingreso,
+			fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
 			usuario_id: usuario.id,
 		};
 
@@ -99,7 +103,9 @@ export const actions: Actions = {
 		if (Object.keys(errores).length > 0) {
 			return {
 				type: 'failure',
-				message: 'Errores en los datos del formulario'
+				message: Object.entries(errores)
+					.map(([campo, mensaje]) => `${campo}: ${mensaje}`)
+					.join(', ')
 			};
 		}
 
@@ -121,7 +127,7 @@ export const actions: Actions = {
 		const docente: DocenteReq = {
 			titulo: payload.titulo,
 			especialidad: payload.especialidad,
-			fecha_ingreso: payload.fecha_ingreso,
+			fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
 			usuario_id: payload.id,
 		};
 
@@ -174,8 +180,6 @@ function validarPayload(
 		'especialidad',
 		'fecha_ingreso',
 	];
-
-	if (!isEditing) camposBase.push('password');
 
 	for (const campo of camposBase) {
 		const valor = payload[campo];

@@ -5,6 +5,8 @@
     import ToastContainer from '$lib/componentes/ToastContainer.svelte';
     import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
     import type {Docente} from '../../../../app';
+	import { resolver } from '$lib/utilidades/resolver';
+	import { enhance } from '$app/forms';
 
     // Datos de la página
     let {data} = $props();
@@ -81,6 +83,12 @@
         isEditing = false;
         modalVisible = true;
     }
+
+    function handleSubmit() {
+        return resolver(() => {
+            modalVisible = false;
+        });    
+    }
 </script>
 
 <div class="w-full">
@@ -111,7 +119,7 @@
 <DataTable data={docentesFiltrados} {actions}></DataTable>
 
     <Modal title={isEditing ? 'Editar Docente' : 'Nuevo Docente'} bind:open={modalVisible} size="lg">
-        <form action={isEditing ? '?/edit' : '?/create'} method="POST" bind:this={formEl} class="min-h-[520px]">
+        <form action={isEditing ? '?/edit' : '?/create'} use:enhance={handleSubmit} method="POST" bind:this={formEl} class="min-h-[520px]">
             {#if isEditing}
                 <input type="hidden" name="id_docente" value={docenteActual!.id}/>
                 <input type="hidden" name="id" value={docenteActual!?.usuario}/>

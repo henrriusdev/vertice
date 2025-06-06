@@ -210,6 +210,7 @@
 						maxYear={new Date().getFullYear() - 16}
 						bind:value={estudianteActual.fecha_nac}
 					/>
+					<input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''} />
 				</div>
 				<div class="md:col-span-2">
 					<Label for="correo" class="mb-2">Correo Electrónico</Label>

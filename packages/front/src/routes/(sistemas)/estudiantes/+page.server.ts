@@ -34,8 +34,13 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 	}
 	try {
 		const res = await obtenerEstudiantes(fetch);
+		console.log(res)
+		const estudiantes = res.map((est) => ({
+			...est,
+			fecha_nacimiento: format(new Date(est.fecha_nacimiento), 'dd/MM/yyyy')
+		}));
 		const carreras = await obtenerCarreras(fetch);
-		return { carreras, estudiantes: res };
+		return { carreras, estudiantes };
 	} catch (error) {
 		console.error('Error al obtener carreras:', error);
 		return { carreras: [], estudiantes: [] };
@@ -45,13 +50,16 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 export const actions: Actions = {
 	create: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as EstudianteReq &
-			(Usuario & { password: string });
+			(Usuario);
 		
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, false);
 		if (Object.keys(errores).length > 0) {
+			const errorString = Object.entries(errores)
+				.map(([campo, mensaje]) => `${campo}: ${mensaje}`)
+				.join(', ');
 			return {
-				success: false,
-				message: 'Errores en los datos del formulario'
+				type: 'failure',
+				message: errorString
 			};
 		}
 		const usuario: Partial<Usuario & { rol_id: number }> = {
@@ -60,7 +68,6 @@ export const actions: Actions = {
 			correo: payload.correo,
 			activo: true,
 			nombre: payload.nombre,
-			password: payload.password,
 			rol_id: 5
 		};
 
@@ -69,13 +76,16 @@ export const actions: Actions = {
 			usuario.id = data.id;
 		} catch (error) {
 			console.error('Error al crear usuario:', error);
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			return { 
+				type: 'failure', 
+				message: error instanceof Error ? error.message : 'Error desconocido' 
+			};
 		}
 
 		const estudiante: EstudianteReq = {
 			carrera: payload.carrera,
 			edad: payload.edad,
-			fecha_nac: format(payload.fecha_nac, "dd/MM/yyyy"),
+			fecha_nac: format(new Date(payload.fecha_nac), "dd/MM/yyyy"),
 			direccion: payload.direccion,
 			semestre: payload.semestre,
 			sexo: payload.sexo,
@@ -86,13 +96,16 @@ export const actions: Actions = {
 		try {
 			await crearEstudiante(fetch, estudiante);
 			return {
-				success: true,
+				type: 'success',
 				message: 'Estudiante creado exitosamente',
 				invalidate: true
 			};
 		} catch (e) {
 			console.error('Error al crear estudiante:', e);
-			return { success: false, message: e instanceof Error ? e.message : 'Error desconocido' };
+			return { 
+				type: 'failure', 
+				message: e instanceof Error ? e.message : 'Error desconocido' 
+			};
 		}
 	},
 
@@ -102,9 +115,12 @@ export const actions: Actions = {
 		
 		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, true);
 		if (Object.keys(errores).length > 0) {
+			const errorString = Object.entries(errores)
+				.map(([campo, mensaje]) => `${campo}: ${mensaje}`)
+				.join(', ');
 			return {
-				success: false,
-				message: 'Errores en los datos del formulario'
+				type: 'failure',
+				message: errorString
 			};
 		}
 
@@ -120,13 +136,16 @@ export const actions: Actions = {
 			await actualizarUsuario(fetch, payload.id, usuario);
 		} catch (error) {
 			console.error('Error al editar usuario:', error);
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			return { 
+				type: 'failure', 
+				message: error instanceof Error ? error.message : 'Error desconocido' 
+			};
 		}
 
 		const estudiante: EstudianteReq = {
 			carrera: payload.carrera,
 			edad: payload.edad,
-			fecha_nac: format(payload.fecha_nac, 'dd/MM/yyyy'),
+			fecha_nac: format(new Date(payload.fecha_nac), 'dd/MM/yyyy'),
 			direccion: payload.direccion,
 			semestre: payload.semestre,
 			sexo: payload.sexo,
@@ -137,13 +156,16 @@ export const actions: Actions = {
 		try {
 			await actualizarEstudiante(fetch, payload.id_estudiante, estudiante);
 			return {
-				success: true,
+				type: 'success',
 				message: 'Estudiante actualizado exitosamente',
 				invalidate: true
 			};
 		} catch (e: any) {
 			console.error('Error al actualizar estudiante:', e);
-			return { success: false, message: e instanceof Error ? e.message : 'Error desconocido' };
+			return { 
+				type: 'failure', 
+				message: e instanceof Error ? e.message : 'Error desconocido' 
+			};
 		}
 	},
 
@@ -154,13 +176,16 @@ export const actions: Actions = {
 		try {
 			await eliminarEstudiante(fetch, cedula);
 			return {
-				success: true,
+				type: 'success',
 				message: 'Estudiante eliminado exitosamente',
 				invalidate: true
 			};
 		} catch (error) {
 			console.error('Error al eliminar estudiante:', error);
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			return { 
+				type: 'failure', 
+				message: error instanceof Error ? error.message : 'Error desconocido' 
+			};
 		}
 	}
 };
@@ -180,7 +205,6 @@ function validarPayload(payload: Record<string, string | number | boolean>, isEd
 		'direccion'
 	];
 
-	if (!isEditing) camposBase.push('password');
 	if (isEditing) camposBase.push('activo');
 
 	for (const campo of camposBase) {
