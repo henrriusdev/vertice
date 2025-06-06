@@ -18,7 +18,7 @@ async def init_db():
         "administrador",
         "caja",
         "control",
-        "coordinacion",
+        "coordinador",
         "estudiante",
         "docente",
     ]
