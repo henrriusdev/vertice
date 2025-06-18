@@ -76,8 +76,8 @@
         modalVisible = true;
     }
 
-    const handleSubmit: SubmitFunction = () => {
-        return resolver(() => modalVisible = false);
+    const handleSubmit: SubmitFunction = ({formElement}) => {
+        return resolver(() => formElement.reset());
     };
 
     const downloadSubmit: SubmitFunction = () => {
@@ -88,6 +88,14 @@
         descargando = true;
         return resolver(() => descargando = false);
     };
+
+    const onSearch = (key: keyof Usuario, row: Usuario) => {
+        if (key.toLowerCase() === 'rol') {
+            return row.nombre[0].toUpperCase() + row.nombre.slice(1)
+        }
+
+        return ""
+    }
 </script>
 
 <div class="w-full">
@@ -160,7 +168,7 @@
         </form>
     </div>
 {/snippet}
-<DataTable data={usuariosFiltrados} {actions}></DataTable>
+<DataTable data={usuariosFiltrados} {actions} {onSearch}></DataTable>
 
     <Modal
             title={isEditing ? 'Editar Usuario' : 'Nuevo Usuario'}

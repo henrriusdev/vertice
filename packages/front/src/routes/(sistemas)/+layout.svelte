@@ -95,7 +95,7 @@
 		}
 
 		loading = true;
-		return resolver(() => {loading = false; cambiarClave = false;});
+		return resolver(() => {loading = false; cambiarClave = false; window.location.reload()});
 	}
 
 	// Función para alternar el estado del sidebar
@@ -229,10 +229,8 @@
 	// Mapeo de rutas a nombres más amigables en español
 	const mapeoRutas: { [key: string]: string } = {
 		'/': 'Inicio',
-		'/panel': 'Panel de Control',
 		'/usuarios': 'Gestión de Usuarios',
-		'/documentos': 'Documentos',
-		'/configuracion': 'Configuración'
+		'/configuracion': 'Configuración del Sistema'
 	};
 
 	// Verificar si el usuario tiene acceso a una ruta específica
@@ -267,7 +265,7 @@
 </script>
 
 <!-- Main layout container with fixed height and no overflow -->
-<div class="flex flex-row-reverse w-full h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+<div class="flex w-full h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
 	<!-- Sidebar - fixed height with its own scrollbar -->
 	<Sidebar
 		activeUrl={rutaActual}
@@ -373,14 +371,7 @@
 	<div class="flex flex-col flex-1 h-screen overflow-hidden">
 		<!-- Navbar - fixed at top -->
 		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
-			<div class="flex items-center justify-between w-full">
-				<Breadcrumb aria-label="Migas de pan" class="hidden md:flex">
-					{#each migasDePan as miga, index}
-					<BreadcrumbItem href={miga.href} home={index === 0}>
-						{mapeoRutas[miga.href] || miga.titulo}
-					</BreadcrumbItem>
-					{/each}
-				</Breadcrumb>
+			<div class="flex items-center justify-start gap-6 w-full">
 				<Button color="light" class="!p-2" size="xs" onclick={toggleSidebar}>
 					{#if sidebarOpen}
 						<ChevronLeftOutline class="w-5 h-5" />
@@ -388,6 +379,13 @@
 						<ChevronRightOutline class="w-5 h-5" />
 					{/if}
 				</Button>
+				<Breadcrumb aria-label="Migas de pan" class="hidden md:flex">
+					{#each migasDePan as miga, index}
+					<BreadcrumbItem href={miga.href} home={index === 0}>
+						{mapeoRutas[miga.href] || miga.titulo}
+					</BreadcrumbItem>
+					{/each}
+				</Breadcrumb>
 			</div>
 		</Navbar>
 
@@ -444,9 +442,6 @@
 								{/if}
 							</div>
 							<div class="flex justify-end gap-4">
-								<Button color="alternative" onclick={() => cambiarClave = false}>
-									Cancelar
-								</Button>
 								<Button type="submit" disabled={loading}>
 									{loading ? 'Actualizando...' : 'Actualizar Contraseña'}
 								</Button>

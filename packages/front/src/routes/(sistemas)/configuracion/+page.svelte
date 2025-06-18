@@ -4,6 +4,7 @@
 	import { format, parse } from 'date-fns';
 	import { toZonedTime } from 'date-fns-tz';
 	import { enhance } from '$app/forms';
+	import { resolver } from '$lib/utilidades/resolver.js';
 
 	let { data } = $props();
 
@@ -22,7 +23,6 @@
 			? toZonedTime(config.horario_fin, 'UTC')
 			: toZonedTime(parse('2025-05-15', 'yyyy-MM-dd', new Date()), 'UTC')
 	});
-	let filtroCarrera: number | null = $state(data.rol === 'coordinador' ? data.carrera_id : null);
 	let porcentajes = $state<number[]>(config?.porcentajes ?? [30, 30, 40]);
 	let cuotas = $state<Date[]>(
 		config?.cuotas
@@ -42,9 +42,7 @@
 
 <form
 	use:enhance={() => {
-		return async ({ update }) => {
-			await update();
-		};
+		return resolver(()=>{})
 	}}
 	method="post"
 	class="flex h-full w-full justify-center items-center"

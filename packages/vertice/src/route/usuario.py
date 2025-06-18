@@ -310,3 +310,39 @@ async def force_password():
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@usr.post('/first-reset-password')
+@jwt_required()
+async def first_reset_password():
+    try:
+        claims = get_jwt()
+        correo = claims.get('sub')
+        datos = request.json
+        password = datos.get('password')
+
+        if not password:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "Token y nueva contraseña son requeridos"}}), 400
+
+        print(correo)
+        usuario = await get_usuario_por_correo(correo)
+        if not usuario:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
+
+        usuario.password = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)
+        usuario.cambiar_clave = False
+        await usuario.save()
+
+        await add_trazabilidad({
+            'accion': f"Primer restablecimiento de contraseña del usuario: {usuario.nombre}",
+            'usuario': usuario,
+            'fecha': datetime.now(),
+            'modulo': "Usuarios",
+            'nivel_alerta': 2
+        })
+
+        return jsonify({"ok": True, "status": 200, "data": "Contraseña actualizada exitosamente"})
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500

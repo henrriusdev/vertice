@@ -157,7 +157,7 @@ export async function cambiarPassword(fetch: typeof window.fetch, currentPasswor
 }
 
 export async function forzarCambioPassword(fetch: typeof window.fetch, newPassword: string) {
-	const response = await fetch(`${API}/force-password`, {
+	const response = await fetch(`${API}/first-reset-password`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

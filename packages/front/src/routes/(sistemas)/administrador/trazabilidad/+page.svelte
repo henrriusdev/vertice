@@ -86,7 +86,6 @@
 		fechaDesde = new Date();
 		fechaHasta = new Date();
 		rolSeleccionado = '';
-		filtroForm!.reset();
 	}
 </script>
 
