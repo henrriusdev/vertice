@@ -35,7 +35,7 @@ async def login_usuario():
 
         access_token = create_access_token(
             identity=usuario.correo,
-            expires_delta=timedelta(hours=2),
+            expires_delta=timedelta(hours=8),
             additional_claims=claims
         )
 
