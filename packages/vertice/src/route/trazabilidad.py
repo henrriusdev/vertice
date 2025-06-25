@@ -6,7 +6,6 @@ from flask import Blueprint, jsonify, request
 from src.model import Usuario
 from src.service.trazabilidad import get_trazabilidad
 from flask_jwt_extended import jwt_required, get_jwt
-from src.middleware.sesion import unica_sesion_requerida
 
 trz = Blueprint('trazabilidad_blueprint', __name__)
 
@@ -48,7 +47,6 @@ def superuser_required():
 
 @trz.post('/')
 @jwt_required()
-@unica_sesion_requerida
 @superuser_required()
 async def list_trazabilidad():
     try:

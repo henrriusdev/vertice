@@ -42,7 +42,7 @@
 	const headers = $derived(
 		Object.keys(data[0] || {})
 			.filter(
-				(k) => k !== 'id' && !['usuario', 'activo', 'ultima_sesion', 'billetes', 'horarios', 'notas', 'cambiar_clave', 'pregunta_configurada'].includes(k)
+                                (k) => k !== 'id' && !['usuario', 'activo', 'billetes', 'horarios', 'notas', 'cambiar_clave', 'pregunta_configurada'].includes(k)
 			)
 			// place nombre first, and then the rest
 			.sort((a, b) =>

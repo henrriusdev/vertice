@@ -15,14 +15,12 @@ from src.service.pagos import (
     update_pago
 )
 from src.service.trazabilidad import add_trazabilidad
-from src.middleware.sesion import unica_sesion_requerida
 
 pago = Blueprint("pagos_blueprint", __name__)
 
 
 @pago.route("/")
 @jwt_required()
-@unica_sesion_requerida
 async def get_pagos():
     claims = get_jwt()
     usuario = claims.get('nombre')
@@ -40,7 +38,6 @@ async def get_pagos():
 
 @pago.route("/<int:id>")
 @jwt_required()
-@unica_sesion_requerida
 async def get_pago(id):
     claims = get_jwt()
     usuario = claims.get('nombre')
@@ -60,7 +57,6 @@ async def get_pago(id):
 
 @pago.route("/add", methods=["POST"])
 @jwt_required()
-@unica_sesion_requerida
 async def crear_pago():
     try:
         body = request.json
@@ -116,7 +112,6 @@ async def crear_pago():
 
 @pago.route("/update/<int:id>", methods=["PUT"])
 @jwt_required()
-@unica_sesion_requerida
 async def update_pago_route(id):
     claims = get_jwt()
     usuario = claims.get('nombre')
@@ -161,7 +156,6 @@ def pdf_response(html: str, filename: str):
 
 @pago.get("/reporte")
 @jwt_required()
-@unica_sesion_requerida
 async def generar_reporte():
     tipo = request.args.get("tipo")              # dia | fechas | monto
     filtro = request.args.get("f", "")           # filtro por método
@@ -191,7 +185,6 @@ async def generar_reporte():
 
 @pago.route("/estudiante")
 @jwt_required()
-@unica_sesion_requerida
 async def get_pagos_by_estudiante():
     cedula = request.args.get("cedula")
     if not cedula:
@@ -237,7 +230,6 @@ async def get_pagos_by_estudiante():
 
 @pago.route("/total")
 @jwt_required()
-@unica_sesion_requerida
 async def total_recaudado():
     desde = datetime.strptime(request.args.get("desde"), "%Y-%m-%d")
     hasta = datetime.strptime(request.args.get("hasta"), "%Y-%m-%d")
@@ -253,7 +245,6 @@ async def total_recaudado():
 
 @pago.route("/por-tipo")
 @jwt_required()
-@unica_sesion_requerida
 async def pagos_por_tipo():
     desde = request.args.get("desde")
     hasta = request.args.get("hasta")
@@ -277,7 +268,6 @@ async def pagos_por_tipo():
 
 @pago.route("/por-dia")
 @jwt_required()
-@unica_sesion_requerida
 async def pagos_por_dia():
     dias = int(request.args.get("dias", 7))
     pagos = (await get_all_pagos())["pagos"]

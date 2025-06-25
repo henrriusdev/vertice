@@ -13,13 +13,11 @@ from src.service.peticiones import (
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
-from src.middleware.sesion import unica_sesion_requerida
 
 ptc = Blueprint('peticion_blueprint', __name__)
 
 @ptc.route('/')
 @jwt_required()
-@unica_sesion_requerida
 async def get_all_peticiones():
     try:
         claims = get_jwt()
@@ -39,7 +37,6 @@ async def get_all_peticiones():
 
 @ptc.route('/<id>')
 @jwt_required()
-@unica_sesion_requerida
 async def get_one_peticion(id):
     try:
         claims = get_jwt()
@@ -61,7 +58,6 @@ async def get_one_peticion(id):
 
 @ptc.route('/pendientes')
 @jwt_required()
-@unica_sesion_requerida
 async def get_pending_peticiones():
     try:
         claims = get_jwt()
@@ -81,7 +77,6 @@ async def get_pending_peticiones():
 
 @ptc.route('/add', methods=["POST"])
 @jwt_required()
-@unica_sesion_requerida
 async def create_peticion():
     try:
         claims = get_jwt()
@@ -108,7 +103,6 @@ async def create_peticion():
 
 @ptc.route('/update/<id>', methods=["PATCH"])
 @jwt_required()
-@unica_sesion_requerida
 async def patch_peticion(id):
     try:
         data = request.json
@@ -127,7 +121,6 @@ async def patch_peticion(id):
 
 @ptc.route('/delete/<id>', methods=["DELETE"])
 @jwt_required()
-@unica_sesion_requerida
 async def remove_peticion(id):
     try:
         claims = get_jwt()
