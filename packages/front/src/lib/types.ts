@@ -54,11 +54,10 @@ export type MateriaReq = {
 	ht: number;
 	semestre: number;
 	id_carrera: string;
-	ciclo: string;
-	modalidad?: string;
-	maximo?: number;
-	id_docente?: string;
-	horarios: { dia: string; inicio: string; fin: string }[];
+        ciclo: string;
+        maximo?: number;
+        id_docente?: string;
+        horarios: { dia: string; inicio: string; fin: string }[];
 }
 
 export type Peticion = {

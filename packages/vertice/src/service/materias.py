@@ -30,7 +30,6 @@ async def get_materias(carrera_id=None):
                 "ht": m.ht,
                 "semestre": m.semestre,
                 "id_carrera": m.id_carrera_id,  # usar el id directamente
-                "modalidad": m.modalidad,
                 "maximo": m.maximo,
                 "id_docente": m.id_docente_id,
                 "horarios": horarios
@@ -95,7 +94,6 @@ async def add_materia(materia: dict):
             id_carrera_id=str(materia["id_carrera"]),
             id_docente_id=str(materia.get("id_docente", "")),
             horarios=horarios,
-            modalidad=str(materia.get("modalidad", "presencial")),
             maximo=safe_int(materia.get("maximo"), defaults["maximo"])
         )
 
@@ -131,7 +129,6 @@ async def update_materia(materia: dict):
         m.id_carrera_id = materia["id_carrera"]
         m.id_docente_id = materia["id_docente"]
         m.horarios = horarios
-        m.modalidad = materia["modalidad"]
         m.maximo = materia["maximo"]
 
         await m.save()
@@ -198,7 +195,6 @@ async def get_materias_validas(cedula_estudiante: str):
                 "semestre": materia.semestre,
                 "id_carrera": materia.id_carrera_id,
                 "id_docente": materia.id_docente_id,
-                "modalidad": materia.modalidad,
                 "maximo": materia.maximo,
                 "horarios": horarios,
                 "cantidad_estudiantes": count,
@@ -328,7 +324,6 @@ async def listar_materias_asignadas():
                 "id_docente": m.id_docente_id,
                 "horarios": horarios,
                 "maximo": m.maximo,
-                "modalidad": m.modalidad,
                 "carrera": m.id_carrera.nombre if m.id_carrera else None,
                 "docente": {
                     "cedula": usuario.cedula,

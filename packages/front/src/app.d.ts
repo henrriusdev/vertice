@@ -75,10 +75,9 @@ export type Materia = {
 	semestre: number;
 	id_carrera: number;
 	horarios: Horario[];
-	ciclo: string;
-	modalidad: string;
-	maximo: number;
-	id_docente: number;
+        ciclo: string;
+        maximo: number;
+        id_docente: number;
 };
 
 export type Metodo_pago = {

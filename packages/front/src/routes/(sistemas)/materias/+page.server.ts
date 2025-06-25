@@ -49,11 +49,10 @@ export const actions: Actions = {
 			semestre: safeNumber(form.get('semestre'), 1),
 			id_carrera: safeNumber(form.get('id_carrera')).toString(),
 			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
-			ciclo: form.get('ciclo')?.toString() || '',
-			modalidad: form.get('modalidad')?.toString() || 'presencial',
-			maximo: safeNumber(form.get('maximo'), 30),
-			id_docente: safeNumber(form.get('id_docente')).toString()
-		};
+                        ciclo: form.get('ciclo')?.toString() || '',
+                        maximo: safeNumber(form.get('maximo'), 30),
+                        id_docente: safeNumber(form.get('id_docente')).toString()
+                };
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
@@ -97,11 +96,10 @@ export const actions: Actions = {
 			semestre: safeNumber(form.get('semestre'), 1),
 			id_carrera: safeNumber(form.get('id_carrera')).toString(),
 			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
-			ciclo: form.get('ciclo')?.toString() as string,
-			modalidad: form.get('modalidad')?.toString() as string,
-			maximo: safeNumber(form.get('maximo'), 30),
-			id_docente: safeNumber(form.get('id_docente')).toString()
-		};
+                        ciclo: form.get('ciclo')?.toString() as string,
+                        maximo: safeNumber(form.get('maximo'), 30),
+                        id_docente: safeNumber(form.get('id_docente')).toString()
+                };
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
@@ -150,11 +148,10 @@ function validarPayload(
 	const errores: Record<string, string> = {};
 	const camposBase: (keyof typeof payload)[] = [
 		'nombre',
-		'semestre',
-		'id_carrera',
-		'modalidad',
-		'maximo'
-	];
+                'semestre',
+                'id_carrera',
+                'maximo'
+        ];
 
 	for (const campo of camposBase) {
 		const valor = payload[campo];
