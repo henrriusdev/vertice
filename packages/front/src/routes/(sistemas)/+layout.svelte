@@ -118,7 +118,7 @@
 			titulo: 'Docentes',
 			icono: UsersOutline,
 			href: '/docentes',
-			roles: ['administrador', 'coordinador', 'control']
+                        roles: ['administrador', 'coordinador']
 		},
 		{
 			titulo: 'Estudiantes',
@@ -130,7 +130,7 @@
 			titulo: 'Materias',
 			icono: ListOutline,
 			href: '/materias',
-			roles: ['coordinador', 'control']
+                        roles: ['coordinador']
 		},
 		{
 			titulo: 'Usuarios',

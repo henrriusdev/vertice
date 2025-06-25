@@ -189,7 +189,6 @@ async def get_materias_inscritas(cedula: str):
         for m in matriculas:
             join["ciclo"] = m.ciclo  # El último ciclo queda guardado, puedes normalizar si necesitas múltiples
             join["contenido"].append({
-                "modalidad": m.cod_materia.modalidad,
                 "asignatura": f"{m.cod_materia.id} {m.cod_materia.nombre}"
             })
 

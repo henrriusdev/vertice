@@ -26,12 +26,11 @@
 		ht: number;
 		semestre: number;
 		id_carrera: string;
-		ciclo: string;
-		modalidad: string;
-		maximo: number;
-		id_docente: string;
-		horarios: Horario[];
-	}
+                ciclo: string;
+                maximo: number;
+                id_docente: string;
+                horarios: Horario[];
+        }
 
 	const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -44,12 +43,11 @@
 		ht: 0,
 		semestre: 1,
 		id_carrera: '',
-		ciclo: '',
-		modalidad: '',
-		maximo: 0,
-		id_docente: '',
-		horarios: []
-	});
+                ciclo: '',
+                maximo: 0,
+                id_docente: '',
+                horarios: []
+        });
 
 	let formEl: HTMLFormElement;
 	let horarios: Horario[] = $state([]);
@@ -117,9 +115,8 @@
 				ht: 0,
 				semestre: 1,
 				id_carrera: '',
-				ciclo: '',
-				modalidad: 'presencial',
-				maximo: 30,
+                                ciclo: '',
+                                maximo: 30,
 				id_docente: '',
 				horarios: []
 			};
@@ -311,20 +308,6 @@
 					placeholder="Seleccione"
 				></Select>
 				<Input type="hidden" name="id_carrera" bind:value={form.id_carrera} />
-			</div>
-			<div>
-				<Label for="modalidad" class="mb-2">Modalidad</Label>
-				<Select
-					id="modalidad"
-					name="modalidad"
-					bind:value={form.modalidad}
-					class="input"
-					items={[
-						{ value: 'presencial', name: 'Presencial' },
-						{ value: 'virtual', name: 'Virtual' }
-					]}
-					placeholder="Seleccione"
-				/>
 			</div>
 			<div class="col-span-3">
 				<Label for="id_docente" class="mb-2">Docente</Label>
