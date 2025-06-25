@@ -10,8 +10,6 @@ from .carrera import *
 from .configuracion import *
 from .matricula import *
 from .metodo_pago import *
-from .sesion_activa import *
 from .trazabilidad import *
 from .billete import *
-from .sesion_activa import *
 from .pregunta_seguridad import *

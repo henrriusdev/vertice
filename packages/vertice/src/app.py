@@ -5,7 +5,7 @@ from src.database.db import init_db
 from src.settings import settings
 from asgiref.wsgi import WsgiToAsgi
 
-from src.route import pagos, usuario, docente, carreras, materias, billete, coordinacion, peticiones, config, archivos, trazabilidad, sesiones, estudiantes, pregunta_seguridad
+from src.route import pagos, usuario, docente, carreras, materias, billete, coordinacion, peticiones, config, archivos, trazabilidad, estudiantes, pregunta_seguridad
 
 def create_app():
     app = Flask(__name__, template_folder="template")
@@ -27,7 +27,6 @@ def create_app():
         (materias.mat,     '/api/materias'),
         (pagos.pago,       '/api/pagos'),
         (peticiones.ptc,   '/api/peticiones'),
-        (sesiones.ses,     '/api/sesiones'),
         (usuario.usr,      '/api/usuario'),
         (trazabilidad.trz, '/api/trazabilidad'),
         (pregunta_seguridad.preg, '/api/pregunta-seguridad'),

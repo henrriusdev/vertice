@@ -4,7 +4,6 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 from werkzeug.security import generate_password_hash
 
-from src.middleware.sesion import unica_sesion_requerida
 from src.model.pregunta_seguridad import PreguntaSeguridad
 from src.model.usuario import Usuario
 from src.service.trazabilidad import add_trazabilidad
@@ -14,7 +13,6 @@ preg = Blueprint('pregunta_seguridad_blueprint', __name__)
 
 @preg.post('/configurar')
 @jwt_required()
-@unica_sesion_requerida
 async def configurar_pregunta():
     try:
         claims = get_jwt()
