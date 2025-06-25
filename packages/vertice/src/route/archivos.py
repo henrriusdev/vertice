@@ -10,7 +10,6 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
 from werkzeug.security import generate_password_hash 
 
-from src.middleware.sesion import unica_sesion_requerida
 from src.model import Configuracion, Estudiante, Docente, Coordinador, Usuario, Rol, Carrera
 from src.route.trazabilidad import superuser_required
 from src.service.estudiantes import obtener_info_estudiante_para_constancia
@@ -40,8 +39,6 @@ def create_folder_if_not_exists(folder_path):
 
 @arc.post("/planificacion")
 @jwt_required()
-@unica_sesion_requerida
-@unica_sesion_requerida
 async def upload_file():
     try:
         claims = get_jwt()
@@ -75,7 +72,6 @@ async def upload_file():
 
 @arc.get("/download/<folder>")
 @jwt_required()
-@unica_sesion_requerida
 async def download_file(folder: str):
     try:
         claims = get_jwt()
@@ -117,7 +113,6 @@ async def download_file(folder: str):
 
 @arc.delete('/delete')
 @jwt_required()
-@unica_sesion_requerida
 async def delete_file():
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -150,7 +145,6 @@ async def delete_file():
 
 @arc.get('/materias_asignadas')
 @jwt_required()
-@unica_sesion_requerida
 def materias_asignadas():
     try:
         data = listar_materias_asignadas()
@@ -168,7 +162,6 @@ def materias_asignadas():
 
 @arc.get('/notas/<string:materia_id>/reporte')
 @jwt_required()
-@unica_sesion_requerida
 async def reporte_notas_pdf(materia_id):
     try:
         claims = get_jwt()
@@ -207,7 +200,6 @@ async def reporte_notas_pdf(materia_id):
 
 @arc.get('/estudiantes/<string:cedula>/constancia')
 @jwt_required()
-@unica_sesion_requerida
 async def constancia_estudios(cedula):
     try:
         estudiante = await obtener_info_estudiante_para_constancia(cedula)  # ← tú defines este servicio
@@ -235,7 +227,6 @@ async def constancia_estudios(cedula):
 
 @arc.post('/trazabilidad/exportar')
 @jwt_required()
-@unica_sesion_requerida
 @superuser_required()
 async def exportar_archivo_trazabilidad():
     try:
@@ -325,7 +316,6 @@ async def generar_archivo_trazabilidad(data: list[dict], formato: str, filtros=N
 
 @arc.post("/usuarios/importar")
 @jwt_required()
-@unica_sesion_requerida
 async def importar_usuarios():
     try:
         claims = get_jwt()
@@ -437,7 +427,6 @@ async def importar_usuarios():
 
 @arc.get("/excel")
 @jwt_required()
-@unica_sesion_requerida
 async def descargar_excel():
     try:
         file_path = path.abspath(EXCEL_PATH)

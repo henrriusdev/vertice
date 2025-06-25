@@ -18,12 +18,6 @@ export interface PromedioCarrera {
     promedio: number;
 }
 
-// Tipos para las sesiones
-export interface Sesion {
-    usuario: string;
-    fecha: string;
-    estado: 'activa' | 'inactiva';
-}
 
 // Tipos para los pagos
 export interface Pago {
@@ -44,7 +38,6 @@ export interface PageData {
     estadisticas: Estadisticas;
     distribucionCarreras: DistribucionCarrera[];
     promediosCarreras: PromedioCarrera[];
-    sesiones: Sesion[];
     pagos: Pago[];
     peticiones: Peticion[];
 }

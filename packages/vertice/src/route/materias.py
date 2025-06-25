@@ -9,7 +9,6 @@ from src.service.materias import (
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
-from src.middleware.sesion import unica_sesion_requerida
 from src.service.coordinadores import get_coordinador_by_usuario
 
 
@@ -17,7 +16,6 @@ mat = Blueprint('materia_blueprint', __name__)
 
 @mat.route('/')
 @jwt_required()
-@unica_sesion_requerida
 async def get_all_materias():
     claims = get_jwt()
     correo = claims.get('sub')
@@ -41,7 +39,6 @@ async def get_all_materias():
 
 @mat.route('/<id>')
 @jwt_required()
-@unica_sesion_requerida
 async def obtener_materia(id: str):
     usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = await get_materia(id)
@@ -53,7 +50,6 @@ async def obtener_materia(id: str):
 
 @mat.route('/inscribir/<cedula_estudiante>', methods=['GET'])
 @jwt_required()
-@unica_sesion_requerida
 async def materias_validas(cedula_estudiante: str):
     usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     try:
@@ -68,7 +64,6 @@ async def materias_validas(cedula_estudiante: str):
 
 @mat.route('/add', methods=['POST'])
 @jwt_required()
-@unica_sesion_requerida
 async def crear_materia():
     usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = request.json
@@ -83,7 +78,6 @@ async def crear_materia():
 
 @mat.route('/update/<id_materia>', methods=['PUT'])
 @jwt_required()
-@unica_sesion_requerida
 async def modificar_materia(id_materia: str):
     usuario = await get_usuario_por_correo(get_jwt().get('sub'))
     data = request.json
@@ -99,7 +93,6 @@ async def modificar_materia(id_materia: str):
 
 @mat.route('/delete/<id>', methods=['DELETE'])
 @jwt_required()
-@unica_sesion_requerida
 async def eliminar_materia(id):
     usuario = get_jwt().get('nombre')
     try:
@@ -112,7 +105,6 @@ async def eliminar_materia(id):
 
 @mat.route("/upload", methods=["PATCH"])
 @jwt_required()
-@unica_sesion_requerida
 async def modificar_materia_estudiante_route():
     try:
         claims = get_jwt()

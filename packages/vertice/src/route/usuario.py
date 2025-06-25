@@ -2,12 +2,10 @@ import traceback
 from datetime import timedelta, datetime
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, decode_token, jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from src.middleware.sesion import unica_sesion_requerida
 from src.model.usuario import Usuario
-from src.service.sesiones import eliminar_sesion_por_jti, registrar_sesion
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import bloquear_usuario, delete_usuario, get_usuarios, login, reactivar_usuario, \
     update_password, get_usuario_por_correo, registrar_usuario, update_usuario
@@ -39,10 +37,6 @@ async def login_usuario():
             additional_claims=claims
         )
 
-        # Extraer jti del token generado
-        jti = decode_token(access_token)["jti"]
-
-        await registrar_sesion(usuario.correo, jti)
 
         await add_trazabilidad({
             "accion": f"Inicio de sesión del usuario: {usuario.correo}",
@@ -68,15 +62,8 @@ async def login_usuario():
 
 @usr.post('/logout')
 @jwt_required()
-@unica_sesion_requerida
 async def logout_usuario():
     try:
-        jti = get_jwt().get("jti")
-
-        eliminado = await eliminar_sesion_por_jti(jti)
-        if not eliminado:
-            return jsonify({"ok": False, "status": 404, "data": {"message": "Sesión no encontrada"}}), 404
-
         return jsonify({"ok": True, "status": 200, "data": "Sesión cerrada correctamente"})
     except Exception as ex:
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
@@ -84,7 +71,6 @@ async def logout_usuario():
 
 @usr.get('/refresh')
 @jwt_required()
-@unica_sesion_requerida
 async def refresh_usuario():
     try:
         correo = get_jwt_identity()
@@ -102,7 +88,6 @@ async def refresh_usuario():
 
 @usr.patch('/update-password')
 @jwt_required()
-@unica_sesion_requerida
 async def update_usuario_password():
     try:
         claims = get_jwt()
@@ -136,7 +121,6 @@ async def update_usuario_password():
 
 @usr.get('/')
 @jwt_required()
-@unica_sesion_requerida
 async def obtener_usuarios():
     try:
         usuarios = await get_usuarios()
@@ -182,7 +166,6 @@ async def registrar():
 
 @usr.put('/update/<int:id>')
 @jwt_required()
-@unica_sesion_requerida
 async def update(id):
     try:
         payload = request.json
@@ -195,7 +178,6 @@ async def update(id):
 
 @usr.patch("/bloquear/<correo>")
 @jwt_required()
-@unica_sesion_requerida
 async def bloquear(correo):
     try:
         claims = get_jwt()
@@ -213,7 +195,6 @@ async def bloquear(correo):
 
 @usr.patch("/reactivar/<correo>")
 @jwt_required()
-@unica_sesion_requerida
 async def reactivar(correo):
     try:
         claims = get_jwt()
@@ -231,7 +212,6 @@ async def reactivar(correo):
 
 @usr.delete('/delete/<cedula>')
 @jwt_required()
-@unica_sesion_requerida
 async def delete(cedula):
     try:
         await delete_usuario(cedula)
@@ -242,7 +222,6 @@ async def delete(cedula):
 
 @usr.patch('/change-password')
 @jwt_required()
-@unica_sesion_requerida
 async def change_password():
     try:
         claims = get_jwt()

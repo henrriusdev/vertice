@@ -14,13 +14,11 @@ from src.service.coordinadores import (
 from src.service.estudiantes import get_notas_estudiante
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
-from src.middleware.sesion import unica_sesion_requerida
 
 crd = Blueprint('coordinacion_blueprint', __name__)
 
 @crd.route('/')
 @jwt_required()
-@unica_sesion_requerida
 async def listar_coordinadores():
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -30,7 +28,6 @@ async def listar_coordinadores():
 
 @crd.route('/<cedula>')
 @jwt_required()
-@unica_sesion_requerida
 async def obtener_coordinador(cedula):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -42,7 +39,6 @@ async def obtener_coordinador(cedula):
 
 @crd.route('/add', methods=['POST'])
 @jwt_required()
-@unica_sesion_requerida
 async def nuevo_coordinador():
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -53,7 +49,6 @@ async def nuevo_coordinador():
 
 @crd.route('/update/<int:id_coordinador>', methods=['PUT'])
 @jwt_required()
-@unica_sesion_requerida
 async def actualizar_coordinador(id_coordinador):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -64,7 +59,6 @@ async def actualizar_coordinador(id_coordinador):
 
 @crd.route('/delete/<cedula>', methods=['DELETE'])
 @jwt_required()
-@unica_sesion_requerida
 async def eliminar_coordinador(cedula):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -74,7 +68,6 @@ async def eliminar_coordinador(cedula):
 
 @crd.route('/materias/<cedula>', methods=['GET'])
 @jwt_required()
-@unica_sesion_requerida
 async def obtener_notas_estudiante(cedula):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
@@ -84,7 +77,6 @@ async def obtener_notas_estudiante(cedula):
 
 @crd.route('/promedio-ponderado/<cedula_estudiante>', methods=['GET'])
 @jwt_required()
-@unica_sesion_requerida
 async def promedio_ponderado(cedula_estudiante):
     usuario = get_jwt_identity()
     if usuario != cedula_estudiante:
