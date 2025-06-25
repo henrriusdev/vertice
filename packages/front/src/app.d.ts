@@ -37,12 +37,11 @@ export type Docente = {
 	nombre: string;
 	correo: string;
 	usuario: number;
-	titulo: string;
-	dedicacion: string;
-	especialidad: string;
-	estatus: string;
-	fecha_ingreso: string;
-	observaciones: string;
+        titulo: string;
+        dedicacion: string;
+        estatus: string;
+        fecha_ingreso: string;
+        observaciones: string;
 };
 
 export type Estudiante = {

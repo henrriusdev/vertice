@@ -77,7 +77,10 @@
     }
 
     const handleSubmit: SubmitFunction = ({formElement}) => {
-        return resolver(() => formElement.reset());
+        return resolver(() => {
+            formElement.reset();
+            modalVisible = false;
+        });
     };
 
     const downloadSubmit: SubmitFunction = () => {

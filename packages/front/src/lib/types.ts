@@ -11,10 +11,9 @@ export type EstudianteReq = {
 };
 
 export type DocenteReq = {
-	usuario_id: number;
-	titulo: string;
-	especialidad: string;
-	fecha_ingreso: string;
+        usuario_id: number;
+        titulo: string;
+        fecha_ingreso: string;
 };
 
 export type CoordinadorReq = {

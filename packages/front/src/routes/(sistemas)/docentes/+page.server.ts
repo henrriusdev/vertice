@@ -13,14 +13,13 @@ import type { Actions, PageServerLoad } from './$types';
 import { format } from 'date-fns';
 
 export type ErroresDocente = {
-	cedula?: string;
-	nombre?: string;
-	correo?: string;
-	password?: string;
-	titulo?: string;
-	especialidad?: string;
-	fecha_ingreso?: string;
-	activo?: string;
+        cedula?: string;
+        nombre?: string;
+        correo?: string;
+        password?: string;
+        titulo?: string;
+        fecha_ingreso?: string;
+        activo?: string;
 };
 
 
@@ -72,12 +71,11 @@ export const actions: Actions = {
 			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 
-		const docente: DocenteReq = {
-			titulo: payload.titulo,
-			especialidad: payload.especialidad,
-			fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
-			usuario_id: usuario.id,
-		};
+                const docente: DocenteReq = {
+                        titulo: payload.titulo,
+                        fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
+                        usuario_id: usuario.id
+                };
 
 		try {
 			await crearDocente(fetch, docente);
@@ -124,12 +122,11 @@ export const actions: Actions = {
 			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 
-		const docente: DocenteReq = {
-			titulo: payload.titulo,
-			especialidad: payload.especialidad,
-			fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
-			usuario_id: payload.id,
-		};
+                const docente: DocenteReq = {
+                        titulo: payload.titulo,
+                        fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
+                        usuario_id: payload.id
+                };
 
 		try {
 			await actualizarDocente(fetch, payload.id_docente, docente);
@@ -172,14 +169,13 @@ function validarPayload(
 	const errores: ErroresDocente = {};
 
 	// Campos requeridos comunes
-	const camposBase: (keyof ErroresDocente)[] = [
-		'cedula',
-		'nombre',
-		'correo',
-		'titulo',
-		'especialidad',
-		'fecha_ingreso',
-	];
+        const camposBase: (keyof ErroresDocente)[] = [
+                'cedula',
+                'nombre',
+                'correo',
+                'titulo',
+                'fecha_ingreso'
+        ];
 
 	for (const campo of camposBase) {
 		const valor = payload[campo];

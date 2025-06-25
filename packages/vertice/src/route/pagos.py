@@ -103,7 +103,7 @@ async def crear_pago():
             }
             await add_billete(billete_data)
 
-        return jsonify({"ok": True, "pago_id": pago_id})
+        return jsonify({"type": "success", "data": {"pago_id": pago_id}})
 
     except Exception as e:
         traceback.print_exc()

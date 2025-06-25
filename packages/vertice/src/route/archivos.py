@@ -397,7 +397,6 @@ async def importar_usuarios():
                     datos = {
                         "usuario_id": usuario.id,
                         "titulo": row["Titulo"] if "Titulo" in row and pd.notna(row["Titulo"]) else "",
-                        "especialidad": row["Especialidad"] if "Especialidad" in row and pd.notna(row["Especialidad"]) else "",
                         "fecha_ingreso": row["Fecha ingreso"] if "Fecha ingreso" in row and pd.notna(row["Fecha ingreso"]) else None,
                     }
                 elif rol == "coordinador":
