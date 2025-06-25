@@ -18,13 +18,13 @@ export const actions = {
 		try {
 			const { usuario, token } = await login(fetch, correo, password);
 
-			cookies.set('sesion', token, {
-				path: '/',
-				httpOnly: true,
-				sameSite: 'strict',
-				secure: false, // true en producción
-				maxAge: 60 * 60 * 2 // 2h
-			});
+                        cookies.set('sesion', token, {
+                                path: '/',
+                                httpOnly: true,
+                                sameSite: 'strict',
+                                secure: false, // true en producción
+                                maxAge: 60 * 60 * 8 // 8h
+                        });
 
 			destino = `/${usuario.rol.nombre.toLowerCase()}`;
 			return {
