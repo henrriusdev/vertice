@@ -23,7 +23,6 @@
         correo: string;
         fecha_ingreso: Date | string;
         titulo: string;
-        especialidad: string;
         usuario: number;
     }> = $state({
         cedula: '',
@@ -51,7 +50,6 @@
                 data?.docentes.filter(
                     (est) =>
                         est?.dedicacion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        est?.especialidad?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         est?.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         est.fecha_ingreso.toLowerCase().includes(searchTerm.toLowerCase())
                 ) ?? [];
@@ -64,7 +62,6 @@
         docentes.filter(
             (est) =>
                 est?.dedicacion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                est?.especialidad?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 est?.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 est.fecha_ingreso.toLowerCase().includes(searchTerm.toLowerCase())
         ) ?? []
@@ -167,16 +164,6 @@
                             name="titulo"
                             placeholder="Ingrese el titulo"
                             value={docenteActual!.titulo}
-                            required
-                    />
-                </div>
-                <div class="md:col-span-2">
-                    <Label for="especialidad" class="mb-2">Especialidad</Label>
-                    <Input
-                            id="especialidad"
-                            name="especialidad"
-                            placeholder="Ingrese la especialidad"
-                            value={docenteActual!.nombre}
                             required
                     />
                 </div>

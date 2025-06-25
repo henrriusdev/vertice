@@ -17,7 +17,6 @@ async def get_docentes():
                 "correo": d.usuario.correo,
                 "usuario": d.usuario.id,
                 "titulo": d.titulo,
-                "especialidad": d.especialidad,
                 "fecha_ingreso": format_fecha(d.fecha_ingreso) if d.fecha_ingreso else None,
             })
         return resultado
@@ -34,7 +33,6 @@ async def get_docente(id: int):
             "nombre": d.usuario.nombre,
             "correo": d.usuario.correo,
             "titulo": d.titulo,
-            "especialidad": d.especialidad,
             "fecha_ingreso": format_fecha(d.fecha_ingreso) if d.fecha_ingreso else None,
         }
     except DoesNotExist:
@@ -42,13 +40,12 @@ async def get_docente(id: int):
     except Exception as ex:
         raise Exception(ex)
 
-async def add_docente(usuario_id: int, titulo: str, especialidad: str, fecha_ingreso=None):
+async def add_docente(usuario_id: int, titulo: str, fecha_ingreso=None):
     try:
         usuario = await Usuario.get(id=usuario_id)
         docente = Docente(
             usuario=usuario,
             titulo=titulo,
-            especialidad=especialidad,
             fecha_ingreso=parse_fecha(fecha_ingreso) if fecha_ingreso else None,
         )
         await docente.save()

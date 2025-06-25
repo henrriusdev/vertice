@@ -333,8 +333,7 @@ async def listar_materias_asignadas():
                 "docente": {
                     "cedula": usuario.cedula,
                     "nombre": usuario.nombre,
-                    "titulo": docente.titulo,
-                    "especialidad": docente.especialidad
+                    "titulo": docente.titulo
                 }
             })
 
