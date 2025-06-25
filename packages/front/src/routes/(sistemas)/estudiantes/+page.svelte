@@ -132,7 +132,7 @@
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Estudiantes</h1>
-		{#if data.rol !== 'coordinador'}
+               {#if data.rol !== 'coordinador' && data.rol !== 'caja'}
 			<Button color="blue" onclick={crearEstudiante}>
 				<PlusOutline class="mr-2 h-5 w-5" />
 				Registrar
@@ -146,7 +146,7 @@
 
 	{#snippet actions(row: Estudiante)}
 		<div class="flex gap-2">
-			{#if data.rol !== 'coordinador'}
+                       {#if data.rol !== 'coordinador' && data.rol !== 'caja'}
 				<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
 					<PenOutline class="w-5 h-5" />
 				</Button>
