@@ -6,13 +6,13 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Button, Input, Label, Modal, MultiSelect, Select } from 'flowbite-svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import {
-		EyeOutline,
-		InfoCircleOutline,
-		PenOutline,
-		PlusOutline,
-		TrashBinOutline,
-		UsersGroupOutline
+        import {
+                CalendarMonthOutline,
+                InfoCircleOutline,
+                PenOutline,
+                PlusOutline,
+                TrashBinOutline,
+                UsersGroupOutline
 	} from 'flowbite-svelte-icons';
 	import type { Horario, Materia } from '../../../app';
 	import type { PageData } from './$types';
@@ -238,9 +238,9 @@
 				<UsersGroupOutline class="w-5 h-5" />
 			</Button>
 		{/if}
-		<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
-			<EyeOutline class="w-5 h-5" />
-		</Button>
+                <Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
+                        <CalendarMonthOutline class="w-5 h-5" />
+                </Button>
 	</div>
 {/snippet}
 

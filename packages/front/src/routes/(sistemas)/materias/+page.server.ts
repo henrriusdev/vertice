@@ -11,10 +11,11 @@ import type { Actions, PageServerLoad } from './$types';
 import type { MateriaReq } from '$lib/types';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
-	const { rol } = await parent();
-	if (!['control', 'administrador', 'coordinador'].includes(rol)) {
-		redirect(302, '/' + rol);
-	}
+        const { rol } = await parent();
+        // la gestión de materias solo está disponible para administradores y coordinadores
+        if (!['administrador', 'coordinador'].includes(rol)) {
+                redirect(302, '/' + rol);
+        }
 
 	try {
 		const data = await obtenerMaterias(fetch);

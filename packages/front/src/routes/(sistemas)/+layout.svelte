@@ -126,12 +126,12 @@
 			href: '/estudiantes',
 			roles: ['administrador', 'caja', 'coordinador']
 		},
-		{
-			titulo: 'Materias',
-			icono: ListOutline,
-			href: '/materias',
-                        roles: ['coordinador']
-		},
+                {
+                        titulo: 'Materias',
+                        icono: ListOutline,
+                        href: '/materias',
+                        roles: ['administrador', 'coordinador']
+                },
 		{
 			titulo: 'Usuarios',
 			icono: UsersOutline,
@@ -159,7 +159,7 @@
 		{
 			titulo: 'Pagos',
 			icono: ReceiptOutline,
-			href: '/caja/pagos',
+                       href: '/caja/pagos/registrar',
 			roles: ['caja']
 		},
 		{

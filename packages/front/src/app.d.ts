@@ -85,14 +85,15 @@ export type Metodo_pago = {
 };
 
 export type Pago = {
-	id: number;
-	cedula_estudiante: number | Estudiante;
-	metodo_pago: Metodo_pago | number;
-	monto: number;
-	concepto: string;
-	fecha_pago: string;
-	referencia_transferencia: string;
-	ciclo: string;
+        id: number;
+        cedula_estudiante: number | Estudiante;
+        metodo_pago: Metodo_pago | number;
+        monto: number;
+        concepto: string;
+        fecha_pago: string;
+        referencia_transferencia: string;
+        ciclo: string;
+        tasa_divisa?: number;
 };
 
 export type Peticion = {

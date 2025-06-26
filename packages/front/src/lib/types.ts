@@ -28,10 +28,11 @@ export type Billete = {
 };
 
 export type Pago = {
-	id: number;
-	fecha: string; // formateado dd-mm-YYYY
-	monto: string; // Bs. como string, ej: "300.00"
-	metodo: string; // "Transferencia", "Billete", etc.
+        id: number;
+        fecha: string; // formateado dd-mm-YYYY
+        monto: string; // Bs. como string, ej: "300.00"
+        tasa?: string;
+        metodo: string; // "Transferencia", "Billete", etc.
 	descripcion: string;
 	ciclo: string;
 	referencia?: string;
