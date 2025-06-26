@@ -67,6 +67,7 @@ async def crear_pago():
         concepto: str = body.get('concept')
         fecha_pago_str: str = body.get('date')
         referencia: str = body.get('reference')
+        tasa_divisa: float | None = body.get('exchange_rate')
         ciclo: str = body.get('ciclo', '2025-1')
         billetes = body.get('billetes', [])
         print(cedula_str)
@@ -91,7 +92,8 @@ async def crear_pago():
             "concepto": concepto,
             "fecha_pago": datetime.strptime(fecha_pago_str, "%Y-%m-%d"),
             "referencia_transferencia": referencia,
-            "ciclo": ciclo
+            "ciclo": ciclo,
+            "tasa_divisa": Decimal(tasa_divisa) if tasa_divisa else None
         })
 
         # Agregar billetes directamente
@@ -214,6 +216,7 @@ async def get_pagos_by_estudiante():
             "id": pago.id,
             "fecha": pago.fecha_pago.strftime("%d-%m-%Y"),
             "monto": str(pago.monto),
+            "tasa": str(pago.tasa_divisa) if pago.tasa_divisa else None,
             "metodo": metodo,
             "descripcion": pago.concepto,
             "ciclo": pago.ciclo,

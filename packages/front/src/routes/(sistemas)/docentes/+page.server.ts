@@ -25,10 +25,11 @@ export type ErroresDocente = {
 
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
-	const { rol } = await parent();
-	if (!['control', 'administrador', 'coordinador'].includes(rol)) {
-		redirect(302, '/' + rol);
-	}
+        const { rol } = await parent();
+        // solo administradores y coordinadores pueden acceder a la vista de docentes
+        if (!['administrador', 'coordinador'].includes(rol)) {
+                redirect(302, '/' + rol);
+        }
 	try {
 		const res = await obtenerDocentes(fetch);
 		return { docentes: res };
