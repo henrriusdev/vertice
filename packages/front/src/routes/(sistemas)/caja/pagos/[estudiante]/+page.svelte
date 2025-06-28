@@ -15,6 +15,10 @@
 		selectedPago = pago;
 		open = true;
 	}
+
+	function onSearch() {
+		return "N/A";
+	}
 </script>
 
 <h2 class="text-xl font-bold text-center mt-6 mb-4">
@@ -29,7 +33,7 @@
 			</Button>
 		</div>
 	{/snippet}
-	<DataTable data={pagos} {actions} />
+	<DataTable data={pagos} {actions} onSearch={onSearch} />
 {:else}
 	<p class="text-center">No hay pagos registrados</p>
 {/if}

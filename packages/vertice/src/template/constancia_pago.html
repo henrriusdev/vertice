@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constancia de Pago</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid #ddd;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #1e3a8a;
+      padding-bottom: 10px;
+    }
+    .logo {
+      width: 150px;
+      height: auto;
+    }
+    h1 {
+      color: #1e3a8a;
+      margin: 10px 0;
+    }
+    .info-section {
+      margin-bottom: 20px;
+    }
+    .info-row {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    .info-label {
+      font-weight: bold;
+      width: 180px;
+    }
+    .info-value {
+      flex: 1;
+    }
+    .payment-details {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f9fafb;
+      border-radius: 5px;
+    }
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #666;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+    .signature-section {
+      margin-top: 60px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .signature {
+      width: 45%;
+      text-align: center;
+      border-top: 1px solid #333;
+      padding-top: 10px;
+    }
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      opacity: 0.1;
+      font-size: 100px;
+      color: #1e3a8a;
+      z-index: -1;
+      white-space: nowrap;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="watermark">VERTICE</div>
+    
+    <div class="header">
+      <h1>CONSTANCIA DE PAGO</h1>
+      <p>Instituto Universitario de Tecnología VERTICE</p>
+      <p>RIF: J-123456789</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-row">
+        <div class="info-label">Fecha de Emisión:</div>
+        <div class="info-value">{{ fecha_emision }}</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Número de Recibo:</div>
+        <div class="info-value">{{ pago_id }}</div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>Datos del Estudiante</h3>
+      <div class="info-row">
+        <div class="info-label">Nombre:</div>
+        <div class="info-value">{{ estudiante.nombre }}</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Cédula:</div>
+        <div class="info-value">{{ estudiante.cedula }}</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Carrera:</div>
+        <div class="info-value">{{ estudiante.carrera }}</div>
+      </div>
+    </div>
+
+    <div class="payment-details">
+      <h3>Detalles del Pago</h3>
+      <div class="info-row">
+        <div class="info-label">Concepto:</div>
+        <div class="info-value">{{ concepto }}</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Fecha de Pago:</div>
+        <div class="info-value">{{ fecha_pago }}</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Monto:</div>
+        <div class="info-value">{{ monto }} Bs.</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Tasa de Cambio:</div>
+        <div class="info-value">{{ tasa_divisa }} Bs./USD</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Equivalente en USD:</div>
+        <div class="info-value">{{ monto_usd }} USD</div>
+      </div>
+      <div class="info-row">
+        <div class="info-label">Método de Pago:</div>
+        <div class="info-value">{{ metodo_pago }}</div>
+      </div>
+      
+      {% if metodo_pago_id == 1 %}
+      <div class="info-row">
+        <div class="info-label">Referencia:</div>
+        <div class="info-value">{{ referencia }}</div>
+      </div>
+      {% endif %}
+      
+      {% if metodo_pago_id == 2 and billetes %}
+      <h4>Billetes Recibidos</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Serial</th>
+            <th>Monto (Bs.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for billete in billetes %}
+          <tr>
+            <td>{{ billete.serial }}</td>
+            <td>{{ billete.monto }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+
+    <div class="signature-section">
+      <div class="signature">
+        <p>{{ cajero }}</p>
+        <p>Cajero</p>
+      </div>
+      <div class="signature">
+        <p>{{ estudiante.nombre }}</p>
+        <p>Estudiante</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Este documento es una constancia oficial de pago emitida por el Instituto Universitario de Tecnología VERTICE.</p>
+      <p>Para cualquier consulta, por favor contacte a administracion@vertice.edu.ve</p>
+    </div>
+  </div>
+</body>
+</html>

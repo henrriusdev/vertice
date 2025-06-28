@@ -163,6 +163,12 @@
 			roles: ['caja']
 		},
 		{
+			titulo: 'Reportes de Pagos',
+			icono: ReceiptOutline,
+                       href: '/caja/pagos/reportes',
+			roles: ['caja']
+		},
+		{
 			titulo: 'Configuración',
 			icono: CogOutline,
 			href: '/configuracion',

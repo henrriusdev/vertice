@@ -27,8 +27,23 @@ export const crearPago = async (fetch: typeof window.fetch, pago: PagoCreate) =>
 		body: JSON.stringify(pago)
 	});
 	if (!res.ok) throw new Error('Error al crear el pago');
-        const data = await res.json();
-        return data.data as { pago_id: number };
+	
+	// Parse the response as JSON first
+	const data = await res.json();
+	
+	// Check if the response contains base64 PDF data
+	if (data.type === 'application/pdf' && 'base64' in data) {
+		// Return the base64 PDF data
+		return {
+			base64: data.base64,
+			filename: 'constancia_pago.pdf'
+		};
+	} else if (data.type === 'success' && data.data && 'pago_id' in data.data) {
+		// Handle legacy JSON response (fallback for backward compatibility)
+		return data.data as { pago_id: number };
+	} else {
+		throw new Error('Formato de respuesta desconocido');
+	}
 };
 
 export const generarReporte = async (fetch: typeof window.fetch, params: string) => {
@@ -38,7 +53,8 @@ export const generarReporte = async (fetch: typeof window.fetch, params: string)
 	const base64 = Buffer.from(arrayBuffer).toString('base64');
 
 	return {
-		base64
+		base64,
+		filename: 'reporte.pdf'
 	};
 };
 

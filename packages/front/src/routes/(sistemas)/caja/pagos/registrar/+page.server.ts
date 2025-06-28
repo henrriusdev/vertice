@@ -19,7 +19,7 @@ export const actions: Actions = {
 		const referencia = formData.get('referencia_transferencia') as string | null;
 		const billetesRaw = formData.getAll('billetes');
 
-                if (!student || !concept || !method || !amount || !fecha_pago || !tasa) {
+                if (!student || !concept || !method || !amount || !fecha_pago) {
 			return {
 				type: 'failure',
 				message: 'Por favor completa todos los campos'
@@ -50,17 +50,32 @@ export const actions: Actions = {
                 };
 
 		try {
-			await crearPago(fetch, payload);
-			return {
-				type: 'success',
-				message: 'Pago registrado exitosamente',
-				invalidate: true
-			};
-		} catch (e: any) {
+			// crearPago now returns a PDF blob as base64 or a pago_id object
+			const result = await crearPago(fetch, payload);
+			
+			// Check if we got a PDF response
+			if ('base64' in result) {
+				return {
+					base64: result.base64,
+					type: 'application/pdf',
+					message: 'Pago registrado exitosamente',
+					invalidate: true
+				};
+			} else {
+				// Fallback for backward compatibility
+				return {
+					type: 'success',
+					message: 'Pago registrado exitosamente',
+					invalidate: true,
+					pago_id: result.pago_id
+				};
+			}
+		} catch (e: Error | unknown) {
 			console.error('Error al registrar el pago:', e);
+			const errorMessage = e instanceof Error ? e.message : 'Error desconocido';
 			return {
 				type: 'failure',
-				message: e.message
+				message: errorMessage
 			};
 		}
 	},

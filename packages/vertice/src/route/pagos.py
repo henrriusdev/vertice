@@ -15,6 +15,7 @@ from src.service.pagos import (
     update_pago
 )
 from src.service.trazabilidad import add_trazabilidad
+from src.utils.reporte_pdf import env
 
 pago = Blueprint("pagos_blueprint", __name__)
 
@@ -73,7 +74,7 @@ async def crear_pago():
         print(cedula_str)
 
         # Buscar estudiante
-        estudiante = await Estudiante.get(usuario__cedula=cedula_str)
+        estudiante = await Estudiante.get(usuario__cedula=cedula_str).prefetch_related("usuario", "carrera")
         if not estudiante:
             return jsonify({"error": "Estudiante no encontrado"}), 404
 
@@ -83,6 +84,13 @@ async def crear_pago():
             "cash": 2,
             "point": 3
         }.get(metodo_pago, 3)
+        
+        # Mapear método de pago a nombre legible
+        metodo_pago_nombre = {
+            "transfer": "Transferencia",
+            "cash": "Efectivo",
+            "point": "Punto de Venta"
+        }.get(metodo_pago, "Otro")
 
         # Crear el pago
         pago_id = await add_pago({
@@ -97,6 +105,7 @@ async def crear_pago():
         })
 
         # Agregar billetes directamente
+        billetes_guardados = []
         for billete in billetes:
             billete_data = {
                 "serial": billete["serial"],
@@ -104,8 +113,48 @@ async def crear_pago():
                 "pago_id": pago_id
             }
             await add_billete(billete_data)
+            billetes_guardados.append(billete_data)
 
-        return jsonify({"type": "success", "data": {"pago_id": pago_id}})
+        # Obtener datos del usuario (cajero)
+        claims = get_jwt()
+        cajero = claims.get('nombre', 'Usuario del Sistema')
+        
+        # Calcular monto en USD
+        monto_decimal = Decimal(monto)
+        tasa_decimal = Decimal(tasa_divisa) if tasa_divisa else Decimal('1')
+        monto_usd = monto_decimal / tasa_decimal if tasa_decimal else Decimal('0')
+        
+        # Obtener datos adicionales del estudiante
+        carrera = await estudiante.carrera
+        usuario = await estudiante.usuario
+        
+        # Preparar datos para la plantilla
+        estudiante_data = {
+            "nombre": usuario.nombre,
+            "cedula": usuario.cedula,
+            "carrera": carrera.nombre if carrera else "No especificada"
+        }
+        
+        # Generar HTML para la constancia de pago
+        template = env.get_template("constancia_pago.html")
+        html = template.render(
+            fecha_emision=datetime.now().strftime("%d/%m/%Y"),
+            pago_id=pago_id,
+            estudiante=estudiante_data,
+            concepto=concepto,
+            fecha_pago=datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime("%d/%m/%Y"),
+            monto=str(monto_decimal),
+            tasa_divisa=str(tasa_decimal),
+            monto_usd=str(round(monto_usd, 2)),
+            metodo_pago=metodo_pago_nombre,
+            metodo_pago_id=metodo_pago_id,
+            referencia=referencia,
+            billetes=billetes_guardados,
+            cajero=cajero
+        )
+        
+        # Generar y devolver el PDF
+        return pdf_response(html, f"constancia_pago_{pago_id}.pdf")
 
     except Exception as e:
         traceback.print_exc()
@@ -142,45 +191,56 @@ async def update_pago_route(id):
         return jsonify({"ok": False, "status": 500, "data": {"message": "Error al actualizar"}}), 500
 
 
-def pdf_response(html: str, filename: str):
+def pdf_response(html: str, filename: str, as_json=True):
     pdf_io = BytesIO()
     HTML(string=html).write_pdf(pdf_io)
     pdf_io.seek(0)
-
-    return Response(
-        pdf_io.read(),
-        mimetype='application/pdf',
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}"
-        }
-    )
-
+    
+    if as_json:
+        import base64
+        pdf_bytes = pdf_io.read()
+        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        
+        return jsonify({
+            "type": "application/pdf",
+            "base64": pdf_base64,
+            "message": "Constancia de pago generada exitosamente"
+        })
+    else:
+        return Response(
+            pdf_io.read(),
+            mimetype='application/pdf',
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
 
 @pago.get("/reporte")
 @jwt_required()
 async def generar_reporte():
-    tipo = request.args.get("tipo")              # dia | fechas | monto
-    filtro = request.args.get("f", "")           # filtro por método
     claims = get_jwt()
     usuario = claims.get('nombre')
-    print(request.args)
+
+    tipo = request.args.get("tipo")
+    filtro = request.args.get("f")
+    as_json = request.args.get("json", "true").lower() == "true"
 
     if tipo == "dia":
         fecha_str = request.args.get("d")
         html = await generar_reporte_dia(fecha_str, filtro, usuario)
-        return pdf_response(html, f"reporte_dia_{fecha_str}.pdf")
+        return pdf_response(html, f"reporte_dia_{fecha_str}.pdf", as_json=as_json)
 
     elif tipo == "fechas":
         fi_str = request.args.get("fi")
         ff_str = request.args.get("ff")
         html = await generar_reporte_fechas(fi_str, ff_str, filtro, usuario)
-        return pdf_response(html, f"reporte_fechas_{fi_str}_to_{ff_str}.pdf")
+        return pdf_response(html, f"reporte_fechas_{fi_str}_to_{ff_str}.pdf", as_json=as_json)
 
     elif tipo == "monto":
         fi_str = request.args.get("fi")
         ff_str = request.args.get("ff")
         html = await generar_reporte_monto(fi_str, ff_str, usuario)
-        return pdf_response(html, f"reporte_montos_{fi_str}_to_{ff_str}.pdf")
+        return pdf_response(html, f"reporte_montos_{fi_str}_to_{ff_str}.pdf", as_json=as_json)
 
     return Response("Tipo de reporte inválido", status=400)
 

@@ -4,10 +4,10 @@
 </script>
 
 <div class="flex flex-col items-center gap-6 mt-8">
-        <Button color="blue" size="lg" on:click={() => goto('/caja/pagos/registrar')}>
+        <Button color="blue" size="lg" onclick={() => goto('/caja/pagos/registrar')}>
                 Registrar Pago
         </Button>
-        <Button color="purple" size="lg" on:click={() => goto('/caja/pagos/reportes')}>
+        <Button color="purple" size="lg" onclick={() => goto('/caja/pagos/reportes')}>
                 Reportes de Pagos
         </Button>
 </div>
