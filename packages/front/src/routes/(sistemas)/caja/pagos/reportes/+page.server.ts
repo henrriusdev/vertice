@@ -21,10 +21,12 @@ export const actions: Actions = {
                 }
 
                 try {
-                        const { base64 } = await generarReporte(fetch, params.toString());
+                        const { base64, filename } = await generarReporte(fetch, params.toString());
+                        console.log(filename)
                         return {
                                 base64,
                                 type: 'application/pdf',
+                                filename,
                                 message: 'Reporte generado exitosamente',
                                 invalidate: true
                         };

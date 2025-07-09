@@ -36,7 +36,7 @@ export const crearPago = async (fetch: typeof window.fetch, pago: PagoCreate) =>
 		// Return the base64 PDF data
 		return {
 			base64: data.base64,
-			filename: 'constancia_pago.pdf'
+			filename: 'constancia_pago'
 		};
 	} else if (data.type === 'success' && data.data && 'pago_id' in data.data) {
 		// Handle legacy JSON response (fallback for backward compatibility)
@@ -49,12 +49,11 @@ export const crearPago = async (fetch: typeof window.fetch, pago: PagoCreate) =>
 export const generarReporte = async (fetch: typeof window.fetch, params: string) => {
 	const res = await fetch(`${API}/reporte?${params}`);
 	if (!res.ok) throw new Error('Error al generar reporte');
-	const arrayBuffer = await res.arrayBuffer();
-	const base64 = Buffer.from(arrayBuffer).toString('base64');
+	const body = await res.json();
 
 	return {
-		base64,
-		filename: 'reporte.pdf'
+		base64: body.base64,
+		filename: 'reporte'
 	};
 };
 

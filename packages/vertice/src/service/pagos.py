@@ -85,7 +85,10 @@ async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str, usuario:
     fi = datetime.strptime(fi_str, "%Y-%m-%d")
     ff = datetime.strptime(ff_str, "%Y-%m-%d")
 
-    q = Q(fecha_pago__date__gte=fi.date(), fecha_pago__date__lte=ff.date())
+    inicio_dia = datetime.combine(fi.date(), datetime.min.time())
+    fin_dia = datetime.combine(ff.date(), datetime.max.time())
+    
+    q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
     if filtro:
         q &= Q(metodo_pago__nombre=filtro)
 
@@ -101,7 +104,11 @@ async def generar_reporte_monto(fi_str: str, ff_str: str, usuario: str):
     fi = datetime.strptime(fi_str, "%Y-%m-%d")
     ff = datetime.strptime(ff_str, "%Y-%m-%d")
 
-    q = Q(fecha_pago__date__gte=fi.date(), fecha_pago__date__lte=ff.date())
+    # Fix: Use datetime objects directly instead of date__gte/date__lte operators
+    inicio_dia = datetime.combine(fi.date(), datetime.min.time())
+    fin_dia = datetime.combine(ff.date(), datetime.max.time())
+    
+    q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
     pagos = await Pago.filter(q).prefetch_related("metodo_pago")
 
     return generar_html_montos(

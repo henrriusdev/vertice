@@ -129,7 +129,10 @@
                             id="cedula"
                             name="cedula"
                             placeholder="Ingrese la cédula"
-                            value={docenteActual?.cedula}
+                            value={docenteActual?.cedula || ''}
+                            oninput={(e) => {
+                                if (docenteActual) docenteActual.cedula = e.currentTarget.value;
+                            }}
                             required
                             use:imask={cedulaMask as any}
                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"

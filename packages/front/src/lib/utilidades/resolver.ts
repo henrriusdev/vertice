@@ -29,41 +29,65 @@ export const resolver = (setAction: () => void) => {
 
 		// 🎯 Si incluye base64 → generar archivo
 		if (data.base64 && data.type) {
-			// Convertir la cadena base64 a un Uint8Array
+			// Convert base64 to Uint8Array for file-type detection
 			const byteCharacters = atob(data.base64);
 			const byteArrays = new Uint8Array(byteCharacters.length);
 			for (let i = 0; i < byteCharacters.length; i++) {
 				byteArrays[i] = byteCharacters.charCodeAt(i);
 			}
 
-			// Intentamos detectar el tipo usando file-type a partir de los primeros bytes
-			const detectedType = await fileTypeFromBuffer(byteArrays);
+			// Default extension
 			let extension = 'bin';
-			if (detectedType && detectedType.ext) {
-				extension = detectedType.ext;
-			} else {
-				// Si file-type no logra determinar el tipo, verificamos si el contenido es texto plano
-				const texto = byteArrays.reduce((acc, code) => acc + String.fromCharCode(code), '');
-				if (/^[\x20-\x7E\r\n\t]+$/.test(texto)) {
-					// Es un archivo de texto, ahora comprobamos si puede ser CSV
-					const lines = texto.split(/\r?\n/);
-					// Tomamos la primera línea no vacía para analizar
-					const firstLine = lines.find(line => line.trim() !== "");
-					if (firstLine) {
-						// Contamos delimitadores comunes (coma o punto y coma)
-						const commaCount = firstLine.split(',').length - 1;
-						const semicolonCount = firstLine.split(';').length - 1;
-						if (commaCount >= 1 || semicolonCount >= 1) {
-							extension = 'csv';
-						} else {
-							extension = 'txt';
-						}
-					} else {
-						extension = 'txt';
-					}
+
+			// Try to detect file type using file-type library
+			try {
+				// Log the first few bytes for debugging
+				const firstBytes = byteArrays.slice(0, 8);
+				console.log('First bytes:', Array.from(firstBytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
+				
+				// Use fileTypeFromBuffer for detection
+				const detectedType = await fileTypeFromBuffer(byteArrays);
+				console.log('Detected type:', detectedType);
+				
+				if (detectedType && detectedType.ext) {
+					// Use the detected extension
+					extension = detectedType.ext;
+					console.log(`File type detected: ${detectedType.mime}, using extension .${extension}`);
 				} else {
-					// Como fallback final, se extrae la extensión del MIME type enviado por el backend
-					extension = data.type.split('/')[1] || 'bin';
+					// If file-type fails, check for PDF signature manually
+					// PDF files start with %PDF- (hex: 25 50 44 46 2D)
+					if (byteArrays.length >= 5 &&
+						byteArrays[0] === 0x25 && // %
+						byteArrays[1] === 0x50 && // P
+						byteArrays[2] === 0x44 && // D
+						byteArrays[3] === 0x46 && // F
+						byteArrays[4] === 0x2D) {  // -
+						extension = 'pdf';
+						console.log('PDF signature detected manually');
+					} else if (data.type.includes('pdf')) {
+						// Use MIME type as fallback for PDFs
+						extension = 'pdf';
+						console.log('Using MIME type to determine PDF');
+					} else {
+						// Extract extension from MIME type as last resort
+						const mimeExtension = data.type.split('/')[1];
+						if (mimeExtension && !mimeExtension.includes(';')) {
+							extension = mimeExtension === 'plain' ? 'txt' : mimeExtension;
+							console.log(`Using MIME type extension: ${extension}`);
+						}
+					}
+				}
+			} catch (error) {
+				console.error('Error detecting file type:', error);
+				
+				// Fallback to MIME type if detection fails
+				if (data.type.includes('pdf')) {
+					extension = 'pdf';
+				} else {
+					const mimeExtension = data.type.split('/')[1];
+					if (mimeExtension && !mimeExtension.includes(';')) {
+						extension = mimeExtension;
+					}
 				}
 			}
 
@@ -72,7 +96,7 @@ export const resolver = (setAction: () => void) => {
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = `reporte.${extension}`;
+			a.download = `${data?.filename ?? 'reporte'}.${extension}`;
 			a.click();
 			URL.revokeObjectURL(url);
 		}

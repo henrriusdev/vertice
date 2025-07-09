@@ -58,7 +58,7 @@
 
                         <div>
                                 <Label for="report-date" class="mb-2">Fecha de pagos</Label>
-                                <Datepicker bind:value={reportDate} dateRange={reportType === 'fechas'} maxYear={new Date().getFullYear()} />
+                                <Datepicker bind:value={reportDate} dateRange={reportType !== 'dia'} maxYear={new Date().getFullYear()} />
                         </div>
 
                         <Button color="primary" size="lg" class="w-full" disabled={!reportDate} type="submit">

@@ -140,10 +140,9 @@
 	const handleSubmit = ({ formData, cancel }: { formData: FormData; cancel: () => void }) => {
 		// Validación de campos
 		if (!student) {
-			alert('Por favor ingresa la cédula del estudiante');
+			addToast({ type: 'error', message: 'Por favor ingresa la cédula del estudiante' });
 			return cancel();
 		}
-
 		if (!data.estudiantes.includes(student)) {
 			alert('No hay algún estudiante con esa cédula en nuestro sistema');
 			return cancel();
@@ -265,6 +264,9 @@
 							placeholder="Ingrese cédula del estudiante..."
 							bind:value={searchQuery}
 							use:imask={cedulaMask as any}
+							oninput={(e) => {
+								searchQuery = e.currentTarget.value;
+							}}
 							class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 pl-10"
 						/>
 					</div>
@@ -319,7 +321,11 @@
 								name="student"
 								placeholder="Ej: V-12345678"
 								bind:value={student}
-								use:imask={cedulaMask as any}
+								oninput={(e) => {
+									// Ensure the value is properly updated
+									student = e.currentTarget.value;
+								}}
+								use:imask={cedulaMask}
 								class="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 pl-10"
 							/>
 						</div>

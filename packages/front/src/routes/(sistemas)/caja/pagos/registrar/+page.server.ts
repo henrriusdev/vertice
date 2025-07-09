@@ -57,6 +57,7 @@ export const actions: Actions = {
 			if ('base64' in result) {
 				return {
 					base64: result.base64,
+					filename: 'constancia_pago.pdf',
 					type: 'application/pdf',
 					message: 'Pago registrado exitosamente',
 					invalidate: true

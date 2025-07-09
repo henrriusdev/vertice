@@ -217,7 +217,7 @@
 
 {#snippet action(row: Materia)}
 	<div class="flex justify-between items-center">
-		{#if data.rol.toLowerCase() === 'coordinador'}
+		{#if ['coordinador','administrador'].includes(data.rol.toLowerCase())}
 			<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
 				<PenOutline class="w-5 h-5" />
 			</Button>

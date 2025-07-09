@@ -60,17 +60,6 @@
       border-top: 1px solid #ddd;
       padding-top: 20px;
     }
-    .signature-section {
-      margin-top: 60px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .signature {
-      width: 45%;
-      text-align: center;
-      border-top: 1px solid #333;
-      padding-top: 10px;
-    }
     .watermark {
       position: absolute;
       top: 50%;
@@ -104,7 +93,7 @@
     <div class="watermark">VERTICE</div>
     
     <div class="header">
-      <h1>CONSTANCIA DE PAGO</h1>
+      <h1>COMPROBANTE DE PAGO</h1>
       <p>Instituto Universitario de Tecnología VERTICE</p>
       <p>RIF: J-123456789</p>
     </div>
@@ -191,19 +180,8 @@
       {% endif %}
     </div>
 
-    <div class="signature-section">
-      <div class="signature">
-        <p>{{ cajero }}</p>
-        <p>Cajero</p>
-      </div>
-      <div class="signature">
-        <p>{{ estudiante.nombre }}</p>
-        <p>Estudiante</p>
-      </div>
-    </div>
-
     <div class="footer">
-      <p>Este documento es una constancia oficial de pago emitida por el Instituto Universitario de Tecnología VERTICE.</p>
+      <p>Este documento es un comprobante oficial de pago emitida por el Instituto Universitario de Tecnología VERTICE.</p>
       <p>Para cualquier consulta, por favor contacte a administracion@vertice.edu.ve</p>
     </div>
   </div>
