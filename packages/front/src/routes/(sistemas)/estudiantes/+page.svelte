@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, Datepicker, maxYearDate, nota } from '$lib';
+	import { cedulaMask, DataTable, maxYearDate, nota } from '$lib';
 	import { imask } from '@imask/svelte';
 	import {
 		Button,
@@ -9,7 +9,8 @@
 		Modal,
 		Select,
 		TableSearch,
-		Textarea
+		Textarea, 
+		Datepicker
 	} from 'flowbite-svelte';
 	import { EyeOutline, PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import type { Estudiante } from '../../../app';
@@ -210,7 +211,9 @@
 				<div class="md:col-span-2">
 					<Label for="fecha_nac" class="mb-2">Fecha de Nacimiento</Label>
 					<Datepicker
-						maxYear={new Date().getFullYear() - 16}
+						availableTo={maxYearDate()}
+						locale="es"
+						placeholder="Seleccione una fecha"
 						bind:value={estudianteActual.fecha_nac}
 					/>
 					<input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''} />

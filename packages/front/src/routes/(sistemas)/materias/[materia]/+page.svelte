@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { DataTable, Datepicker, nota as notaMask } from '$lib';
-	import { Button, Input, Label, Modal, Select, Textarea } from 'flowbite-svelte';
+	import { DataTable, nota as notaMask } from '$lib';
+	import { Button, Input, Modal, Select, Textarea, Datepicker } from 'flowbite-svelte';
 	import { imask } from '@imask/svelte';
 	import { FileLinesOutline, PenOutline, ReceiptOutline } from 'flowbite-svelte-icons';
 	import type { Nota } from '../../../../app';

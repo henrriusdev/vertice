@@ -13,7 +13,8 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
+		Datepicker
 	} from 'flowbite-svelte';
 	import {
 		CalendarEditOutline,
@@ -24,8 +25,8 @@
 		SearchOutline
 	} from 'flowbite-svelte-icons';
 	import { resolver } from '$lib/utilidades/resolver';
-	import { Datepicker } from '$lib';
 	import { tick } from 'svelte';
+	import { maxYearDate } from '$lib';
 
 	// Definir props
 	let { data } = $props();
@@ -58,7 +59,7 @@
 	const registrosPaginados = $derived.by(() => {
 		const inicio = (paginaActual - 1) * elementosPorPagina;
 		const fin = inicio + elementosPorPagina;
-		return data.registros.slice(inicio, fin);
+		return data.registros?.slice(inicio, fin);
 	});
 
 	const totalPaginas = $derived.by(() => Math.ceil(data.registros.length / elementosPorPagina));
@@ -132,7 +133,8 @@
 						<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
 							<CalendarEditOutline class="w-4 h-4 text-gray-500" />
 						</div>
-						<Datepicker bind:value={fechaDesde} />
+						<Datepicker bind:value={fechaDesde} availableTo={new Date()} locale="es"
+						placeholder="Seleccione una fecha" />
 						<input type="hidden" name="fechaDesde" bind:value={fechaDesde} class="hidden" />
 					</div>
 				</div>
@@ -141,7 +143,8 @@
 				<div>
 					<Label for="fechaHasta" class="mb-2">Fecha hasta</Label>
 					<div class="relative">
-						<Datepicker bind:value={fechaHasta} maxYear={new Date().getFullYear()} />
+						<Datepicker bind:value={fechaHasta} availableFrom={fechaDesde} availableTo={new Date()} locale="es"
+						placeholder="Seleccione una fecha" />
 						<input type="hidden" name="fechaHasta" bind:value={fechaHasta} class="hidden" />
 					</div>
 				</div>
@@ -215,7 +218,7 @@
 				<Spinner size="12" />
 				<p class="ml-4 text-lg">Exportando archivo...</p>
 			</div>
-		{:else if data.registros.length === 0}
+		{:else if data.registros?.length === 0}
 			<div class="flex flex-col items-center justify-center p-12 text-gray-500">
 				<InfoCircleOutline class="w-12 h-12 mb-4" />
 				<p class="text-lg font-medium">Sin resultados</p>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Chart, Button } from 'flowbite-svelte';
   import type { PageData } from './$types';
+  import { Chart } from '@flowbite-svelte-plugins/chart';
 
   let { data }: { data: PageData } = $props();
 

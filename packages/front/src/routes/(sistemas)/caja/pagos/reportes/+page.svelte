@@ -1,13 +1,12 @@
 <script lang="ts">
-        import { Datepicker } from '$lib';
-        import { Button, Card, Heading, Label, Select } from 'flowbite-svelte';
+        import { Button, Card, Heading, Label, Select, Datepicker } from 'flowbite-svelte';
         import { FileLinesOutline } from 'flowbite-svelte-icons';
         import { enhance } from '$app/forms';
         import { resolver } from '$lib/utilidades/resolver';
 
         let reportType = $state('dia');
         let paymentSelection = $state('todos');
-        let reportDate: Date | { from?: Date; to?: Date } | null = $state(new Date());
+        let reportDate: Date | { from?: Date; to?: Date } | undefined = $state(new Date());
 </script>
 
 <div class="w-full flex justify-center mt-8">
@@ -58,7 +57,8 @@
 
                         <div>
                                 <Label for="report-date" class="mb-2">Fecha de pagos</Label>
-                                <Datepicker bind:value={reportDate} dateRange={reportType !== 'dia'} maxYear={new Date().getFullYear()} />
+                                <Datepicker bind:value={reportDate} dateRange={reportType !== 'dia'} availableTo={new Date()} locale="es"
+                                placeholder="Seleccione una fecha" />
                         </div>
 
                         <Button color="primary" size="lg" class="w-full" disabled={!reportDate} type="submit">

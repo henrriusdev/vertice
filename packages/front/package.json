@@ -6,12 +6,6 @@
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"packageManager": "pnpm@10.5.2",
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild"
-		]
-	},
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -26,6 +20,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@flowbite-svelte-plugins/chart": "^0.2.4",
 		"@imask/svelte": "^7.6.1",
 		"@sveltejs/adapter-node": "^5.2.11",
 		"@sveltejs/kit": "^2.16.0",
@@ -43,8 +38,8 @@
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
 		"flowbite": "^3.1.2",
-		"flowbite-svelte": "^1.4.3",
-		"flowbite-svelte-icons": "^2.1.0",
+		"flowbite-svelte": "^1.10.7",
+		"flowbite-svelte-icons": "^2.2.1",
 		"globals": "^16.0.0",
 		"imask": "^7.6.1",
 		"prettier": "^3.4.2",

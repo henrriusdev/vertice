@@ -114,6 +114,7 @@ export type Trazabilidad = {
 	fecha: string;
 	modulo: string;
 	nivel_alerta: number;
+	rol: string;
 };
 
 export type Usuario = {

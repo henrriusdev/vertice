@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Chart, Button } from 'flowbite-svelte';
+	import { Chart } from '@flowbite-svelte-plugins/chart';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -53,7 +53,7 @@
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-semibold mb-4">Pagos por tipo</h2>
         <Chart
-                options={donutChartOptions}
+            options={donutChartOptions}
         />
     </div>
 

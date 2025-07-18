@@ -4,13 +4,13 @@
 	import { page } from '$app/stores';
 	import {
 		Button,
-		ButtonGroup,
 		Card,
 		Heading,
 		Input,
 		Label,
 		Modal,
 		Select,
+		Datepicker,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -22,17 +22,15 @@
 	import { resolver } from '$lib/utilidades/resolver';
 	import { addToast } from '$lib/utilidades/toast';
 	import {
-		ArrowLeftOutline,
 		CreditCardOutline,
 		SearchOutline,
 		DownloadOutline,
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import { cedulaMask, Datepicker } from '$lib';
+	import { cedulaMask } from '$lib';
 	import { imask } from '@imask/svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-
 
 	import type { PageData } from './$types';
 
@@ -67,7 +65,7 @@
 	// Form state variables
 	let student: string = $state('');
 	let paymentConcept: string = $state('inscripcion');
-	let paymentDate = $state<Date | null>(null);
+	let paymentDate = $state<Date | undefined>(undefined);
 	let paymentMethod: string = $state('transfer');
 	let amount: string = $state('');
 	let exchangeRate: string = $state('');
@@ -82,7 +80,7 @@
 	// Download PDF function
 	function downloadPdf() {
 		if (!pdfData) return;
-		
+
 		const linkSource = `data:application/pdf;base64,${pdfData.base64}`;
 		const downloadLink = document.createElement('a');
 		const fileName = pdfData.filename;
@@ -106,7 +104,7 @@
 			// Reset form fields when modal is closed
 			student = '';
 			paymentConcept = 'inscripcion';
-			paymentDate = null;
+			paymentDate = undefined;
 			paymentMethod = 'transfer';
 			amount = '';
 			exchangeRate = '';
@@ -120,7 +118,7 @@
 		// Reset form fields when opening modal
 		student = '';
 		paymentConcept = 'inscripcion';
-		paymentDate = null;
+		paymentDate = undefined;
 		paymentMethod = 'transfer';
 		amount = '';
 		exchangeRate = '';
@@ -178,10 +176,10 @@
 
 		// The backend already returns the PDF as a base64-encoded string in a JSON response
 		// We need to handle this response format in our form submission handler
-		
+
 		return async ({ result }: { result: any }) => {
 			closePaymentModal();
-			
+
 			// Check if the result contains PDF data (the backend returns type: 'application/pdf')
 			if (result && result.type === 'application/pdf' && result.base64) {
 				// Store the PDF data for our modal
@@ -189,12 +187,12 @@
 					base64: result.base64,
 					filename: 'constancia_pago.pdf'
 				};
-				
+
 				// Show success message
 				if (result.message) {
 					addToast({ type: 'success', message: result.message });
 				}
-				
+
 				// Open the PDF modal after a small delay
 				setTimeout(() => {
 					pdfModalOpen = true;
@@ -352,7 +350,12 @@
 					<!-- Payment Date -->
 					<div>
 						<Label for="payment-date" class="mb-2 font-medium">Fecha del Pago</Label>
-						<Datepicker bind:value={paymentDate} maxYear={new Date().getFullYear()} />
+						<Datepicker
+							bind:value={paymentDate}
+							availableTo={new Date()}
+							locale="es"
+							placeholder="Seleccione una fecha"
+						/>
 						<input
 							type="hidden"
 							name="payment-date"
@@ -375,18 +378,18 @@
 
 					<!-- Exchange Rate - only shown for cash payment -->
 					{#if paymentMethod === 'cash'}
-					<div>
-						<Label for="exchange" class="mb-2 font-medium">Tasa de cambio ($)</Label>
-						<Input
-							id="exchange"
-							name="tasa_divisa"
-							type="number"
-							step="0.01"
-							placeholder="Tasa actual"
-							bind:value={exchangeRate}
-							class="bg-white border-gray-300"
-						/>
-					</div>
+						<div>
+							<Label for="exchange" class="mb-2 font-medium">Tasa de cambio ($)</Label>
+							<Input
+								id="exchange"
+								name="tasa_divisa"
+								type="number"
+								step="0.01"
+								placeholder="Tasa actual"
+								bind:value={exchangeRate}
+								class="bg-white border-gray-300"
+							/>
+						</div>
 					{/if}
 				</div>
 			</div>
@@ -394,7 +397,7 @@
 			<!-- Payment Method Section -->
 			<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
 				<h4 class="text-gray-700 font-medium mb-3">Método de Pago</h4>
-				
+
 				<!-- Payment Method Selector -->
 				<div class="mb-4">
 					<Label for="payment-method" class="mb-2 font-medium">Seleccione el método de pago</Label>
@@ -413,7 +416,12 @@
 						<div class="flex gap-4 mb-4">
 							<div class="flex-1">
 								<Label for="serial" class="mb-2 font-medium">Serial del billete</Label>
-								<Input id="serial" type="text" bind:value={serial} placeholder="Ingrese el serial" />
+								<Input
+									id="serial"
+									type="text"
+									bind:value={serial}
+									placeholder="Ingrese el serial"
+								/>
 							</div>
 							<div class="flex-1">
 								<Label for="monto" class="mb-2 font-medium">Denominación</Label>
@@ -461,11 +469,13 @@
 					{/if}
 				{:else if paymentMethod === 'transfer'}
 					<div class="bg-white p-3 rounded-lg border border-gray-200">
-						<Label for="payment-reference" class="mb-2 font-medium">Referencia de transferencia</Label>
-						<Input 
-							id="payment-reference" 
-							type="text" 
-							placeholder="Ingrese el número de referencia" 
+						<Label for="payment-reference" class="mb-2 font-medium"
+							>Referencia de transferencia</Label
+						>
+						<Input
+							id="payment-reference"
+							type="text"
+							placeholder="Ingrese el número de referencia"
 							bind:value={paymentReference}
 						/>
 					</div>
@@ -480,46 +490,62 @@
 				</Button>
 			</div>
 		</form>
-		
+
 		<ToastContainer />
 	</Modal>
 
-<!-- PDF Modal -->
-<Modal bind:open={pdfModalOpen} size="lg" autoclose={false} class="w-full">
-	<div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
-		<Heading tag="h3" class="text-xl font-semibold text-gray-900">
-			Constancia de Pago
-		</Heading>
-		<Button class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" onclick={closePdfModal}>
-			<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-			</svg>
-		</Button>
-	</div>
-	
-	<div class="p-4 md:p-5 space-y-4">
-		{#if pdfData}
-			<div class="flex flex-col items-center">
-				<p class="mb-4 text-center text-gray-700">La constancia de pago ha sido generada exitosamente.</p>
-				
-				<div class="w-full h-[500px] mb-4 border border-gray-300 rounded overflow-hidden">
-					<iframe 
-						title="Constancia de Pago" 
-						class="w-full h-full" 
-						src={`data:application/pdf;base64,${pdfData?.base64 || ''}`}>
-					</iframe>
+	<!-- PDF Modal -->
+	<Modal bind:open={pdfModalOpen} size="lg" autoclose={false} class="w-full">
+		<div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+			<Heading tag="h3" class="text-xl font-semibold text-gray-900">Constancia de Pago</Heading>
+			<Button
+				class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+				onclick={closePdfModal}
+			>
+				<svg
+					class="w-3 h-3"
+					aria-hidden="true"
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 14 14"
+				>
+					<path
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+					/>
+				</svg>
+			</Button>
+		</div>
+
+		<div class="p-4 md:p-5 space-y-4">
+			{#if pdfData}
+				<div class="flex flex-col items-center">
+					<p class="mb-4 text-center text-gray-700">
+						La constancia de pago ha sido generada exitosamente.
+					</p>
+
+					<div class="w-full h-[500px] mb-4 border border-gray-300 rounded overflow-hidden">
+						<iframe
+							title="Constancia de Pago"
+							class="w-full h-full"
+							src={`data:application/pdf;base64,${pdfData?.base64 || ''}`}
+						>
+						</iframe>
+					</div>
+
+					<Button color="blue" onclick={downloadPdf}>
+						<DownloadOutline class="mr-2 h-5 w-5" />
+						Descargar Constancia
+					</Button>
 				</div>
-				
-				<Button color="blue" onclick={downloadPdf}>
-					<DownloadOutline class="mr-2 h-5 w-5" />
-					Descargar Constancia
-				</Button>
-			</div>
-		{:else}
-			<p class="text-center text-gray-700">No se ha generado ninguna constancia de pago.</p>
-		{/if}
-	</div>
-</Modal>
+			{:else}
+				<p class="text-center text-gray-700">No se ha generado ninguna constancia de pago.</p>
+			{/if}
+		</div>
+	</Modal>
 </div>
 
 <style>

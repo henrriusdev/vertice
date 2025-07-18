@@ -1,10 +1,10 @@
 <script lang="ts">
-    import {cedulaMask, DataTable, Datepicker} from '$lib';
+    import {cedulaMask, DataTable} from '$lib';
     import {imask} from '@imask/svelte';
-    import {Button, Input, Label, Modal, TableSearch} from 'flowbite-svelte';
+    import {Button, Input, Label, Modal, TableSearch, Datepicker} from 'flowbite-svelte';
     import ToastContainer from '$lib/componentes/ToastContainer.svelte';
     import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
-    import type {Docente} from '../../../../app';
+    import type {Docente} from '../../../app';
 	import { resolver } from '$lib/utilidades/resolver';
 	import { enhance } from '$app/forms';
 
@@ -21,20 +21,16 @@
         cedula: string;
         nombre: string;
         correo: string;
-        fecha_ingreso: Date | string;
+        fecha_ingreso: Date | undefined;
         titulo: string;
         usuario: number;
     }> = $state({
         cedula: '',
         nombre: '',
         correo: '',
-        activo: true,
-        semestre: 1,
-        carrera: 1,
-        promedio: 0,
-        direccion: '',
-        sexo: 'M',
-        fecha_ingreso: new Date()
+        fecha_ingreso: new Date(),
+        titulo: '',
+        usuario: 0,
     });
 
 
@@ -174,11 +170,12 @@
                     <Label for="fecha_ingreso" class="mb-2">Fecha de ingreso</Label>
                     <Datepicker
                             id="fecha_ingreso"
-                            name="fecha_ingreso"
-                            maxDate={new Date()}
+                            availableTo={new Date()}
                             bind:value={docenteActual.fecha_ingreso}
+                            locale="es"
+                            placeholder="Seleccione una fecha"
                     />
-                    <input type="hidden" name="fecha_ingreso" value={docenteActual.fecha_ingreso?.toISOString().split('T')[0] ?? ''}/>
+                    <input type="hidden" name="fecha_ingreso" value={(docenteActual.fecha_ingreso as Date | undefined)?.toISOString().split('T')[0] ?? ''}/>
                 </div>
             </div>
         </form>
@@ -186,7 +183,7 @@
             <div class="flex justify-between items-center w-full">
                 <div>
                     <Button type="button" color="alternative" onclick={() => (modalVisible = false)}>Cancelar</Button>
-                    <Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}>{isEditing ? 'Actualizar' : 'Guardar'}</Button>
+                    <Button type="submit" color="primary" onclick={() => formEl!.requestSubmit()}>{isEditing ? 'Actualizar' : 'Guardar'}</Button>
                 </div>
                 <ToastContainer />
             </div>

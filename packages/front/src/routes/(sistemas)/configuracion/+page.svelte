@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Datepicker } from '$lib';
-	import { Input, Button, Label, Select, Card } from 'flowbite-svelte';
+	import { Input, Button, Label, Select, Card, Datepicker } from 'flowbite-svelte';
 	import { format, parse } from 'date-fns';
 	import { toZonedTime } from 'date-fns-tz';
 	import { enhance } from '$app/forms';
@@ -60,9 +59,9 @@
 				<h2 class="text-base font-semibold text-blue-800">Configuración Básica</h2>
 			</div>
 			
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-x-6 gap-y-4">
 				<!-- Ciclo Académico -->
-				<div>
+				<div class="col-span-2">
 					<Label class="font-medium mb-1.5 block">Ciclo Académico</Label>
 					<div class="flex gap-2 items-center">
 						<Select
@@ -118,9 +117,15 @@
 				</div>
 
 				<!-- Fechas de horario -->
-				<div>
+				<div class="col-span-2">
 					<Label class="font-medium mb-1.5 block">Periodo de horarios</Label>
-					<Datepicker bind:value={horario} dateRange />
+					<Datepicker 
+						range={true} 
+						bind:rangeFrom={horario.from} 
+						bind:rangeTo={horario.to} 
+						placeholder="Seleccionar periodo" 
+						locale="es"
+					/>
 					<p class="text-xs text-gray-500 mt-1">Periodo para configurar horarios</p>
 					{#if horario.from && horario.to && horario.from.toString() !== 'Invalid Date' && horario.to.toString() !== 'Invalid Date'}
 						<input
@@ -187,7 +192,8 @@
 				{#each Array(num_cuotas) as _, i}
 					<div>
 						<Label class="font-medium mb-1.5 block">Cuota {i + 1}</Label>
-						<Datepicker bind:value={cuotas[i]} />
+						<Datepicker bind:value={cuotas[i]} locale="es"
+						placeholder="Seleccione una fecha"/>
 						<input type="hidden" name={`cuotas`} value={getValue(cuotas[i])} />
 					</div>
 				{/each}
