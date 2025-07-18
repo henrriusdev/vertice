@@ -40,7 +40,6 @@
 			case 'materia':
 				return value.nombre;
 			default:
-				console.log((value as Peticion).id);
 				return `${(value as Peticion).descripcion}; corte: ${(value as Peticion).campo}, nota: ${(value as Peticion).valor}`;
 		}
 	};
