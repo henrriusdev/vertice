@@ -11,7 +11,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const rol = url.searchParams.get('rol') || '';
 
 	try {
-		console.log(busqueda, fechaDesde, fechaHasta, rol, url.searchParams.toString());
 		const registros = await filtrarTrazabilidad({ busqueda, fechaDesde, fechaHasta, rol }, fetch);
 		return { registros };
 	} catch (error) {
@@ -51,7 +50,6 @@ export const actions: Actions = {
 		const fechaDesde = formData.get('fechaDesde')?.toString() || '';
 		const fechaHasta = formData.get('fechaHasta')?.toString() || '';
 		const rol = formData.get('rol')?.toString() || '';
-		console.log(formData.get('formato')?.toString())
 
 		try {
 			// Verificar que hay datos para exportar

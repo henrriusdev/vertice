@@ -65,7 +65,6 @@
     // Función para abrir el modal en modo edición
     function editarUsuario(usuario: any) {
         usuarioActual = {...usuario};
-        console.log('usuarioActual', usuarioActual);
         isEditing = true;
         modalVisible = true;
     }

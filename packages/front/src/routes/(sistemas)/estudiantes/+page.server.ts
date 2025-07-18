@@ -34,7 +34,6 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 	}
 	try {
 		const res = await obtenerEstudiantes(fetch);
-		console.log(res)
 		const estudiantes = res.map((est) => ({
 			...est,
 			fecha_nacimiento: format(new Date(est.fecha_nacimiento), 'dd/MM/yyyy')

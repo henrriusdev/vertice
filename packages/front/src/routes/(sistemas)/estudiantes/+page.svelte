@@ -82,7 +82,6 @@
 			fecha_nac: new Date(estudiante.fecha_nacimiento),
 			fecha_nacimiento: undefined
 		};
-		console.log('estudianteActual', estudianteActual);
 		isEditing = true;
 		modalVisible = true;
 	}

@@ -8,7 +8,6 @@ import { obtenerPeticiones } from '$lib/servicios/peticiones';
 
 export const load = async ({ fetch }) => {
 	const today = new Date().toISOString().split('T')[0];
-	console.log('today', today);
 
 	const [estudiantes, peticiones, totalRecaudado, pagosPorTipo, pagosPorDia] = await Promise.all([
 		obtenerEstudiantes(fetch),

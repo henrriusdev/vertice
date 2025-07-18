@@ -66,7 +66,6 @@
     // Función para abrir el modal en modo edición
     function editarDocente(docente: any) {
         docenteActual = {...docente};
-        console.log('docenteActual', docenteActual);
         isEditing = true;
         modalVisible = true;
     }

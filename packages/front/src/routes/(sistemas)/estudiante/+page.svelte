@@ -7,7 +7,6 @@
 		Badge,
 		Button,
 		Card,
-		Chart,
 		Heading,
 		P,
 		Spinner,
@@ -21,6 +20,7 @@
 	} from 'flowbite-svelte';
 	import { FileLinesOutline } from 'flowbite-svelte-icons';
 	import type { PageData } from './$types';
+	import { Chart } from '@flowbite-svelte-plugins/chart';
 
 	let { data }: { data: PageData } = $props();
 

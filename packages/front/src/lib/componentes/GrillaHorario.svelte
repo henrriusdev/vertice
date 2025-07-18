@@ -47,7 +47,6 @@
 	}
 
 	function getColorClass(color: string, conflicto?: boolean): string {
-		console.log(color);
 		const base = conflicto ? 'border-2 border-dashed border-red-500' : '';
 		const map = {
 			blue: 'bg-blue-100',
@@ -143,7 +142,9 @@
 </script>
 
 <div class="container mx-auto p-4 bg-white">
-	<h1 class="text-xl font-bold text-center mb-4">Horario</h1>
+	{#if docente}
+		<h1 class="text-xl font-bold text-center mb-4">Horario</h1>
+	{/if}
 
 	<div class="overflow-x-auto">
 		<div class="min-w-[768px] relative">

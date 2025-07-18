@@ -64,7 +64,6 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	// Función para abrir el modal en modo edición
 	function editarCoordinador(coordinador: any) {
 		coordinadorActual = { ...coordinador, carrera: data.carreras.find((car) => car.nombre === coordinador.carrera)?.id };
-		console.log('coordinadorActual', coordinadorActual);
 		isEditing = true;
 		modalVisible = true;
 	}

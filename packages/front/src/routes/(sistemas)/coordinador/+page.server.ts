@@ -25,7 +25,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
     let distribucionCarreras: DistribucionCarrera = {} as DistribucionCarrera;
     let promediosCarreras: PromedioCarrera = {} as PromedioCarrera;
     if (estudiantes.length > 0) {
-        console.log(estudiantes[0].carrera);
         const carreraNombre = (estudiantes[0]?.carrera as unknown as string) || 'Carrera';
         distribucionCarreras = { nombre: carreraNombre , estudiantes: estudiantes.length };
         const promedio = estudiantes.reduce((acc, e) => acc + (e.promedio || 0), 0) / estudiantes.length;

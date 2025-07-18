@@ -21,7 +21,6 @@ export const crearCarrera = async (fetch: typeof window.fetch, carrera: Carrera)
     body: JSON.stringify(carrera)
   });
   const carreraCreada = await res.json();
-  console.log('carreraCreada', carreraCreada);
   return carreraCreada.data.carrera as Carrera;
 };
 

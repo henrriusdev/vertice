@@ -32,13 +32,11 @@
 
 	const handleEdit = (row: Nota) => {
 		mostrarFormulario = true;
-		console.log(row);
 	};
 
 	const handlePeticion = (row: Nota) => {
 		mostrarFormulario = true;
 		esPeticion = true;
-		console.log(row);
 	};
 
 	const enviarCambioNotas: SubmitFunction = ({ formData }) => {

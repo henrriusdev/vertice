@@ -22,7 +22,6 @@ export const actions: Actions = {
 
                 try {
                         const { base64, filename } = await generarReporte(fetch, params.toString());
-                        console.log(filename)
                         return {
                                 base64,
                                 type: 'application/pdf',
