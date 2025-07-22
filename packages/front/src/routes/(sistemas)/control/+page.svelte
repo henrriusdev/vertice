@@ -3,7 +3,6 @@
 		Alert,
 		Badge,
 		Card,
-		Chart,
 		Heading,
 		P,
 		Table,
@@ -15,6 +14,7 @@
 	} from 'flowbite-svelte';
 	import type { PageData } from './$types';
 	import type { DistribucionCarrera, PromedioCarrera } from './types';
+	import { Chart } from '@flowbite-svelte-plugins/chart';
 
 	let { data }: { data: PageData } = $props();
 
