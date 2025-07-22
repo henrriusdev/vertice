@@ -48,10 +48,35 @@ export const eliminarMateria = async (fetch: typeof window.fetch, id: string) =>
 };
 
 export const obtenerMateriasDisponibles = async (fetch: typeof window.fetch, cedula: string) => {
-	const res = await fetch(`${API}/inscribir/${cedula}`);
-	const materias = await res.json();
-	if (res.status === 401) return [];
-	return materias.data as MateriaDisponible[];
+	try {
+		const res = await fetch(`${API}/inscribir/${cedula}`);
+		
+		// Manejar específicamente el caso 204 (No Content)
+		if (res.status === 204) {
+			console.log('El servidor respondió con 204 No Content');
+			return [];
+		}
+		
+		// Verificar el estado de la respuesta antes de intentar analizar el JSON
+		if (!res.ok) {
+			console.error(`Error al obtener materias disponibles: ${res.status} ${res.statusText}`);
+			return [];
+		}
+		
+		// Verificar si la respuesta está vacía
+		const text = await res.text();
+		if (!text || text.trim() === '') {
+			console.log('La respuesta del servidor está vacía');
+			return [];
+		}
+		
+		// Intentar analizar el JSON
+		const materias = JSON.parse(text);
+		return materias.data as MateriaDisponible[];
+	} catch (error) {
+		console.error('Error al procesar materias disponibles:', error);
+		return [];
+	}
 };
 
 export const actualizarNota = async (
