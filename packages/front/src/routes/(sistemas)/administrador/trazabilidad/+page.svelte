@@ -133,8 +133,7 @@
 						<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
 							<CalendarEditOutline class="w-4 h-4 text-gray-500" />
 						</div>
-						<Datepicker bind:value={fechaDesde} availableTo={new Date()} locale="es"
-						placeholder="Seleccione una fecha" />
+						<Datepicker bind:value={fechaDesde} availableTo={new Date()} placeholder="Seleccione una fecha" />
 						<input type="hidden" name="fechaDesde" bind:value={fechaDesde} class="hidden" />
 					</div>
 				</div>
@@ -143,8 +142,7 @@
 				<div>
 					<Label for="fechaHasta" class="mb-2">Fecha hasta</Label>
 					<div class="relative">
-						<Datepicker bind:value={fechaHasta} availableFrom={fechaDesde} availableTo={new Date()} locale="es"
-						placeholder="Seleccione una fecha" />
+						<Datepicker bind:value={fechaHasta} availableFrom={fechaDesde} availableTo={new Date()} placeholder="Seleccione una fecha" />
 						<input type="hidden" name="fechaHasta" bind:value={fechaHasta} class="hidden" />
 					</div>
 				</div>

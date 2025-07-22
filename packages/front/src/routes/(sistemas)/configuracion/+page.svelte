@@ -124,7 +124,6 @@
 						bind:rangeFrom={horario.from} 
 						bind:rangeTo={horario.to} 
 						placeholder="Seleccionar periodo" 
-						locale="es"
 					/>
 					<p class="text-xs text-gray-500 mt-1">Periodo para configurar horarios</p>
 					{#if horario.from && horario.to && horario.from.toString() !== 'Invalid Date' && horario.to.toString() !== 'Invalid Date'}
@@ -192,8 +191,7 @@
 				{#each Array(num_cuotas) as _, i}
 					<div>
 						<Label class="font-medium mb-1.5 block">Cuota {i + 1}</Label>
-						<Datepicker bind:value={cuotas[i]} locale="es"
-						placeholder="Seleccione una fecha"/>
+						<Datepicker bind:value={cuotas[i]} placeholder="Seleccione una fecha"/>
 						<input type="hidden" name={`cuotas`} value={getValue(cuotas[i])} />
 					</div>
 				{/each}

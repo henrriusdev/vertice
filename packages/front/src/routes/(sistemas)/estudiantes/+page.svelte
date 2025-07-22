@@ -211,7 +211,6 @@
 					<Label for="fecha_nac" class="mb-2">Fecha de Nacimiento</Label>
 					<Datepicker
 						availableTo={maxYearDate()}
-						locale="es"
 						placeholder="Seleccione una fecha"
 						bind:value={estudianteActual.fecha_nac}
 					/>

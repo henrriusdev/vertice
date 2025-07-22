@@ -171,7 +171,6 @@
                             id="fecha_ingreso"
                             availableTo={new Date()}
                             bind:value={docenteActual.fecha_ingreso}
-                            locale="es"
                             placeholder="Seleccione una fecha"
                     />
                     <input type="hidden" name="fecha_ingreso" value={(docenteActual.fecha_ingreso as Date | undefined)?.toISOString().split('T')[0] ?? ''}/>

@@ -353,7 +353,6 @@
 						<Datepicker
 							bind:value={paymentDate}
 							availableTo={new Date()}
-							locale="es"
 							placeholder="Seleccione una fecha"
 						/>
 						<input

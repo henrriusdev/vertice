@@ -57,8 +57,7 @@
 
                         <div>
                                 <Label for="report-date" class="mb-2">Fecha de pagos</Label>
-                                <Datepicker bind:value={reportDate} dateRange={reportType !== 'dia'} availableTo={new Date()} locale="es"
-                                placeholder="Seleccione una fecha" />
+                                <Datepicker bind:value={reportDate} dateRange={reportType !== 'dia'} availableTo={new Date()} placeholder="Seleccione una fecha" />
                         </div>
 
                         <Button color="primary" size="lg" class="w-full" disabled={!reportDate} type="submit">
