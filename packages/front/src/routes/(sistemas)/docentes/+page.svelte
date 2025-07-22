@@ -172,7 +172,7 @@
                             availableTo={new Date()}
                             bind:value={docenteActual.fecha_ingreso}
                             placeholder="Seleccione una fecha"
-                            translationLocale="es-VE" locale="es-VE"
+                            translationLocale="es-VE" locale="fr-FR"
                             dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
                     />
                     <input type="hidden" name="fecha_ingreso" value={(docenteActual.fecha_ingreso as Date | undefined)?.toISOString().split('T')[0] ?? ''}/>

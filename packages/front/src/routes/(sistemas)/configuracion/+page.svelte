@@ -124,7 +124,7 @@
 						bind:rangeFrom={horario.from} 
 						bind:rangeTo={horario.to} 
 						placeholder="Seleccionar periodo" 
-						translationLocale="es-VE" locale="es-VE"
+						translationLocale="es-VE" locale="fr-FR"
 						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 					/>
 					<p class="text-xs text-gray-500 mt-1">Periodo para configurar horarios</p>
@@ -193,7 +193,7 @@
 				{#each Array(num_cuotas) as _, i}
 					<div>
 						<Label class="font-medium mb-1.5 block">Cuota {i + 1}</Label>
-						<Datepicker bind:value={cuotas[i]} placeholder="Seleccione una fecha" translationLocale="es-VE" locale="es-VE" dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}/>
+						<Datepicker bind:value={cuotas[i]} placeholder="Seleccione una fecha" translationLocale="es-VE" locale="fr-FR" dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}/>
 						<input type="hidden" name={`cuotas`} value={getValue(cuotas[i])} />
 					</div>
 				{/each}
