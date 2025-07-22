@@ -218,7 +218,7 @@
 						availableTo={maxYearDate()}
 						placeholder="Seleccione una fecha"
 						bind:value={estudianteActual.fecha_nac}
-						translationLocale="es-VE"
+						translationLocale="es-VE" locale="es-VE"
 						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 					/>
 					<input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''} />

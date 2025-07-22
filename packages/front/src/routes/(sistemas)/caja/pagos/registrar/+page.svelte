@@ -354,7 +354,7 @@
 							bind:value={paymentDate}
 							availableTo={new Date()}
 							placeholder="Seleccione una fecha"
-							translationLocale="es-VE"
+							translationLocale="es-VE" locale="es-VE"
 							dateFormat={{year: 'numeric', month: '2-digit', day: '2-digit'}}
 						/>
 						<input
