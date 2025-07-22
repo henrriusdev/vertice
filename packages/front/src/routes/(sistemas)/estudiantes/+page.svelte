@@ -125,8 +125,13 @@
 	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac));
 
 	const handleSubmit: SubmitFunction = () => {
-		return resolver(() => {});
+		return resolver(() => {
+			if (isEditing) {
+				modalVisible = false;
+			}
+		});
 	};
+	
 </script>
 
 <div class="w-full">
@@ -213,6 +218,8 @@
 						availableTo={maxYearDate()}
 						placeholder="Seleccione una fecha"
 						bind:value={estudianteActual.fecha_nac}
+						translationLocale="es-VE"
+						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 					/>
 					<input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''} />
 				</div>
