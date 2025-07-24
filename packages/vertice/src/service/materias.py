@@ -121,7 +121,11 @@ async def update_materia(materia: dict):
                 })
 
         m.nombre = materia["nombre"]
-        m.prelacion = materia["prelacion"]
+
+        if materia["semestre"] > 1:
+            m.prelacion = materia["prelacion"]
+        else:
+            m.prelacion = ""
         m.unidad_credito = materia["unidad_credito"]
         m.hp = materia["hp"]
         m.ht = materia["ht"]
@@ -253,10 +257,10 @@ async def get_materia(id: str):
         raise Exception(ex)
 
 
-async def delete_materia(materia):
+async def delete_materia(materia_id):
     try:
-        eliminado = await Materia.filter(id=materia.id).delete()
-        return eliminado[0]  # cantidad de filas eliminadas
+        eliminado = await Materia.filter(id=materia_id).delete()
+        return eliminado  # cantidad de filas eliminadas
     except Exception as ex:
         raise Exception(ex)
 

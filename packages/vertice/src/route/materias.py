@@ -100,6 +100,7 @@ async def eliminar_materia(id):
         await add_trazabilidad({"accion": f"Eliminar Materia {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 3})
         return jsonify({"ok": True, "status": 200})
     except Exception as ex:
+        traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
 
 

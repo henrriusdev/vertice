@@ -159,9 +159,11 @@
 <!-- Tabla de materias -->
 <div class="flex justify-between items-center mb-4">
 	<h1 class="text-2xl font-bold">Materias</h1>
+	{#if ['coordinador','administrador'].includes(data.rol.toLowerCase())}
 	<Button onclick={() => openModal()} class="btn btn-primary"
 		><PlusOutline class="h-5 w-5 mr-4" />Crear Materia</Button
 	>
+	{/if}
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
@@ -197,7 +199,7 @@
 			]}
 		/>
 	</div>
-	<div>
+	<div class="col-span-2">
 		<Label>Búsqueda o condición</Label>
 		<Input bind:value={searchTerm} placeholder="Nombre, código o expresión...">
 			{#snippet right()}
@@ -227,7 +229,7 @@
 					<TrashBinOutline class="w-5 h-5" />
 				</Button>
 			</form>
-		{:else if ['control', 'superusuario', 'superusuario'].includes(data.rol.toLowerCase())}
+		{:else if ['control', 'superusuario', 'coordnador'].includes(data.rol.toLowerCase())}
 			<Button
 				pill
 				class="p-1.5!"
@@ -333,6 +335,7 @@
 					name="prelacion"
 					bind:value={form.prelacion}
 					items={opcionesPrelacion}
+					disabled={form.semestre < 2}
 					placeholder="Seleccione las prelaciones"
 				/>
 			</div>

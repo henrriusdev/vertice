@@ -9,7 +9,7 @@ from src.model.matricula import Matricula
 
 async def get_coordinadores():
     try:
-        coordinadores = await Coordinador.all().prefetch_related("usuario", "carrera")
+        coordinadores = await Coordinador.all().prefetch_related("usuario", "carrera").order_by("usuario__fecha_creacion")
         resultado = []
         for c in coordinadores:
             resultado.append({

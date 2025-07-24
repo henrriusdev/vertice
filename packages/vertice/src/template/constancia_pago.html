@@ -158,26 +158,6 @@
         <div class="info-value">{{ referencia }}</div>
       </div>
       {% endif %}
-      
-      {% if metodo_pago_id == 2 and billetes %}
-      <h4>Billetes Recibidos</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Serial</th>
-            <th>Monto (Bs.)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for billete in billetes %}
-          <tr>
-            <td>{{ billete.serial }}</td>
-            <td>{{ billete.monto }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
     </div>
 
     <div class="footer">

@@ -1,20 +1,7 @@
 <script lang="ts">
-	import {
-		Alert,
-		Badge,
-		Card,
-		Chart,
-		Heading,
-		P,
-		Table,
-		TableBody,
-		TableBodyCell,
-		TableBodyRow,
-		TableHead,
-		TableHeadCell
-	} from 'flowbite-svelte';
+	import { Chart } from '@flowbite-svelte-plugins/chart';
+	import { Card, Heading, P } from 'flowbite-svelte';
 	import type { PageData } from './$types';
-	import type { DistribucionCarrera, PromedioCarrera } from './types';
 
 	let { data }: { data: PageData } = $props();
 
@@ -101,7 +88,5 @@
 			<Heading tag="h3" class="mb-4">Promedio por Carrera</Heading>
 			<Chart options={promediosOptions} />
 		</Card>
-
-
 	</div>
 </div>

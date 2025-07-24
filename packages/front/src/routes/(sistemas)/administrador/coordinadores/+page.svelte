@@ -5,6 +5,9 @@
 import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
 	import type {Coordinador} from '../../../../app';
+	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { resolver } from '$lib/utilidades/resolver';
 
 	// Datos de la página
 	let { data } = $props();
@@ -73,6 +76,12 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 		isEditing = false;
 		modalVisible = true;
 	}
+
+	const handleSubmit: SubmitFunction = () => {
+		return resolver(() => {
+			modalVisible = false;
+		});
+	};
 </script>
 
 <div class="w-full">
@@ -109,7 +118,7 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 		bind:open={modalVisible}
 		size="lg"
 	>
-		<form action={isEditing ? '?/edit' : '?/create'} method="POST" bind:this={formEl}>
+		<form action={isEditing ? '?/edit' : '?/create'} use:enhance={handleSubmit} method="POST" bind:this={formEl}>
 			{#if isEditing}
 				<input type="hidden" name="id_coordinador" value={coordinadorActual!.id} />
 				<input type="hidden" name="id" value={coordinadorActual!?.usuario} />

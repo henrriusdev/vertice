@@ -13,7 +13,7 @@ import type { MateriaReq } from '$lib/types';
 export const load: PageServerLoad = async ({ fetch, parent }) => {
         const { rol } = await parent();
         // la gestión de materias solo está disponible para administradores y coordinadores
-        if (!['administrador', 'coordinador'].includes(rol)) {
+        if (!['administrador', 'coordinador', 'control'].includes(rol)) {
                 redirect(302, '/' + rol);
         }
 

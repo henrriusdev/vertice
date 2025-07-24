@@ -119,10 +119,15 @@ async def crear_pago():
         claims = get_jwt()
         cajero = claims.get('nombre', 'Usuario del Sistema')
         
-        # Calcular monto en USD
+        # Inicializar variables para el monto en USD
         monto_decimal = Decimal(monto)
-        tasa_decimal = Decimal(tasa_divisa) if tasa_divisa else Decimal('1')
-        monto_usd = monto_decimal / tasa_decimal if tasa_decimal else Decimal('0')
+        monto_usd = Decimal('0')
+        tasa_decimal = Decimal('1')
+        
+        # Calcular monto en USD solo si el método de pago es Efectivo
+        if metodo_pago == "cash":
+            tasa_decimal = Decimal(tasa_divisa) if tasa_divisa else Decimal('1')
+            monto_usd = monto_decimal / tasa_decimal if tasa_decimal else Decimal('0')
         
         # Obtener datos adicionales del estudiante
         carrera = await estudiante.carrera
@@ -148,8 +153,7 @@ async def crear_pago():
             monto_usd=str(round(monto_usd, 2)),
             metodo_pago=metodo_pago_nombre,
             metodo_pago_id=metodo_pago_id,
-            referencia=referencia,
-            billetes=billetes_guardados,
+            referencia=referencia if metodo_pago == "transfer" else "N/A",
             cajero=cajero
         )
         

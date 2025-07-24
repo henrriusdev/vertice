@@ -60,7 +60,7 @@
 
 	function validatePassword(password: string): string[] {
 		const errors: string[] = [];
-		
+
 		if (password.length < 6) {
 			errors.push('La contraseña debe tener al menos 6 caracteres');
 		}
@@ -73,7 +73,7 @@
 		if (!/\d/.test(password)) {
 			errors.push('Debe contener al menos un número');
 		}
-		
+
 		return errors;
 	}
 
@@ -95,8 +95,12 @@
 		}
 
 		loading = true;
-		return resolver(() => {loading = false; cambiarClave = false; window.location.reload()});
-	}
+		return resolver(() => {
+			loading = false;
+			cambiarClave = false;
+			window.location.reload();
+		});
+	};
 
 	// Función para alternar el estado del sidebar
 	function toggleSidebar() {
@@ -118,20 +122,20 @@
 			titulo: 'Docentes',
 			icono: UsersOutline,
 			href: '/docentes',
-                        roles: ['administrador', 'coordinador']
+			roles: ['administrador', 'coordinador']
 		},
 		{
 			titulo: 'Estudiantes',
 			icono: UsersGroupOutline,
 			href: '/estudiantes',
-			roles: ['administrador', 'caja', 'coordinador']
+			roles: ['administrador', 'caja', 'coordinador', 'control']
 		},
-                {
-                        titulo: 'Materias',
-                        icono: ListOutline,
-                        href: '/materias',
-                        roles: ['administrador', 'coordinador']
-                },
+		{
+			titulo: 'Materias',
+			icono: ListOutline,
+			href: '/materias',
+			roles: ['administrador', 'coordinador', 'control']
+		},
 		{
 			titulo: 'Usuarios',
 			icono: UsersOutline,
@@ -159,13 +163,13 @@
 		{
 			titulo: 'Pagos',
 			icono: ReceiptOutline,
-                       href: '/caja/pagos/registrar',
+			href: '/caja/pagos/registrar',
 			roles: ['caja']
 		},
 		{
 			titulo: 'Reportes de Pagos',
 			icono: ReceiptOutline,
-                       href: '/caja/pagos/reportes',
+			href: '/caja/pagos/reportes',
 			roles: ['caja']
 		},
 		{
@@ -387,9 +391,9 @@
 				</Button>
 				<Breadcrumb aria-label="Migas de pan" class="hidden md:flex">
 					{#each migasDePan as miga, index}
-					<BreadcrumbItem href={miga.href} home={index === 0}>
-						{mapeoRutas[miga.href] || miga.titulo}
-					</BreadcrumbItem>
+						<BreadcrumbItem href={miga.href} home={index === 0}>
+							{mapeoRutas[miga.href] || miga.titulo}
+						</BreadcrumbItem>
 					{/each}
 				</Breadcrumb>
 			</div>
@@ -397,19 +401,14 @@
 
 		<!-- Main content - only this should scroll vertically -->
 		<main class="flex-1 overflow-y-auto p-6 w-full">
-			<Drawer
-				placement="right"
-				id="drawer-cambiar-clave"
-				bind:hidden={cambiarClave}
-                class="w-1/4"
-			>
+			<Drawer placement="right" id="drawer-cambiar-clave" bind:hidden={cambiarClave} class="w-1/4">
 				<div class="flex h-full flex-col justify-between p-4">
 					<div>
 						<h5 class="mb-4 text-xl font-medium text-gray-500 dark:text-gray-400">
 							Cambiar Contraseña
 						</h5>
-						<form 
-							class="flex flex-col gap-4" 
+						<form
+							class="flex flex-col gap-4"
 							use:enhance={handleSubmit}
 							action="/password"
 							method="POST"
