@@ -2,7 +2,7 @@
 import type { CoordinadorReq } from "$lib/types";
 import type { Coordinador } from "../../app";
 
-const API = 'http://127.0.0.1:8000/api/coordinadores';
+const API = 'http://127.0.0.1:8000/api/coordinadores/';
 
 export const obtenerCoordinadores = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}`);
@@ -17,7 +17,7 @@ export const obtenerCoordinador = async (fetch: typeof window.fetch, id: number)
 };
 
 export const crearCoordinador = async (fetch: typeof window.fetch, coordinador: CoordinadorReq) => {
-  const res = await fetch(`${API}/add`, {
+  const res = await fetch(`${API}add`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(coordinador)
@@ -27,7 +27,7 @@ export const crearCoordinador = async (fetch: typeof window.fetch, coordinador: 
 };
 
 export const actualizarCoordinador = async (fetch: typeof window.fetch, id: number, coordinador: CoordinadorReq) => {
-  const res = await fetch(`${API}/update/${id}`, {
+  const res = await fetch(`${API}update/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(coordinador)
@@ -37,7 +37,7 @@ export const actualizarCoordinador = async (fetch: typeof window.fetch, id: numb
 };
 
 export const eliminarCoordinador = async (fetch: typeof window.fetch, cedula: string) => {
-  const res = await fetch(`${API}/delete/${cedula}`, {
+  const res = await fetch(`${API}delete/${cedula}`, {
     method: 'DELETE'
   });
   const coordinadorEliminado = await res.json();

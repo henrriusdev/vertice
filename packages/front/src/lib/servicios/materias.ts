@@ -1,7 +1,7 @@
 import type { MateriaReq } from '$lib/types';
 import type { Materia, MateriaCiclo, MateriaDisponible } from '../../app';
 
-const API = 'http://127.0.0.1:8000/api/materias';
+const API = 'http://127.0.0.1:8000/api/materias/';
 
 export const obtenerMaterias = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}`);
@@ -10,13 +10,13 @@ export const obtenerMaterias = async (fetch: typeof window.fetch) => {
 };
 
 export const obtenerMateria = async (fetch: typeof window.fetch, id: string) => {
-	const res = await fetch(`${API}/${id}`);
+	const res = await fetch(`${API}${id}`);
 	const materia = await res.json();
 	return materia.data as MateriaCiclo;
 };
 
 export const crearMateria = async (fetch: typeof window.fetch, materia: MateriaReq) => {
-	const res = await fetch(`${API}/add`, {
+	const res = await fetch(`${API}add`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(materia)
@@ -30,7 +30,7 @@ export const actualizarMateria = async (
 	id: string,
 	materia: MateriaReq
 ) => {
-	const res = await fetch(`${API}/update/${id}`, {
+	const res = await fetch(`${API}update/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(materia)
@@ -40,7 +40,7 @@ export const actualizarMateria = async (
 };
 
 export const eliminarMateria = async (fetch: typeof window.fetch, id: string) => {
-	const res = await fetch(`${API}/delete/${id}`, {
+	const res = await fetch(`${API}delete/${id}`, {
 		method: 'DELETE'
 	});
 	const materiaEliminada = await res.json();
@@ -49,7 +49,7 @@ export const eliminarMateria = async (fetch: typeof window.fetch, id: string) =>
 
 export const obtenerMateriasDisponibles = async (fetch: typeof window.fetch, cedula: string) => {
 	try {
-		const res = await fetch(`${API}/inscribir/${cedula}`);
+		const res = await fetch(`${API}inscribir/${cedula}`);
 		
 		// Manejar específicamente el caso 204 (No Content)
 		if (res.status === 204) {
@@ -88,7 +88,7 @@ export const actualizarNota = async (
 		materia: string;
 	}
 ) => {
-	const res = await fetch(`${API}/upload`, {
+	const res = await fetch(`${API}upload`, {
 		method: 'PATCH',
 		body: JSON.stringify(payload),
 		headers: {

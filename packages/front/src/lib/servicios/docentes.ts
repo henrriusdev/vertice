@@ -2,7 +2,7 @@
 import type { DocenteReq } from '$lib/types';
 import type { Docente, MateriaDocente } from '../../app';
 
-const API = 'http://127.0.0.1:8000/api/docentes';
+const API = 'http://127.0.0.1:8000/api/docentes/';
 
 export const obtenerDocentes = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}`);
@@ -17,7 +17,7 @@ export const obtenerDocente = async (fetch: typeof window.fetch, id: number) => 
 };
 
 export const crearDocente = async (fetch: typeof window.fetch, docente: DocenteReq) => {
-	const res = await fetch(`${API}/add`, {
+	const res = await fetch(`${API}add`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(docente)
@@ -31,7 +31,7 @@ export const actualizarDocente = async (
 	id: number,
 	docente: DocenteReq
 ) => {
-	const res = await fetch(`${API}/update/${id}`, {
+	const res = await fetch(`${API}update/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(docente)
@@ -41,7 +41,7 @@ export const actualizarDocente = async (
 };
 
 export const eliminarDocente = async (fetch: typeof window.fetch, cedula: string) => {
-	const res = await fetch(`${API}/delete/${cedula}`, {
+	const res = await fetch(`${API}delete/${cedula}`, {
 		method: 'DELETE'
 	});
 	const docenteEliminado = await res.json();
@@ -49,7 +49,7 @@ export const eliminarDocente = async (fetch: typeof window.fetch, cedula: string
 };
 
 export const obtenerMateriasAsignadas = async (fetch: typeof window.fetch) => {
-	const res = await fetch(`${API}/materias`);
+	const res = await fetch(`${API}materias`);
 	const response = await res.json();
 	return response.data as MateriaDocente[];
 };

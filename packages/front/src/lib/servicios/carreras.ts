@@ -1,6 +1,6 @@
 import type { Carrera } from "../../app";
 
-const API = 'http://127.0.0.1:8000/api/carreras';
+const API = 'http://127.0.0.1:8000/api/carreras/';
 
 export const obtenerCarreras = async (fetch: typeof window.fetch) => {
   const res = await fetch(`${API}`);
@@ -9,13 +9,13 @@ export const obtenerCarreras = async (fetch: typeof window.fetch) => {
 };
 
 export const obtenerCarrera = async (fetch: typeof window.fetch, id: number) => {
-  const res = await fetch(`${API}/${id}`);
+  const res = await fetch(`${API}${id}`);
   const carrera = await res.json();
   return carrera.data.carrera as Carrera;
 };
 
 export const crearCarrera = async (fetch: typeof window.fetch, carrera: Carrera) => {
-  const res = await fetch(`${API}/add`, {
+  const res = await fetch(`${API}add`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(carrera)
@@ -25,7 +25,7 @@ export const crearCarrera = async (fetch: typeof window.fetch, carrera: Carrera)
 };
 
 export const actualizarCarrera = async (fetch: typeof window.fetch, id: number, carrera: Carrera) => {
-  const res = await fetch(`${API}/update/${id}`, {
+  const res = await fetch(`${API}update/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({nombre: carrera.nombre})
@@ -35,7 +35,7 @@ export const actualizarCarrera = async (fetch: typeof window.fetch, id: number, 
 };
 
 export const eliminarCarrera = async (fetch: typeof window.fetch, id: number) => {
-  const res = await fetch(`${API}/delete/${id}`, {
+  const res = await fetch(`${API}delete/${id}`, {
     method: 'DELETE'
   });
   const carreraEliminada = await res.json();

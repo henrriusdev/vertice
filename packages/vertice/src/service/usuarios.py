@@ -23,11 +23,41 @@ async def login(correo: str, password: str):
         raise Exception(ex)
 
 
+# Simple in-memory cache with expiration time
+_usuarios_cache = {"data": None, "timestamp": 0, "ttl": 60}  # 60 seconds TTL
+
 async def get_usuarios():
     try:
-        # get only users with rol administrador and control
-        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).prefetch_related("rol").all()
-        response = [u.to_dict() for u in data]
+        import time
+        current_time = time.time()
+        
+        if _usuarios_cache["data"] is not None and (current_time - _usuarios_cache["timestamp"] < _usuarios_cache["ttl"]):
+            return _usuarios_cache["data"]
+            
+        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).select_related("rol")
+        
+        response = []
+        for u in data:
+            cedula_clean = u.cedula.replace("V-", "").replace("E-", "")
+            
+            response.append({
+                "id": u.id,
+                "cedula": u.cedula,
+                "nombre": u.nombre,
+                "correo": u.correo,
+                "activo": u.activo,
+                "fecha_creacion": u.fecha_creacion.strftime("%d/%m/%Y") if u.fecha_creacion else None,
+                "cambiar_clave": u.check_password(cedula_clean),
+                "pregunta_configurada": u.pregunta_configurada,
+                "rol": {
+                    "id": u.rol.id,
+                    "nombre": u.rol.nombre,
+                },
+            })
+        
+        _usuarios_cache["data"] = response
+        _usuarios_cache["timestamp"] = current_time
+        
         return response
     except Exception as ex:
         raise Exception(ex)

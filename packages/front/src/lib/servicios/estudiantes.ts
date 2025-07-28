@@ -1,7 +1,7 @@
 import type { EstudianteReq } from '$lib/types';
 import type { Estudiante, MateriaHistorico, MateriaInscrita } from '../../app';
 
-const API = 'http://127.0.0.1:8000/api/estudiantes';
+const API = 'http://127.0.0.1:8000/api/estudiantes/';
 
 export const obtenerEstudiantes = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}`);
@@ -10,13 +10,13 @@ export const obtenerEstudiantes = async (fetch: typeof window.fetch) => {
 };
 
 export const obtenerEstudiante = async (fetch: typeof window.fetch, id: number) => {
-	const res = await fetch(`${API}/${id}`);
+	const res = await fetch(`${API}${id}`);
 	const estudiante = await res.json();
 	return estudiante.data as Estudiante;
 };
 
 export const crearEstudiante = async (fetch: typeof window.fetch, estudiante: EstudianteReq) => {
-	const res = await fetch(`${API}/add`, {
+	const res = await fetch(`${API}add`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(estudiante)
@@ -30,7 +30,7 @@ export const actualizarEstudiante = async (
 	id: number,
 	estudiante: EstudianteReq
 ) => {
-	const res = await fetch(`${API}/update/${id}`, {
+	const res = await fetch(`${API}update/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(estudiante)
@@ -40,7 +40,7 @@ export const actualizarEstudiante = async (
 };
 
 export const eliminarEstudiante = async (fetch: typeof window.fetch, cedula: string) => {
-	const res = await fetch(`${API}/delete/${cedula}`, {
+	const res = await fetch(`${API}delete/${cedula}`, {
 		method: 'DELETE'
 	});
 	const estudianteEliminado = await res.json();
@@ -48,13 +48,13 @@ export const eliminarEstudiante = async (fetch: typeof window.fetch, cedula: str
 };
 
 export const obtenerMateriasInscritas = async (fetch: typeof window.fetch) => {
-	const res = await fetch(`${API}/horario`);
+	const res = await fetch(`${API}horario`);
 	const materias = await res.json();
 	return materias.data.materias as MateriaInscrita[];
 };
 
 export const obtenerHistoricoMaterias = async (fetch: typeof window.fetch) => {
-	const res = await fetch(`${API}/historico`);
+	const res = await fetch(`${API}historico`);
 	const materias = await res.json();
 	return materias.data.notas as MateriaHistorico[];
 };
@@ -63,7 +63,7 @@ export const inscribirMaterias = async (
 	fetch: typeof window.fetch,
 	payload: { materias: string[] }
 ) => {
-	const res = await fetch(`${API}/add-materia`, {
+	const res = await fetch(`${API}add-materia`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(payload)

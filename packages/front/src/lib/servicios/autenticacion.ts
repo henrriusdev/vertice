@@ -1,14 +1,14 @@
 // src/lib/servicios/autenticacion.ts
 import type { Usuario } from '../../app.d';
 
-const API = 'http://127.0.0.1:8000/api/usuario';
+const API = 'http://127.0.0.1:8000/api/usuario/';
 
 export async function login(
 	fetch: typeof window.fetch,
 	correo: string,
 	password: string
 ): Promise<{ usuario: Usuario; token: string }> {
-	const res = await fetch(`${API}/login`, {
+	const res = await fetch(`${API}login`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ correo, password })
@@ -32,7 +32,7 @@ export async function login(
 }
 
 export async function refresh(fetch: typeof window.fetch, token: string): Promise<Usuario> {
-	const res = await fetch(`${API}/refresh`, {
+	const res = await fetch(`${API}refresh`, {
 		method: 'GET',
 		headers: {
 			Authorization: token
@@ -46,7 +46,7 @@ export async function refresh(fetch: typeof window.fetch, token: string): Promis
 }
 
 export async function logout(fetch: typeof window.fetch, token: string): Promise<boolean> {
-	const res = await fetch(`${API}/logout`, {
+	const res = await fetch(`${API}logout`, {
 		method: 'POST',
 		headers: {
 			Authorization: token,
@@ -66,7 +66,7 @@ export async function crearUsuario(
 	fetch: typeof window.fetch,
 	usuario: Partial<Usuario>
 ) {
-	const res = await fetch(`${API}/register`, {
+	const res = await fetch(`${API}register`, {
 		method: 'POST',
 		body: JSON.stringify(usuario),
 		headers: {
@@ -86,7 +86,7 @@ export async function actualizarUsuario(
 	id: number,
 	usuario: Partial<Usuario>
 ) {
-	const res = await fetch(`${API}/update/${id}`, {
+	const res = await fetch(`${API}update/${id}`, {
 		method: 'PUT',
 		body: JSON.stringify(usuario),
 		headers: {
@@ -102,7 +102,7 @@ export async function actualizarUsuario(
 }
 
 export async function eliminarUsuario(fetch: typeof window.fetch, cedula: string) {
-	const res = await fetch(`${API}/delete/${cedula}`, {
+	const res = await fetch(`${API}delete/${cedula}`, {
 		method: 'DELETE'
 	});
 	if (!res.ok) {
@@ -125,7 +125,7 @@ export async function obtenerUsuarios(fetch: typeof window.fetch) {
 }
 
 export async function obtenerUsuario(fetch: typeof window.fetch, cedula: string) {
-	const res = await fetch(`${API}/${cedula}`);
+	const res = await fetch(`${API}${cedula}`);
 	if (!res.ok) {
 		const err = await res.json();
 		throw new Error(err?.message ?? 'Error al crear usuario');
@@ -136,7 +136,7 @@ export async function obtenerUsuario(fetch: typeof window.fetch, cedula: string)
 }
 
 export async function cambiarPassword(fetch: typeof window.fetch, currentPassword: string, newPassword: string) {
-	const response = await fetch(`${API}/change-password`, {
+	const response = await fetch(`${API}change-password`, {
 		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ export async function cambiarPassword(fetch: typeof window.fetch, currentPasswor
 }
 
 export async function forzarCambioPassword(fetch: typeof window.fetch, newPassword: string) {
-	const response = await fetch(`${API}/first-reset-password`, {
+	const response = await fetch(`${API}first-reset-password`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ export async function recuperarContrasena(
 	correo: string,
 	password: string
 ) {
-	const res = await fetch(`${API}/force-password`, {
+	const res = await fetch(`${API}force-password`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ correo, password })
