@@ -1,4 +1,4 @@
-import { actualizarNota, addToast, obtenerMateria } from '$lib';
+import { actualizarNota, obtenerMateria } from '$lib';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { crearPeticion } from '$lib/servicios/peticiones';

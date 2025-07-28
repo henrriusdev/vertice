@@ -1,4 +1,3 @@
-// src/routes/+page.server.ts
 import { login } from '$lib';
 import { redirect } from '@sveltejs/kit';
 

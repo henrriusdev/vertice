@@ -1,10 +1,10 @@
 import type { Materia, Peticion } from '../../app';
-import type { MateriaReq, Peticion as PeticionGet } from '$lib/types';
+import type { Peticion as PeticionGet } from '$lib/types';
 
-const API = 'http://127.0.0.1:8000/api/peticiones';
+const API = 'http://127.0.0.1:8000/api/peticiones/';
 
 export const crearPeticion = async (fetch: typeof window.fetch, payload: Omit<Peticion, 'id'>) => {
-	const res = await fetch(`${API}/add`, {
+	const res = await fetch(`${API}add`, {
 		method: 'POST',
 		body: JSON.stringify(payload),
 		headers: {
@@ -25,7 +25,7 @@ export const actualizarPeticion = async (
 	id: number,
 	payload: any
 ) => {
-	const res = await fetch(`${API}/update/${id}`, {
+	const res = await fetch(`${API}update/${id}`, {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(payload)

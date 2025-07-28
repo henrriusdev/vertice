@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DataTable } from '$lib';
 	import { Button, Label, Select } from 'flowbite-svelte';
-	import { CheckOutline, CloseOutline, XSolid } from 'flowbite-svelte-icons';
+	import { CheckOutline, CloseOutline } from 'flowbite-svelte-icons';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { Peticion } from '../../../app';

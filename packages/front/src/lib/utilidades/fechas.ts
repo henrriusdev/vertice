@@ -1,3 +1,1 @@
-export const now = () => new Date();
-
-export const maxYearDate = () => new Date(now().getFullYear() - 16, now().getMonth(), now().getDate());
+export const maxYearDate = () => new Date(new Date().getFullYear() - 16, new Date().getMonth(), new Date().getDate());

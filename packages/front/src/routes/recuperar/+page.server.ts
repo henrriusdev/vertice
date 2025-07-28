@@ -1,4 +1,4 @@
-import type { Actions } from '@sveltejs/kit';
+import type { Actions } from './$types';
 import { obtenerPreguntasSeguridad, verificarPreguntaSeguridad } from '$lib/servicios/pregunta-seguridad';
 import { recuperarContrasena } from '$lib/servicios/autenticacion';
 import type { PreguntaSeguridad } from '../../app';

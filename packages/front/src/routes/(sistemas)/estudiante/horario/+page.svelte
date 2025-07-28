@@ -1,18 +1,14 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { Button, Card, Modal, Popover, Spinner, Toast } from 'flowbite-svelte';
-	import {
-		CalendarWeekOutline,
-		ClockOutline,
-		CloseOutline,
-		PlusOutline
-	} from 'flowbite-svelte-icons';
-	import { slide } from 'svelte/transition';
-	import type { MateriaDisponible } from '../../../../app';
-	import type { PageData } from './$types';
-	import { GrillaHorario } from '$lib';
-	import { resolver } from '$lib/utilidades/resolver';
-	import type { SubmitFunction } from '@sveltejs/kit';
+	import {enhance} from '$app/forms';
+	import {Button, Modal, Popover, Spinner} from 'flowbite-svelte';
+	import {CalendarWeekOutline, PlusOutline} from 'flowbite-svelte-icons';
+	import {slide} from 'svelte/transition';
+	import type {MateriaDisponible} from '../../../../app';
+	import type {PageData} from './$types';
+	import {addToast, GrillaHorario} from '$lib';
+	import {resolver} from '$lib/utilidades/resolver';
+	import type {SubmitFunction} from '@sveltejs/kit';
+	import {getRandomColor} from "$lib/utilidades/colors";
 
 	// Tipos
 	type HorarioMateria = {
@@ -35,8 +31,6 @@
 
 	let openModal = $state(false);
 	let isLoading = $state(false);
-
-	const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 	function horaAMinutos(hora: string): number {
 		const [horas, minutos] = hora.split(':').map(Number);
@@ -71,8 +65,10 @@
 		}
 
 		if (conflictoDetectado) {
-			mensajeToast = 'Hay conflictos en tu horario. Corrige antes de registrar.';
-			mostrarToast = true;
+			addToast({
+				type: 'error',
+				message: '¡Existen conflictos en el horario!'
+			});
 		}
 	}
 
@@ -129,27 +125,6 @@
 	function quitarMateriaPorID(materiaId: string) {
 		materias = materias.filter((m) => m.id !== materiaId);
 		verificarConflictos();
-	}
-
-	function getRandomColor() {
-		const colors = [
-			'blue',
-			'green',
-			'purple',
-			'yellow',
-			'red',
-			'pink',
-			'indigo',
-			'gray',
-			'orange',
-			'cyan',
-			'teal',
-			'violet',
-			'lime',
-			'sky',
-			'amber'
-		];
-		return colors[Math.floor(Math.random() * colors.length)];
 	}
 
 	const handleSubmit: SubmitFunction = () => {
@@ -241,9 +216,3 @@
 		{/snippet}
 	</Modal>
 </div>
-
-<style>
-	.custom-cols {
-		grid-template-columns: 4rem repeat(6, 1fr);
-	}
-</style>

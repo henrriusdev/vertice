@@ -2,7 +2,7 @@ import { inscribirMaterias, obtenerConfiguracion, obtenerMateriasInscritas } fro
 import { obtenerMateriasDisponibles } from '$lib/servicios/materias';
 import { isAfter } from 'date-fns';
 import type { Actions, PageServerLoad } from './$types';
-import type { MateriaDisponible, MateriaInscrita } from '../../../../app';
+import type { MateriaDisponible } from '../../../../app';
 import { addToast } from '$lib';
 
 export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {

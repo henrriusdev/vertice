@@ -1,4 +1,3 @@
-// src/lib/utilidades/resolver.ts
 import { goto, invalidate, invalidateAll } from '$app/navigation';
 import { addToast } from '$lib';
 import { fileTypeFromBuffer } from 'file-type';

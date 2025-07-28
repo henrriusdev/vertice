@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Chart } from '@flowbite-svelte-plugins/chart';
-  import type { PageData } from './$types';
+  import {Chart} from '@flowbite-svelte-plugins/chart';
+  import type {PageData} from './$types';
 
-  let { data }: { data: PageData } = $props();
+  let {data}: { data: PageData } = $props();
 
   const pagosPorDia = $derived(Object.entries(data.pagosPorDia));
   const pagosLabels = $derived(pagosPorDia.map(([fecha]) => fecha));
@@ -53,7 +53,7 @@
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-semibold mb-4">Pagos por tipo</h2>
         <Chart
-            options={donutChartOptions}
+                options={donutChartOptions}
         />
     </div>
 

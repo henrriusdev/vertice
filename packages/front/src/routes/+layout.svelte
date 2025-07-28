@@ -4,7 +4,7 @@
 	let { children } = $props();
 </script>
 
-<div class="relative" data-sveltekit-preload-code>
+<div class="relative">
 	<ToastContainer position="bottom-right" />
 	{@render children()}
 </div>

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import {cedulaMask, DataTable, telefono} from '$lib';
-	import {imask} from '@imask/svelte';
-	import {Button, Input, Label, Modal, Select, TableSearch} from 'flowbite-svelte';
-import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import {PenOutline, PlusOutline, TrashBinOutline} from 'flowbite-svelte-icons';
-	import type {Coordinador} from '../../../../app';
+	import { cedulaMask, DataTable, telefono } from '$lib';
+	import { imask } from '@imask/svelte';
+	import { Button, Input, Label, Modal, Select, TableSearch } from 'flowbite-svelte';
+	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
+	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import type { Coordinador } from '../../../../app';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { resolver } from '$lib/utilidades/resolver';
@@ -45,10 +45,10 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 			coordinadoresFiltrados =
 				data?.coordinadores.filter(
 					(est) =>
-						(est?.cedula?.includes(searchTerm) ||
+						est?.cedula?.includes(searchTerm) ||
 						est?.telefono?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 						est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()))
+						est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
 				) ?? [];
 		}
 	});
@@ -57,16 +57,19 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	let coordinadoresFiltrados = $derived(
 		coordinadores.filter(
 			(est) =>
-				(est?.cedula?.includes(searchTerm) ||
+				est?.cedula?.includes(searchTerm) ||
 				est?.telefono?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()))
+				est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
 		) ?? []
 	);
 
 	// Función para abrir el modal en modo edición
 	function editarCoordinador(coordinador: any) {
-		coordinadorActual = { ...coordinador, carrera: data.carreras.find((car) => car.nombre === coordinador.carrera)?.id };
+		coordinadorActual = {
+			...coordinador,
+			carrera: data.carreras.find((car) => car.nombre === coordinador.carrera)?.id
+		};
 		isEditing = true;
 		modalVisible = true;
 	}
@@ -93,32 +96,36 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 		</Button>
 	</div>
 
-
 	<div class="mb-4">
 		<TableSearch bind:inputValue={searchTerm} placeholder="Buscar por nombre, cédula o correo..." />
 	</div>
 
-		{#snippet actions(row: Coordinador)}
-	<div class="flex gap-2">
-		<Button size="xs" color="light" onclick={() => editarCoordinador(row)}>
-			<PenOutline class="w-4 h-4" />
-		</Button>
-		<form action="?/delete" method="POST">
-			<input type="hidden" name="cedula" value={row.cedula} />
-			<Button size="xs" color="red" type="submit">
-				<TrashBinOutline class="w-4 h-4" />
+	{#snippet actions(row: Coordinador)}
+		<div class="flex gap-2">
+			<Button size="xs" color="light" onclick={() => editarCoordinador(row)}>
+				<PenOutline class="w-4 h-4" />
 			</Button>
-		</form>
-	</div>
-{/snippet}
-<DataTable data={coordinadoresFiltrados} {actions}></DataTable>
+			<form action="?/delete" method="POST">
+				<input type="hidden" name="cedula" value={row.cedula} />
+				<Button size="xs" color="red" type="submit">
+					<TrashBinOutline class="w-4 h-4" />
+				</Button>
+			</form>
+		</div>
+	{/snippet}
+	<DataTable data={coordinadoresFiltrados} {actions}></DataTable>
 
 	<Modal
 		title={isEditing ? 'Editar Coordinador' : 'Nuevo Coordinador'}
 		bind:open={modalVisible}
 		size="lg"
 	>
-		<form action={isEditing ? '?/edit' : '?/create'} use:enhance={handleSubmit} method="POST" bind:this={formEl}>
+		<form
+			action={isEditing ? '?/edit' : '?/create'}
+			use:enhance={handleSubmit}
+			method="POST"
+			bind:this={formEl}
+		>
 			{#if isEditing}
 				<input type="hidden" name="id_coordinador" value={coordinadorActual!.id} />
 				<input type="hidden" name="id" value={coordinadorActual!?.usuario} />
@@ -190,7 +197,9 @@ import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 		{#snippet footer()}
 			<div class="flex justify-between items-center w-full">
 				<div>
-					<Button type="button" color="alternative" onclick={() => (modalVisible = false)}>Cancelar</Button>
+					<Button type="button" color="alternative" onclick={() => (modalVisible = false)}
+						>Cancelar</Button
+					>
 					<Button type="submit" color="primary" onclick={() => formEl?.requestSubmit()}>
 						{isEditing ? 'Actualizar' : 'Guardar'}
 					</Button>

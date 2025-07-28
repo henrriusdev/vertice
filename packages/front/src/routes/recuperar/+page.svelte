@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Alert, Button, Input, Label, StepIndicator } from 'flowbite-svelte';
@@ -33,26 +32,6 @@
 
 		return errors;
 	}
-
-	// Tipos para la respuesta del servidor
-	type SuccessResponse = {
-		type: 'success';
-		status: number;
-		data: {
-			pregunta?: string;
-			message?: string;
-		};
-	};
-
-	type FailureResponse = {
-		type: 'failure';
-		status: number;
-		data: {
-			message: string;
-		};
-	};
-
-	type ServerResponse = SuccessResponse | FailureResponse;
 
 	// Datos del formulario
 	let correo = $state('');

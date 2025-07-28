@@ -1,7 +1,6 @@
 import { actualizarPeticion, obtenerPeticiones } from '$lib/servicios/peticiones';
 import type { Actions, PageServerLoad } from './$types';
 import { obtenerDocentes, obtenerEstudiantes } from '$lib';
-import { addToast } from '$lib'; // Asegúrate de que la ruta sea correcta
 
 export const load = (async ({ fetch, }) => {
 	const peticiones = await obtenerPeticiones(fetch);

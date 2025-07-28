@@ -7,7 +7,6 @@ import { error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import type { MateriaDisponible } from '../../../app';
 import { obtenerConstancia, obtenerPlanificacion } from '$lib/servicios/archivos';
-import { addToast } from '$lib';
 
 export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 	try {

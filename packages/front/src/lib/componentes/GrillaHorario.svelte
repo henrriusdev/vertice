@@ -1,5 +1,4 @@
 <script lang="ts">
-	// Componente reusable SOLO PARA VISUALIZAR la grilla de materias
 	import { Card } from 'flowbite-svelte';
 	import { ClockOutline } from 'flowbite-svelte-icons';
 

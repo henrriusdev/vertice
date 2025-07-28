@@ -7,8 +7,6 @@
 		Badge,
 		Button,
 		Card,
-		Heading,
-		P,
 		Spinner,
 		Table,
 		TableBody,
@@ -145,22 +143,22 @@
 	<div class="grid md:grid-cols-6 gap-4 mb-6">
 		<!-- Resumen estadístico -->
 		<Card class="col-span-2 p-4 max-w-full">
-			<Heading tag="h3" class="mb-4">Resumen Académico</Heading>
+			<h3 class="text-lg font-semibold mb-4">Resumen Académico</h3>
 
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 				<div class="bg-gray-50 p-4 rounded-lg text-center">
-					<P weight="bold" class="text-3xl text-primary-700">{creditosObtenidos}</P>
-					<P size="sm">Créditos Obtenidos</P>
+					<p class="text-3xl font-bold text-primary-700">{creditosObtenidos}</p>
+					<p class="text-sm">Créditos Obtenidos</p>
 				</div>
 
 				<div class="bg-gray-50 p-4 rounded-lg text-center">
-					<P weight="bold" class="text-3xl text-red-600">{materiasAplazadas}</P>
-					<P size="sm">Materias Aplazadas</P>
+					<p class="text-3xl font-bold text-red-600">{materiasAplazadas}</p>
+					<p class="text-sm">Materias Aplazadas</p>
 				</div>
 
 				<div class="bg-gray-50 p-4 rounded-lg text-center">
-					<P weight="bold" class="text-3xl text-primary-700">{promedioGeneral.toFixed(2)}</P>
-					<P size="sm">Promedio General</P>
+					<p class="text-3xl font-bold text-primary-700">{promedioGeneral.toFixed(2)}</p>
+					<p class="text-sm">Promedio General</p>
 				</div>
 			</div>
 			<h3 class="text-lg font-semibold mr-3">Estado de inscripción:</h3>
@@ -173,12 +171,12 @@
 
 		<!-- Gráfico de promedio por semestre -->
 		<Card class="col-span-4 p-4 max-w-full">
-			<Heading tag="h3" class="mb-4">Evolución del Promedio</Heading>
+			<h3 class="text-lg font-semibold mb-4">Evolución del Promedio</h3>
 			<Chart {options} />
 		</Card>
 		<!-- Materias inscritas -->
 		<Card class="mb-6 p-4 max-w-full col-span-2">
-			<Heading tag="h3" class="mb-4">Materias Inscritas</Heading>
+			<h3 class="text-lg font-semibold mb-4">Materias Inscritas</h3>
 
 			{#if data.materiasInscritas.length > 0}
 				<Table striped={true}>
@@ -246,7 +244,7 @@
 		<!-- Histórico de materias -->
 		{#if data.historicoMaterias.length > 0}
 			<Card class="col-span-2 max-w-full p-4">
-				<Heading tag="h3" class="mb-4">Histórico de Materias</Heading>
+				<h3 class="text-lg font-semibold mb-4">Histórico de Materias</h3>
 
 				<Table striped={true} hoverable={true}>
 					<TableHead>
@@ -281,7 +279,7 @@
 
 		<!-- Materias disponibles -->
 		<Card class="col-span-2 max-w-full p-4">
-			<Heading tag="h3" class="mb-4">Materias Disponibles</Heading>
+			<h3 class="text-lg font-semibold mb-4">Materias Disponibles</h3>
 			
 			{#if data.materiasDisponibles.length > 0}
 				<Table striped={true} hoverable={true}>

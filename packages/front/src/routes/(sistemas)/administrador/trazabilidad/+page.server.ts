@@ -1,8 +1,7 @@
-import { fail } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
-import { filtrarTrazabilidad } from '$lib/servicios/trazabilidad';
 import { exportarTrazabilidad } from '$lib/servicios/archivos';
+import { filtrarTrazabilidad } from '$lib/servicios/trazabilidad';
 import { format } from 'date-fns';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const busqueda = url.searchParams.get('busqueda') || '';
@@ -64,10 +63,10 @@ export const actions: Actions = {
 			);
 
 			if (registros.length === 0) {
-				return fail(400, {
-					message: 'No hay datos para exportar',
-					type: 'failure'
-				});
+				return {
+					type: 'failure',
+					message: 'No hay datos para exportar'
+				}
 			}
 
 			// Generar el archivo de exportación
@@ -90,10 +89,10 @@ export const actions: Actions = {
 			};
 		} catch (error) {
 			console.error('Error al exportar los datos:', error);
-			return fail(500, {
-				message: 'Error al exportar los datos. Por favor, inténtelo de nuevo.',
-				type: 'failure'
-			});
+			return {
+				type: 'failure',
+				message: 'Error al exportar los datos. Por favor, inténtelo de nuevo.'
+			};
 		}
 	}
 };

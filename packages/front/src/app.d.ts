@@ -1,10 +1,3 @@
-export type Billete = {
-	id: number;
-	serial: string;
-	monto: number;
-	pago_id: number;
-};
-
 export type Carrera = {
 	id: number;
 	nombre: string;
@@ -21,7 +14,6 @@ export type Configuracion = {
 	porcentajes: number[];
 };
 
-
 export type Coordinador = {
 	cedula: string;
 	nombre: string;
@@ -37,11 +29,11 @@ export type Docente = {
 	nombre: string;
 	correo: string;
 	usuario: number;
-        titulo: string;
-        dedicacion: string;
-        estatus: string;
-        fecha_ingreso: string;
-        observaciones: string;
+	titulo: string;
+	dedicacion: string;
+	estatus: string;
+	fecha_ingreso: string;
+	observaciones: string;
 };
 
 export type Estudiante = {
@@ -74,9 +66,9 @@ export type Materia = {
 	semestre: number;
 	id_carrera: number;
 	horarios: Horario[];
-        ciclo: string;
-        maximo: number;
-        id_docente: number;
+	ciclo: string;
+	maximo: number;
+	id_docente: number;
 };
 
 export type Metodo_pago = {
@@ -85,15 +77,15 @@ export type Metodo_pago = {
 };
 
 export type Pago = {
-        id: number;
-        cedula_estudiante: number | Estudiante;
-        metodo_pago: Metodo_pago | number;
-        monto: number;
-        concepto: string;
-        fecha_pago: string;
-        referencia_transferencia: string;
-        ciclo: string;
-        tasa_divisa?: number;
+	id: number;
+	cedula_estudiante: number | Estudiante;
+	metodo_pago: Metodo_pago | number;
+	monto: number;
+	concepto: string;
+	fecha_pago: string;
+	referencia_transferencia: string;
+	ciclo: string;
+	tasa_divisa?: number;
 };
 
 export type Peticion = {
@@ -104,7 +96,7 @@ export type Peticion = {
 	id_estudiante: number | string | object;
 	id_materia: string | object;
 	campo: string;
-	valor: number
+	valor: number;
 };
 
 export type Trazabilidad = {
@@ -170,7 +162,7 @@ export type MateriaDocente = {
 	hora_inicio: string;
 	hora_fin: string;
 	color: null;
-	conflicto: false,
+	conflicto: false;
 };
 
 export interface MateriaCiclo {
@@ -192,8 +184,8 @@ export interface Nota {
 	promedio: number;
 }
 
-export interface PreguntaSeguridad{
-	pregunta: string
+export interface PreguntaSeguridad {
+	pregunta: string;
 	respuesta: string;
 	orden: number;
 }

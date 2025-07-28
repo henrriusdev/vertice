@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Chart } from '@flowbite-svelte-plugins/chart';
-	import { Card, Heading, P } from 'flowbite-svelte';
+	import { Card } from 'flowbite-svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -63,29 +63,29 @@
 		<Card class="col-span-6 p-4 max-w-full">
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 				<div class="bg-gray-50 p-4 rounded-lg text-center">
-					<P weight="bold" class="text-3xl text-primary-700">{totalEstudiantes}</P>
-					<P size="sm">Estudiantes Activos</P>
+					<p class="text-3xl font-bold text-primary-700">{totalEstudiantes}</p>
+					<p class="text-sm">Estudiantes Activos</p>
 				</div>
 				<div class="bg-gray-50 p-4 rounded-lg text-center">
-					<P weight="bold" class="text-3xl text-green-600">{totalDocentes}</P>
-					<P size="sm">Docentes Activos</P>
+					<p class="text-3xl font-bold text-green-600">{totalDocentes}</p>
+					<p class="text-sm">Docentes Activos</p>
 				</div>
 				<div class="bg-gray-50 p-4 rounded-lg text-center">
-					<P weight="bold" class="text-3xl text-blue-600">{totalMaterias}</P>
-					<P size="sm">Materias Activas</P>
+					<p class="text-3xl font-bold text-blue-600">{totalMaterias}</p>
+					<p class="text-sm">Materias Activas</p>
 				</div>
 			</div>
 		</Card>
 
 		<!-- Gráfico de distribución por carrera -->
 		<Card class="col-span-3 p-4 max-w-full">
-			<Heading tag="h3" class="mb-4">Distribución de Estudiantes por Carrera</Heading>
+			<h3 class="text-lg font-semibold mb-4">Distribución de Estudiantes por Carrera</h3>
 			<Chart options={distribucionOptions} />
 		</Card>
 
 		<!-- Gráfico de promedios por carrera -->
 		<Card class="col-span-3 p-4 max-w-full">
-			<Heading tag="h3" class="mb-4">Promedio por Carrera</Heading>
+			<h3 class="text-lg font-semibold mb-4">Promedio por Carrera</h3>
 			<Chart options={promediosOptions} />
 		</Card>
 	</div>

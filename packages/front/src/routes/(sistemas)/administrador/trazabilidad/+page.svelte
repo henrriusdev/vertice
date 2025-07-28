@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { resolver } from '$lib/utilidades/resolver';
 	import { format } from 'date-fns';
 	import { es } from 'date-fns/locale';
 	import {
 		Button,
+		Datepicker,
 		Input,
 		Label,
 		Select,
@@ -13,8 +15,7 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell,
-		Datepicker
+		TableHeadCell
 	} from 'flowbite-svelte';
 	import {
 		CalendarEditOutline,
@@ -24,9 +25,7 @@
 		InfoCircleOutline,
 		SearchOutline
 	} from 'flowbite-svelte-icons';
-	import { resolver } from '$lib/utilidades/resolver';
 	import { tick } from 'svelte';
-	import { maxYearDate } from '$lib';
 
 	// Definir props
 	let { data } = $props();
@@ -133,7 +132,14 @@
 						<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
 							<CalendarEditOutline class="w-4 h-4 text-gray-500" />
 						</div>
-						<Datepicker bind:value={fechaDesde} availableTo={new Date()} placeholder="Seleccione una fecha" translationLocale="es-VE" locale="fr-FR" dateFormat={{year: 'numeric', month: '2-digit', day: '2-digit'}} />
+						<Datepicker
+							bind:value={fechaDesde}
+							availableTo={new Date()}
+							placeholder="Seleccione una fecha"
+							translationLocale="es-VE"
+							locale="fr-FR"
+							dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
+						/>
 						<input type="hidden" name="fechaDesde" bind:value={fechaDesde} class="hidden" />
 					</div>
 				</div>
@@ -142,7 +148,15 @@
 				<div>
 					<Label for="fechaHasta" class="mb-2">Fecha hasta</Label>
 					<div class="relative">
-						<Datepicker bind:value={fechaHasta} availableFrom={fechaDesde} availableTo={new Date()} placeholder="Seleccione una fecha" translationLocale="es-VE" locale="fr-FR" dateFormat={{year: 'numeric', month: '2-digit', day: '2-digit'}} />
+						<Datepicker
+							bind:value={fechaHasta}
+							availableFrom={fechaDesde}
+							availableTo={new Date()}
+							placeholder="Seleccione una fecha"
+							translationLocale="es-VE"
+							locale="fr-FR"
+							dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
+						/>
 						<input type="hidden" name="fechaHasta" bind:value={fechaHasta} class="hidden" />
 					</div>
 				</div>

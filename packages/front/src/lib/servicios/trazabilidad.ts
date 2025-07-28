@@ -1,7 +1,7 @@
 import type { Trazabilidad } from '../../app';
 import type { FiltroTrazabilidad } from '$lib';
 
-const API = 'http://127.0.0.1:8000/api/trazabilidad';
+const API = 'http://127.0.0.1:8000/api/trazabilidad/';
 
 export async function filtrarTrazabilidad(
 	filtros: FiltroTrazabilidad,
