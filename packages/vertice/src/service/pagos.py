@@ -66,9 +66,9 @@ async def delete_pago(pago_id: int):
 
 async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):
     fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
-
     inicio_dia = datetime.combine(fecha.date(), datetime.min.time())
     fin_dia = datetime.combine(fecha.date(), datetime.max.time())
+    print(f"Rango de búsqueda: {inicio_dia} a {fin_dia}")
 
     q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
     if filtro:

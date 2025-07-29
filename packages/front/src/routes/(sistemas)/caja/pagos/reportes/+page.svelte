@@ -5,9 +5,18 @@
 	import { resolver } from '$lib/utilidades/resolver';
 
 	let reportType = $state('dia');
-	$inspect(reportType)
 	let paymentSelection = $state('todos');
 	let reportDate: Date | { from?: Date; to?: Date } | undefined = $state(new Date());
+
+	$effect(() => {
+		if (reportType === 'dia') {
+			reportDate = new Date();
+		} else if (reportType === 'fechas') {
+			reportDate = { from: new Date(), to: new Date() };
+		} else {
+			reportDate = undefined;
+		}
+	});
 </script>
 
 <div class="w-full flex justify-center mt-8">
@@ -20,6 +29,7 @@
 			use:enhance={({ formData }) => {
 				formData.append('tipo', reportType);
 				formData.append('filtro', paymentSelection);
+				console.log('Report Type:', reportDate);
 				if (reportType === 'dia') {
 					formData.append('fecha', (reportDate as Date)?.toISOString().split('T')[0]);
 				}
@@ -62,14 +72,28 @@
 
 			<div>
 				<Label for="report-date" class="mb-2">Fecha de pagos</Label>
-				<Datepicker
-					bind:value={reportDate}
-					range={reportType !== 'dia'}
-					availableTo={new Date()}
-					placeholder="Seleccione una fecha"
-					translationLocale="es-VE" locale="fr-FR"
-					dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
-				/>
+				{#if reportType === 'dia'}
+					<Datepicker
+						bind:value={reportDate}
+						range={reportType !== 'dia'}
+						availableTo={new Date()}
+						placeholder="Seleccione una fecha"
+						translationLocale="es-VE"
+						locale="fr-FR"
+						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
+					/>
+				{:else}
+					<Datepicker
+						bind:rangeFrom={reportDate.from}
+						bind:rangeTo={reportDate.to}
+						range
+						availableTo={new Date()}
+						placeholder="Seleccione un rango de fechas"
+						translationLocale="es-VE"
+						locale="fr-FR"
+						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
+					/>
+				{/if}
 			</div>
 
 			<Button color="primary" size="lg" class="w-full" disabled={!reportDate} type="submit">
