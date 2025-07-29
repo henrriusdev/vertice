@@ -29,7 +29,7 @@ export const actions: Actions = {
 		}
 	},
 
-	denegar: async ({ fetch, request }) => {
+	rechazar: async ({ fetch, request }) => {
 		try {
 			const data = await request.formData();
 			const id = Number(data.get('id'));
