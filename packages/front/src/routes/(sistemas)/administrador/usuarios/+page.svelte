@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cedulaMask, DataTable } from '$lib';
+	import { cedulaMask, DataTable, ConfirmDeleteModal } from '$lib';
 	import { imask } from '@imask/svelte';
 	import { Button, Input, Label, Modal, Select, Spinner, TableSearch } from 'flowbite-svelte';
 	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
@@ -23,6 +23,9 @@
 	let isEditing = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
+	// Estado para el modal de confirmación de eliminación
+	let deleteModalOpen = $state(false);
+	let selectedUsuarioForDelete: Usuario | null = $state(null);
 	let usuarioActual: Partial<{
 		id: number;
 		cedula: string;
@@ -67,6 +70,12 @@
 		usuarioActual = { ...usuario };
 		isEditing = true;
 		modalVisible = true;
+	}
+
+	// Función para abrir el modal de eliminación
+	function confirmarEliminarUsuario(usuario: Usuario) {
+		selectedUsuarioForDelete = usuario;
+		deleteModalOpen = true;
 	}
 
 	// Función para abrir el modal en modo creación
@@ -161,12 +170,9 @@
 			<Button size="xs" color="light" onclick={() => editarUsuario(row)}>
 				<PenOutline class="w-4 h-4" />
 			</Button>
-			<form action="?/delete" method="POST">
-				<input type="hidden" name="cedula" value={row.cedula} />
-				<Button size="xs" color="red" type="submit">
-					<TrashBinOutline class="w-4 h-4" />
-				</Button>
-			</form>
+			<Button size="xs" color="red" onclick={() => confirmarEliminarUsuario(row)}>
+				<TrashBinOutline class="w-4 h-4" />
+			</Button>
 		</div>
 	{/snippet}
 	<DataTable data={usuariosFiltrados} {actions} {onSearch}></DataTable>
@@ -247,4 +253,16 @@
 			</div>
 		{/snippet}
 	</Modal>
+
+	<!-- Modal de confirmación de eliminación -->
+	<ConfirmDeleteModal
+		bind:open={deleteModalOpen}
+		title="Eliminar Usuario"
+		message="¿Estás seguro de que deseas eliminar al usuario {selectedUsuarioForDelete?.nombre}? Esta acción no se puede deshacer."
+		action="?/delete"
+		formData={{ cedula: selectedUsuarioForDelete?.cedula || '' }}
+		onSuccess={() => {
+			selectedUsuarioForDelete = null;
+		}}
+	/>
 </div>

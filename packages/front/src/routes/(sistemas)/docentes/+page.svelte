@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {cedulaMask, DataTable} from '$lib';
+    import {cedulaMask, DataTable, ConfirmDeleteModal} from '$lib';
     import {imask} from '@imask/svelte';
     import {Button, Input, Label, Modal, TableSearch, Datepicker} from 'flowbite-svelte';
     import ToastContainer from '$lib/componentes/ToastContainer.svelte';
@@ -16,6 +16,9 @@
     let isEditing = $state(false);
     let searchTerm = $state('');
     let formEl: HTMLFormElement | undefined = $state();
+    // Estado para el modal de confirmación de eliminación
+    let deleteModalOpen = $state(false);
+    let selectedDocenteForDelete: Docente | null = $state(null);
     let docenteActual: Partial<{
         id: number;
         cedula: string;
@@ -76,6 +79,12 @@
         modalVisible = true;
     }
 
+    // Función para abrir el modal de eliminación
+    function confirmarEliminarDocente(docente: Docente) {
+        selectedDocenteForDelete = docente;
+        deleteModalOpen = true;
+    }
+
     function handleSubmit() {
         return resolver(() => {
             modalVisible = false;
@@ -100,12 +109,9 @@
         <Button size="xs" color="light" onclick={() => editarDocente(row)}>
             <PenOutline class="w-4 h-4"/>
         </Button>
-        <form action="?/delete" method="POST">
-            <input type="hidden" name="cedula" value={row.cedula}/>
-            <Button size="xs" color="red" type="submit">
-                <TrashBinOutline class="w-4 h-4"/>
-            </Button>
-        </form>
+        <Button size="xs" color="red" onclick={() => confirmarEliminarDocente(row)}>
+            <TrashBinOutline class="w-4 h-4"/>
+        </Button>
     </div>
 {/snippet}
 <DataTable data={docentesFiltrados} {actions}></DataTable>
@@ -189,4 +195,16 @@
             </div>
         {/snippet}
     </Modal>
+
+    <!-- Modal de confirmación de eliminación -->
+    <ConfirmDeleteModal
+        bind:open={deleteModalOpen}
+        title="Eliminar Docente"
+        message="¿Estás seguro de que deseas eliminar al docente {selectedDocenteForDelete?.nombre}? Esta acción no se puede deshacer."
+        action="?/delete"
+        formData={{ cedula: selectedDocenteForDelete?.cedula || '' }}
+        onSuccess={() => {
+            selectedDocenteForDelete = null;
+        }}
+    />
 </div>

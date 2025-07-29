@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, maxYearDate, nota } from '$lib';
+	import { cedulaMask, DataTable, maxYearDate, nota, ConfirmDeleteModal } from '$lib';
 	import { imask } from '@imask/svelte';
 	import {
 		Button,
@@ -27,6 +27,9 @@
 	let isEditing = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
+	// Estado para el modal de confirmación de eliminación
+	let deleteModalOpen = $state(false);
+	let selectedStudentForDelete: Estudiante | null = $state(null);
 	let estudianteActual: Partial<{
 		id: number;
 		cedula: string;
@@ -124,6 +127,12 @@
 	// Actualizar edad cuando cambia la fecha de nacimiento
 	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac));
 
+	// Función para abrir el modal de eliminación
+	function confirmarEliminarEstudiante(estudiante: Estudiante) {
+		selectedStudentForDelete = estudiante;
+		deleteModalOpen = true;
+	}
+
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => {
 			if (isEditing) {
@@ -155,12 +164,9 @@
 				<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
 					<PenOutline class="w-5 h-5" />
 				</Button>
-				<form action="?/delete" method="POST">
-					<input type="hidden" name="cedula" value={row.cedula} />
-					<Button pill class="p-1.5!" size="xs" color="red" type="submit">
-						<TrashBinOutline class="w-5 h-5" />
-					</Button>
-				</form>
+				<Button pill class="p-1.5!" size="xs" color="red" onclick={() => confirmarEliminarEstudiante(row)}>
+					<TrashBinOutline class="w-5 h-5" />
+				</Button>
 			{:else}
 				<Button pill size="xs" color="light" class="p-1!">
 					<EyeOutline class="w-5 h-5" />
@@ -322,4 +328,16 @@
 			</div>
 		{/snippet}
 	</Modal>
+
+	<!-- Modal de confirmación de eliminación -->
+	<ConfirmDeleteModal
+		bind:open={deleteModalOpen}
+		title="Eliminar Estudiante"
+		message="¿Estás seguro de que deseas eliminar al estudiante {selectedStudentForDelete?.nombre}? Esta acción no se puede deshacer."
+		action="?/delete"
+		formData={{ cedula: selectedStudentForDelete?.cedula || '' }}
+		onSuccess={() => {
+			selectedStudentForDelete = null;
+		}}
+	/>
 </div>
