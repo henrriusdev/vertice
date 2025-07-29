@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.utils.fecha import format_fecha, parse_fecha
+from src.utils.fecha import format_fecha, parse_fecha, now_in_venezuela
 from src.model.usuario import Usuario
 from src.model.estudiante import Estudiante
 from src.model.matricula import Matricula
@@ -274,7 +274,7 @@ async def validar_pagos_estudiante(usuario):
         
         config = await Configuracion.get(id=1)
         ciclo_actual = config.ciclo
-        fecha_actual = datetime.now().date()
+        fecha_actual = now_in_venezuela().date()
 
         conceptos_requeridos = ["pre_inscripcion", "inscripcion"]
         

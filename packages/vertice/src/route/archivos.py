@@ -13,6 +13,7 @@ from werkzeug.security import generate_password_hash
 from src.model import Configuracion, Estudiante, Docente, Coordinador, Usuario, Rol, Carrera
 from src.route.trazabilidad import superuser_required
 from src.service.estudiantes import obtener_info_estudiante_para_constancia
+from src.utils.fecha import now_in_venezuela
 from src.service.materias import listar_materias_asignadas, get_materia_con_nombre_y_config, get_estudiantes_con_notas
 from src.service.trazabilidad import add_trazabilidad
 from src.service.trazabilidad import get_trazabilidad
@@ -305,7 +306,7 @@ async def generar_archivo_trazabilidad(data: list[dict], formato: str, filtros=N
                 "rol": filtros.get("rol"),
                 "query": filtros.get("busqueda")
             },
-            fecha_generacion=datetime.now().strftime("%d/%m/%Y %H:%M"),
+            fecha_generacion=now_in_venezuela().strftime("%d/%m/%Y %H:%M"),
             logo_url=None  # o base64 o URL pública
         )
         pdf_bytes = HTML(string=html_render).write_pdf()

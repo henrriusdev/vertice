@@ -9,6 +9,7 @@ from src.model.usuario import Usuario
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import bloquear_usuario, delete_usuario, get_usuarios, login, reactivar_usuario, \
     update_password, get_usuario_por_correo, registrar_usuario, update_usuario
+from src.utils.fecha import now_in_venezuela
 
 usr = Blueprint('usuario_blueprint', __name__)
 
@@ -41,7 +42,6 @@ async def login_usuario():
         await add_trazabilidad({
             "accion": f"Inicio de sesión del usuario: {usuario.correo}",
             "usuario": usuario,
-            "fecha": datetime.now(),
             "modulo": "Autenticación",
             "nivel_alerta": 1
         })
@@ -108,7 +108,6 @@ async def update_usuario_password():
         await add_trazabilidad({
             'accion': f"Actualizar contraseña del usuario: {nombre}",
             'usuario': correo,
-            'fecha': datetime.now(),
             'modulo': "Usuarios",
             'nivel_alerta': 2
         })
@@ -152,7 +151,6 @@ async def registrar():
         await add_trazabilidad({
             "accion": f"Registrar usuario: {usuario.correo}, nombre: {usuario.nombre}",
             "usuario": usuario,
-            "fecha": datetime.now(),
             "modulo": "Usuarios",
             "nivel_alerta": 2
         })
@@ -246,7 +244,6 @@ async def change_password():
         await add_trazabilidad({
             'accion': f"Cambio de contraseña del usuario: {usuario.nombre}",
             'usuario': usuario,
-            'fecha': datetime.now(),
             'modulo': "Usuarios",
             'nivel_alerta': 2
         })
@@ -279,7 +276,6 @@ async def force_password():
         await add_trazabilidad({
             'accion': f"Actualización forzada de contraseña del usuario: {usuario.nombre}",
             'usuario': usuario,
-            'fecha': datetime.now(),
             'modulo': "Usuarios",
             'nivel_alerta': 2
         })
@@ -315,7 +311,6 @@ async def first_reset_password():
         await add_trazabilidad({
             'accion': f"Primer restablecimiento de contraseña del usuario: {usuario.nombre}",
             'usuario': usuario,
-            'fecha': datetime.now(),
             'modulo': "Usuarios",
             'nivel_alerta': 2
         })

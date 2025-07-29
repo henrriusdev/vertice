@@ -23,7 +23,7 @@ async def listar_coordinadores():
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
     data = await get_coordinadores()
-    await add_trazabilidad({"accion": "Obtener Coordinadores", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 1})
+    await add_trazabilidad({"accion": "Obtener Coordinadores", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 1})
     return jsonify({"ok": True, "status": 200, "data": data})
 
 @crd.route('/<cedula>')
@@ -33,7 +33,7 @@ async def obtener_coordinador(cedula):
     usuario = await get_usuario_por_correo(claims.get('sub'))
     data = await get_coordinador(cedula)
     if data:
-        await add_trazabilidad({"accion": f"Obtener Coordinador {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 1})
+        await add_trazabilidad({"accion": f"Obtener Coordinador {cedula}", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 1})
         return jsonify({"ok": True, "status": 200, "data": data})
     return jsonify({"ok": False, "status": 404, "data": {"message": "coordinador no encontrado"}}), 404
 
@@ -44,7 +44,7 @@ async def nuevo_coordinador():
     usuario = await get_usuario_por_correo(claims.get('sub'))
     payload = request.json
     await add_coordinador(payload["usuario_id"], payload["carrera_id"], payload["telefono"])
-    await add_trazabilidad({"accion": f"Añadir Coordinador {payload['usuario_id']}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 2})
+    await add_trazabilidad({"accion": f"Añadir Coordinador {payload['usuario_id']}", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 2})
     return jsonify({"ok": True, "status": 200})
 
 @crd.route('/update/<int:id_coordinador>', methods=['PUT'])
@@ -54,7 +54,7 @@ async def actualizar_coordinador(id_coordinador):
     usuario = await get_usuario_por_correo(claims.get('sub'))
     payload = request.json
     await update_coordinador(id_coordinador, payload["carrera_id"], payload["telefono"])
-    await add_trazabilidad({"accion": f"Actualizar Coordinador {id_coordinador}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 2})
+    await add_trazabilidad({"accion": f"Actualizar Coordinador {id_coordinador}", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 2})
     return jsonify({"ok": True, "status": 200})
 
 @crd.route('/delete/<cedula>', methods=['DELETE'])
@@ -63,7 +63,7 @@ async def eliminar_coordinador(cedula):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
     await delete_coordinador(cedula)
-    await add_trazabilidad({"accion": f"Eliminar Coordinador {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Coordinacion", "nivel_alerta": 3})
+    await add_trazabilidad({"accion": f"Eliminar Coordinador {cedula}", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 3})
     return jsonify({"ok": True, "status": 200})
 
 @crd.route('/materias/<cedula>', methods=['GET'])
@@ -72,7 +72,7 @@ async def obtener_notas_estudiante(cedula):
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
     data = await get_notas_estudiante(cedula)
-    await add_trazabilidad({"accion": f"Obtener Notas del Estudiante {cedula}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Estudiante", "nivel_alerta": 1})
+    await add_trazabilidad({"accion": f"Obtener Notas del Estudiante {cedula}", "usuario": usuario, "modulo": "Estudiante", "nivel_alerta": 1})
     return jsonify({"ok": True, "status": 200, "data": data})
 
 @crd.route('/promedio-ponderado/<cedula_estudiante>', methods=['GET'])
@@ -84,6 +84,6 @@ async def promedio_ponderado(cedula_estudiante):
 
     promedio = await calcular_promedio_ponderado_estudiante(cedula_estudiante)
     if promedio is not None:
-        await add_trazabilidad({"accion": f"Obtener Promedio Ponderado del Estudiante {cedula_estudiante}", "usuario": usuario, "fecha": datetime.now(), "modulo": "Estudiante", "nivel_alerta": 1})
+        await add_trazabilidad({"accion": f"Obtener Promedio Ponderado del Estudiante {cedula_estudiante}", "usuario": usuario, "modulo": "Estudiante", "nivel_alerta": 1})
         return jsonify({"ok": True, "status": 200, "data": {"promedio_ponderado": promedio}})
     return jsonify({"ok": False, "status": 404, "data": {"message": "No se encontraron notas"}}), 404
