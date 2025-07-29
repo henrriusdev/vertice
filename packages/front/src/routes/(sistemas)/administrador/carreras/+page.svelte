@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DataTable } from '$lib';
+	import { DataTable, ConfirmDeleteModal } from '$lib';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import { Button, ButtonGroup, Input, Label, Modal, TableSearch } from 'flowbite-svelte';
 	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
@@ -16,6 +16,9 @@
 	let isEditing = $state(false);
 	let searchTerm = $state('');
 	let estudianteActual: any = $state({});
+	// Estado para el modal de confirmación de eliminación
+	let deleteModalOpen = $state(false);
+	let selectedCarreraForDelete: Carrera | null = $state(null);
 
 	$effect(() => {
 		if (!modalVisible) {
@@ -40,6 +43,12 @@
 		}
 		isEditing = true;
 		modalVisible = true;
+	}
+
+	// Función para abrir el modal de eliminación
+	function confirmarEliminarCarrera(carrera: Carrera) {
+		selectedCarreraForDelete = carrera;
+		deleteModalOpen = true;
 	}
 
 	// Función para abrir el modal en modo creación
@@ -79,12 +88,9 @@
 			<Button size="xs" color="light" onclick={() => editarEstudiante(row)}>
 				<PenOutline class="w-4 h-4" />
 			</Button>
-			<form action="?/delete" method="POST">
-				<input type="hidden" name="id" value={row.id} />
-				<Button size="xs" color="red" type="submit">
-					<TrashBinOutline class="w-4 h-4" />
-				</Button>
-			</form>
+			<Button size="xs" color="red" onclick={() => confirmarEliminarCarrera(row)}>
+				<TrashBinOutline class="w-4 h-4" />
+			</Button>
 		</div>
 	{/snippet}
 	<DataTable data={carrerasFiltradas} {actions}></DataTable>
@@ -114,4 +120,16 @@
 			<ToastContainer />
 		{/snippet}
 	</Modal>
+
+	<!-- Modal de confirmación de eliminación -->
+	<ConfirmDeleteModal
+		bind:open={deleteModalOpen}
+		title="Eliminar Carrera"
+		message="¿Estás seguro de que deseas eliminar la carrera {selectedCarreraForDelete?.nombre}? Esta acción no se puede deshacer."
+		action="?/delete"
+		formData={{ id: selectedCarreraForDelete?.id || '' }}
+		onSuccess={() => {
+			selectedCarreraForDelete = null;
+		}}
+	/>
 </div>

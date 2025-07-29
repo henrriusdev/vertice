@@ -1,7 +1,7 @@
 <script lang="ts">
   import {enhance} from '$app/forms';
   import {goto} from '$app/navigation';
-  import DataTable from '$lib/componentes/DataTable.svelte';
+  import {DataTable, ConfirmDeleteModal} from '$lib/componentes';
   import {resolver} from '$lib/utilidades/resolver';
   import type {SubmitFunction} from '@sveltejs/kit';
   import {Button, Input, Label, Modal, MultiSelect, Select} from 'flowbite-svelte';
@@ -60,6 +60,9 @@
   let filtroSemestre = $state('');
   let searchTerm = $state('');
   let showAyuda = $state(false);
+  // Estado para el modal de confirmación de eliminación
+  let deleteModalOpen = $state(false);
+  let selectedMateriaForDelete: Materia | null = $state(null);
 
   // Opciones de prelación calculadas dinámicamente
   let opcionesPrelacion = $derived.by(() => {
@@ -133,6 +136,12 @@
   function openHorario(row: Materia) {
     horarios = row.horarios;
     showHorario = true;
+  }
+
+  // Función para abrir el modal de eliminación
+  function confirmarEliminarMateria(materia: Materia) {
+    selectedMateriaForDelete = materia;
+    deleteModalOpen = true;
   }
 
   function searchName(key: 'id_docente' | 'id_carrera', value: number): string {
@@ -222,12 +231,9 @@
             <Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
                 <PenOutline class="w-5 h-5"/>
             </Button>
-            <form action="?/delete" method="POST">
-                <input type="hidden" name="id" value={row.id}/>
-                <Button pill class="p-1.5!" size="xs" color="red" type="submit">
-                    <TrashBinOutline class="w-5 h-5"/>
-                </Button>
-            </form>
+            <Button pill class="p-1.5!" size="xs" color="red" onclick={() => confirmarEliminarMateria(row)}>
+                <TrashBinOutline class="w-5 h-5"/>
+            </Button>
         {:else if ['control', 'superusuario', 'coordnador'].includes(data.rol.toLowerCase())}
             <Button
                     pill
@@ -410,3 +416,15 @@
         </div>
     {/snippet}
 </Modal>
+
+<!-- Modal de confirmación de eliminación -->
+<ConfirmDeleteModal
+    bind:open={deleteModalOpen}
+    title="Eliminar Materia"
+    message="¿Estás seguro de que deseas eliminar la materia {selectedMateriaForDelete?.nombre}? Esta acción no se puede deshacer."
+    action="?/delete"
+    formData={{ id: selectedMateriaForDelete?.id || '' }}
+    onSuccess={() => {
+        selectedMateriaForDelete = null;
+    }}
+/>
