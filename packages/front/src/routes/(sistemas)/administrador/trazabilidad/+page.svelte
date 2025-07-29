@@ -205,9 +205,19 @@
 		action="?/exportar"
 		use:enhance={() => {
 			exportando = true;
-			return resolver(() => {
-				exportando = false;
-			});
+			
+			return async ({ result, update }) => {
+				try {
+					// Use the resolver with proper error handling
+					await resolver(() => {
+						exportando = false;
+					})({ result, update });
+				} catch (error) {
+					// Failsafe: always reset exportando on any error
+					console.error('Export error:', error);
+					exportando = false;
+				}
+			};
 		}}
 		style="display: none;"
 	>

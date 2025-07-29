@@ -10,13 +10,16 @@ export const resolver = (setAction: () => void) => {
 		if (!data) {
 			addToast({ type: 'error', message: 'Respuesta malformada del servidor' });
 			console.warn('[resolver] return malformado:', result);
+			if (setAction) {
+				setAction();
+			}
 			return;
 		}
 
 		if (data.type === 'failure') {
 			addToast({ type: 'error', message: data.message });
 			if (setAction) {
-				setAction()
+				setAction();
 			}
 			return;
 		}
