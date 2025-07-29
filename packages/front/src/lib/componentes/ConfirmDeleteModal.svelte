@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, Button } from 'flowbite-svelte';
-	import { ExclamationTriangleOutline } from 'flowbite-svelte-icons';
+	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { addToast } from '$lib';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -61,7 +61,7 @@
 <Modal bind:open size="sm">
 	{#snippet header()}
 		<div class="flex items-center">
-			<ExclamationTriangleOutline class="h-6 w-6 text-red-600 mr-3" />
+			<ExclamationCircleOutline class="h-6 w-6 text-red-600 mr-3" />
 			<h3 class="text-lg font-semibold text-gray-900">{title}</h3>
 		</div>
 	{/snippet}
