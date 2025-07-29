@@ -35,6 +35,7 @@ export const actions: Actions = {
 			observacion: undefined,
 			valor: Number(payload.valor)
 		};
+		console.log(payload)
 
 		if (peticion === 'true') {
 			const body = {
