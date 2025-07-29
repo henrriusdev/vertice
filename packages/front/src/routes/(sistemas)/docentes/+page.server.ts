@@ -10,26 +10,24 @@ import {
 import { redirect } from '@sveltejs/kit';
 import type { Usuario } from '../../../app';
 import type { Actions, PageServerLoad } from './$types';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export type ErroresDocente = {
-        cedula?: string;
-        nombre?: string;
-        correo?: string;
-        password?: string;
-        titulo?: string;
-        fecha_ingreso?: string;
-        activo?: string;
+	cedula?: string;
+	nombre?: string;
+	correo?: string;
+	password?: string;
+	titulo?: string;
+	fecha_ingreso?: string;
+	activo?: string;
 };
 
-
-
 export const load: PageServerLoad = async ({ fetch, parent }) => {
-        const { rol } = await parent();
-        // solo administradores y coordinadores pueden acceder a la vista de docentes
-        if (!['administrador', 'coordinador'].includes(rol)) {
-                redirect(302, '/' + rol);
-        }
+	const { rol } = await parent();
+	// solo administradores y coordinadores pueden acceder a la vista de docentes
+	if (!['administrador', 'coordinador'].includes(rol)) {
+		redirect(302, '/' + rol);
+	}
 	try {
 		const res = await obtenerDocentes(fetch);
 		return { docentes: res };
@@ -42,10 +40,12 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 export const actions: Actions = {
 	// Acción para crear un usuario y un docente
 	create: async ({ request, fetch }) => {
-		const payload = Object.fromEntries(await request.formData()) as unknown as DocenteReq &
-			Usuario;
-		
-		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, false);
+		const payload = Object.fromEntries(await request.formData()) as unknown as DocenteReq & Usuario;
+
+		const errores = validarPayload(
+			payload as unknown as Record<string, string | number | boolean>,
+			false
+		);
 		if (Object.keys(errores).length > 0) {
 			const errorString = Object.entries(errores)
 				.map(([campo, mensaje]) => `${campo}: ${mensaje}`)
@@ -69,14 +69,17 @@ export const actions: Actions = {
 			usuario.id = data.id;
 		} catch (error) {
 			console.error('Error al crear usuario:', error);
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			return {
+				success: false,
+				message: error instanceof Error ? error.message : 'Error desconocido'
+			};
 		}
 
-                const docente: DocenteReq = {
-                        titulo: payload.titulo,
-                        fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
-                        usuario_id: usuario.id
-                };
+		const docente: DocenteReq = {
+			titulo: payload.titulo,
+			fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
+			usuario_id: usuario.id
+		};
 
 		try {
 			await crearDocente(fetch, docente);
@@ -97,8 +100,11 @@ export const actions: Actions = {
 	edit: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as DocenteReq &
 			Usuario & { id_docente: number };
-		
-		const errores = validarPayload(payload as unknown as Record<string, string | number | boolean>, true);
+
+		const errores = validarPayload(
+			payload as unknown as Record<string, string | number | boolean>,
+			true
+		);
 		if (Object.keys(errores).length > 0) {
 			return {
 				type: 'failure',
@@ -120,14 +126,17 @@ export const actions: Actions = {
 			await actualizarUsuario(fetch, payload.id, usuario);
 		} catch (error) {
 			console.error('Error al editar usuario:', error);
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			return {
+				success: false,
+				message: error instanceof Error ? error.message : 'Error desconocido'
+			};
 		}
 
-                const docente: DocenteReq = {
-                        titulo: payload.titulo,
-                        fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
-                        usuario_id: payload.id
-                };
+		const docente: DocenteReq = {
+			titulo: payload.titulo,
+			fecha_ingreso: format(new Date(payload.fecha_ingreso), 'dd/MM/yyyy'),
+			usuario_id: payload.id
+		};
 
 		try {
 			await actualizarDocente(fetch, payload.id_docente, docente);
@@ -158,7 +167,10 @@ export const actions: Actions = {
 			};
 		} catch (error) {
 			console.error('Error al eliminar docente:', error);
-			return { success: false, message: error instanceof Error ? error.message : 'Error desconocido' };
+			return {
+				success: false,
+				message: error instanceof Error ? error.message : 'Error desconocido'
+			};
 		}
 	}
 };
@@ -170,13 +182,13 @@ function validarPayload(
 	const errores: ErroresDocente = {};
 
 	// Campos requeridos comunes
-        const camposBase: (keyof ErroresDocente)[] = [
-                'cedula',
-                'nombre',
-                'correo',
-                'titulo',
-                'fecha_ingreso'
-        ];
+	const camposBase: (keyof ErroresDocente)[] = [
+		'cedula',
+		'nombre',
+		'correo',
+		'titulo',
+		'fecha_ingreso'
+	];
 
 	for (const campo of camposBase) {
 		const valor = payload[campo];
