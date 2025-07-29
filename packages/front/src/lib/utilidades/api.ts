@@ -17,7 +17,10 @@ export async function apiCall(
         if (response.status === 401) {
             // Only redirect to logout in browser environment
             if (browser) {
-                console.warn('Session expired (401), redirecting to logout...');
+                console.warn('Session expired (401), redirecting to logout...', {
+                    url: input.toString(),
+                    method: init?.method || 'GET'
+                });
                 // Clear any existing session data immediately
                 if (typeof document !== 'undefined') {
                     // Clear cookies
@@ -32,6 +35,12 @@ export async function apiCall(
         
         return response;
     } catch (error) {
+        // Log network errors for debugging
+        console.error('Network error in API call:', {
+            url: input.toString(),
+            method: init?.method || 'GET',
+            error: error
+        });
         // Re-throw network or other errors
         throw error;
     }
@@ -48,6 +57,11 @@ export async function apiJson<T = any>(
     const response = await apiCall(fetch, input, init);
     
     if (!response.ok) {
+        // For 401 errors, let the user see the logout process
+        if (response.status === 401) {
+            throw new Error('Su sesión ha expirado. Será redirigido al inicio de sesión.');
+        }
+        
         const error = await response.json().catch(() => ({ data: { message: 'Error en la respuesta del servidor' } }));
         throw new Error(error?.data?.message || `HTTP ${response.status}: ${response.statusText}`);
     }
