@@ -64,7 +64,7 @@ async def delete_pago(pago_id: int):
     deleted = await Pago.filter(id=pago_id).delete()
     return deleted
 
-async def generar_reporte_dia(fecha_str: str, filtro: str, usuario: str):
+async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):
     fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
 
     inicio_dia = datetime.combine(fecha.date(), datetime.min.time())
@@ -81,7 +81,7 @@ async def generar_reporte_dia(fecha_str: str, filtro: str, usuario: str):
     )
 
 
-async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str, usuario: str):
+async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str | None, usuario: str):
     fi = datetime.strptime(fi_str, "%Y-%m-%d")
     ff = datetime.strptime(ff_str, "%Y-%m-%d")
 
