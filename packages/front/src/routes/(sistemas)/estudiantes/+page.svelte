@@ -9,7 +9,7 @@
 		Modal,
 		Select,
 		TableSearch,
-		Textarea, 
+		Textarea,
 		Datepicker
 	} from 'flowbite-svelte';
 	import { EyeOutline, PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
@@ -140,13 +140,12 @@
 			}
 		});
 	};
-	
 </script>
 
 <div class="w-full">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-bold">Estudiantes</h1>
-               {#if data.rol !== 'coordinador' && data.rol !== 'caja'}
+		{#if data.rol !== 'coordinador' && data.rol !== 'caja'}
 			<Button color="blue" onclick={crearEstudiante}>
 				<PlusOutline class="mr-2 h-5 w-5" />
 				Registrar
@@ -160,16 +159,18 @@
 
 	{#snippet actions(row: Estudiante)}
 		<div class="flex gap-2">
-                       {#if data.rol !== 'coordinador' && data.rol !== 'caja'}
+			{#if data.rol !== 'coordinador' && data.rol !== 'caja'}
 				<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
 					<PenOutline class="w-5 h-5" />
 				</Button>
-				<Button pill class="p-1.5!" size="xs" color="red" onclick={() => confirmarEliminarEstudiante(row)}>
+				<Button
+					pill
+					class="p-1.5!"
+					size="xs"
+					color="red"
+					onclick={() => confirmarEliminarEstudiante(row)}
+				>
 					<TrashBinOutline class="w-5 h-5" />
-				</Button>
-			{:else}
-				<Button pill size="xs" color="light" class="p-1!">
-					<EyeOutline class="w-5 h-5" />
 				</Button>
 			{/if}
 		</div>
@@ -224,10 +225,15 @@
 						availableTo={maxYearDate()}
 						placeholder="Seleccione una fecha"
 						bind:value={estudianteActual.fecha_nac}
-						translationLocale="es-VE" locale="fr-FR"
+						translationLocale="es-VE"
+						locale="fr-FR"
 						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 					/>
-					<input type="hidden" name="fecha_nac" value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''} />
+					<input
+						type="hidden"
+						name="fecha_nac"
+						value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''}
+					/>
 				</div>
 				<div class="md:col-span-2">
 					<Label for="correo" class="mb-2">Correo Electrónico</Label>
