@@ -16,6 +16,7 @@ from src.service.pagos import (
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.utils.reporte_pdf import env
+from src.utils.fecha import to_venezuela_timezone
 
 pago = Blueprint("pagos_blueprint", __name__)
 
@@ -93,12 +94,14 @@ async def crear_pago():
         }.get(metodo_pago, "Otro")
 
         # Crear el pago
+        from src.utils.fecha import parse_fecha_with_timezone
+        
         pago_id = await add_pago({
             "cedula_estudiante": estudiante,
             "metodo_pago_id": metodo_pago_id,
             "monto": Decimal(monto),
             "concepto": concepto,
-            "fecha_pago": datetime.strptime(fecha_pago_str, "%Y-%m-%d"),
+            "fecha_pago": parse_fecha_with_timezone(fecha_pago_str),
             "referencia_transferencia": referencia,
             "ciclo": ciclo,
             "tasa_divisa": Decimal(tasa_divisa) if tasa_divisa else None
@@ -141,13 +144,18 @@ async def crear_pago():
         }
         
         # Generar HTML para la constancia de pago
+        from src.utils.fecha import now_in_venezuela, parse_fecha_with_timezone
+        
         template = env.get_template("constancia_pago.html")
+        fecha_emision_vz = now_in_venezuela()
+        fecha_pago_vz = parse_fecha_with_timezone(fecha_pago_str)
+        
         html = template.render(
-            fecha_emision=datetime.now().strftime("%d/%m/%Y"),
+            fecha_emision=fecha_emision_vz.strftime("%d/%m/%Y"),
             pago_id=pago_id,
             estudiante=estudiante_data,
             concepto=concepto,
-            fecha_pago=datetime.strptime(fecha_pago_str, "%Y-%m-%d").strftime("%d/%m/%Y"),
+            fecha_pago=fecha_pago_vz.strftime("%d/%m/%Y"),
             monto=str(monto_decimal),
             tasa_divisa=str(tasa_decimal),
             monto_usd=str(round(monto_usd, 2)),
@@ -298,7 +306,7 @@ async def get_pagos_by_estudiante():
 
         resultado.append({
             "id": pago.id,
-            "fecha": pago.fecha_pago.strftime("%d-%m-%Y"),
+            "fecha": to_venezuela_timezone(pago.fecha_pago).strftime("%d-%m-%Y"),
             "monto": str(pago.monto),
             "tasa": str(pago.tasa_divisa) if pago.tasa_divisa else None,
             "metodo": metodo,
@@ -318,14 +326,19 @@ async def get_pagos_by_estudiante():
 @pago.route("/total")
 @jwt_required()
 async def total_recaudado():
-    desde = datetime.strptime(request.args.get("desde"), "%Y-%m-%d")
-    hasta = datetime.strptime(request.args.get("hasta"), "%Y-%m-%d")
+    from src.utils.fecha import parse_fecha_with_timezone
+    
+    desde = parse_fecha_with_timezone(request.args.get("desde"))
+    hasta = parse_fecha_with_timezone(request.args.get("hasta"))
+    # Adjust hasta to end of day
+    hasta = hasta.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
     pagos = (await get_all_pagos())["pagos"]
 
     total = sum(
         p["monto"]
         for p in pagos
-        if desde <= p["fecha_pago"].replace(tzinfo=None) <= hasta
+        if desde <= p["fecha_pago"] <= hasta
     )
     return jsonify({"ok": True, "status": 200, "total": float(total)})
 
@@ -333,18 +346,25 @@ async def total_recaudado():
 @pago.route("/por-tipo")
 @jwt_required()
 async def pagos_por_tipo():
-    desde = request.args.get("desde")
-    hasta = request.args.get("hasta")
+    from src.utils.fecha import parse_fecha_with_timezone
+    
+    desde_str = request.args.get("desde")
+    hasta_str = request.args.get("hasta")
+    
+    desde = parse_fecha_with_timezone(desde_str)
+    hasta = parse_fecha_with_timezone(hasta_str)
+    # Adjust hasta to end of day
+    hasta = hasta.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
     pagos = (await get_all_pagos())["pagos"]
 
     tipos = {"transferencia": 0, "efectivo": 0, "punto": 0}
     for p in pagos:
-        # Convert p["fecha_pago"] to a naive datetime object
-        fecha_pago = p["fecha_pago"].replace(tzinfo=None)
-        if datetime.strptime(desde, "%Y-%m-%d") <= fecha_pago <= datetime.strptime(hasta, "%Y-%m-%d"):
+        fecha_pago = p["fecha_pago"]
+        if desde <= fecha_pago <= hasta:
             nombre = p["metodo_pago"]
             if nombre == "Transferencia":
-                tipos["ransferencia"] += float(p["monto"])
+                tipos["transferencia"] += float(p["monto"])
             elif nombre == "Efectivo":
                 tipos["efectivo"] += float(p["monto"])
             elif nombre == "Punto":
@@ -356,18 +376,20 @@ async def pagos_por_tipo():
 @pago.route("/por-dia")
 @jwt_required()
 async def pagos_por_dia():
+    from src.utils.fecha import now_in_venezuela
+    
     dias = int(request.args.get("dias", 7))
     pagos = (await get_all_pagos())["pagos"]
 
-    hoy = datetime.now()
+    hoy = now_in_venezuela().date()
     conteo = {}
 
-    for i in range(dias -1, -1, -1):
+    for i in range(dias - 1, -1, -1):
         fecha = hoy - timedelta(days=i)
         conteo[fecha.strftime("%Y-%m-%d")] = 0
 
     for p in pagos:
-        fecha_pago = p["fecha_pago"].strftime("%Y-%m-%d")
+        fecha_pago = p["fecha_pago"].date().strftime("%Y-%m-%d")
         if fecha_pago in conteo:
             conteo[fecha_pago] += float(p["monto"])
 

@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+import pytz
 
 class Settings(BaseSettings):
     SECRET_KEY: str
@@ -9,9 +10,15 @@ class Settings(BaseSettings):
     PGSQL_DB: str
     PGSQL_PORT: int = 5432
     DEBUG: bool = True
+    TIMEZONE: str = "America/Caracas"  # GMT-4 Venezuela timezone
 
     class Config:
         env_file = ".env"
+
+    @property
+    def timezone_obj(self):
+        """Get the timezone object for the configured timezone"""
+        return pytz.timezone(self.TIMEZONE)
 
 settings = Settings()
 
