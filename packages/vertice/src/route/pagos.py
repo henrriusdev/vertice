@@ -229,24 +229,44 @@ async def generar_reporte():
     filtro = request.args.get("f")
     as_json = request.args.get("json", "true").lower() == "true"
 
+    # Validate required tipo parameter
+    if not tipo:
+        return Response("Parámetro 'tipo' es requerido", status=400)
+
+    # Map frontend filter values to backend method names
+    filtro_mapping = {
+        "transferencia": "Transferencia",
+        "efectivo": "Efectivo", 
+        "punto": "Punto"
+    }
+    
+    # Convert filtro to proper case if provided, otherwise None for "todos"
+    filtro_backend = filtro_mapping.get(filtro) if filtro else None
+
     if tipo == "dia":
         fecha_str = request.args.get("d")
-        html = await generar_reporte_dia(fecha_str, filtro, usuario)
+        if not fecha_str:
+            return Response("Parámetro 'd' (fecha) es requerido para reporte de día", status=400)
+        html = await generar_reporte_dia(fecha_str, filtro_backend, usuario)
         return pdf_response(html, f"reporte_dia_{fecha_str}.pdf", as_json=as_json)
 
     elif tipo == "fechas":
         fi_str = request.args.get("fi")
         ff_str = request.args.get("ff")
-        html = await generar_reporte_fechas(fi_str, ff_str, filtro, usuario)
+        if not fi_str or not ff_str:
+            return Response("Parámetros 'fi' y 'ff' (fechas inicial y final) son requeridos para reporte de fechas", status=400)
+        html = await generar_reporte_fechas(fi_str, ff_str, filtro_backend, usuario)
         return pdf_response(html, f"reporte_fechas_{fi_str}_to_{ff_str}.pdf", as_json=as_json)
 
     elif tipo == "monto":
         fi_str = request.args.get("fi")
         ff_str = request.args.get("ff")
+        if not fi_str or not ff_str:
+            return Response("Parámetros 'fi' y 'ff' (fechas inicial y final) son requeridos para reporte de montos", status=400)
         html = await generar_reporte_monto(fi_str, ff_str, usuario)
         return pdf_response(html, f"reporte_montos_{fi_str}_to_{ff_str}.pdf", as_json=as_json)
 
-    return Response("Tipo de reporte inválido", status=400)
+    return Response("Tipo de reporte inválido. Tipos válidos: 'dia', 'fechas', 'monto'", status=400)
 
 
 @pago.route("/estudiante")
