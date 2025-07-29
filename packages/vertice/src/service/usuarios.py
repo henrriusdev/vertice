@@ -35,7 +35,7 @@ async def get_usuarios():
         if _usuarios_cache["data"] is not None and (current_time - _usuarios_cache["timestamp"] < _usuarios_cache["ttl"]):
             return _usuarios_cache["data"]
             
-        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).select_related("rol").order_by("fecha_creacion")
+        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).select_related("rol").order_by("nombre")
         
         response = []
         for u in data:
