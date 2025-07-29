@@ -139,6 +139,7 @@
         <div class="info-label">Monto:</div>
         <div class="info-value">{{ monto }} Bs.</div>
       </div>
+      {% if metodo_pago_id == 2 %}
       <div class="info-row">
         <div class="info-label">Tasa de Cambio:</div>
         <div class="info-value">{{ tasa_divisa }} Bs./USD</div>
@@ -147,6 +148,7 @@
         <div class="info-label">Equivalente en USD:</div>
         <div class="info-value">{{ monto_usd }} USD</div>
       </div>
+      {% endif %}
       <div class="info-row">
         <div class="info-label">Método de Pago:</div>
         <div class="info-value">{{ metodo_pago }}</div>
