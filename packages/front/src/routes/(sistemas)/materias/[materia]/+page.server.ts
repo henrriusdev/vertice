@@ -35,7 +35,6 @@ export const actions: Actions = {
 			observacion: undefined,
 			valor: Number(payload.valor)
 		};
-		console.log(payload)
 
 		if (peticion === 'true') {
 			const body = {
@@ -47,6 +46,7 @@ export const actions: Actions = {
 				id_materia: payload.materia,
 				valor: payload.valor
 			};
+			console.log(body);
 
 			try {
 				await crearPeticion(fetch, body as Omit<Peticion, "id">);
