@@ -57,11 +57,10 @@
     formData.set('folder', data.materia.materia.id);
     formData.set('ciclo', data.materia.ciclo);
     formData.set('file', archivosDrop[0], archivosDrop[0].name);
-    return async ({update}) => {
-      await update();
+    return resolver(() => {
       archivosDrop = null;
       if (fileInput) fileInput.value = '';
-    };
+    })
   };
 
   const handleSubmit: SubmitFunction = () => {
