@@ -87,10 +87,12 @@
             Notas de estudiantes en <span class="text-blue-600">{data.materia.materia.nombre}</span>
         </h1>
         <div class="flex gap-2">
-            <Button color="light" size="lg" onclick={() => fileInput.click()}>
-                <CloudArrowUpOutline class="mr-2 h-5 w-5"/>
-                Subir Planificación
-            </Button>
+            {#if data.rol.toLowerCase() === 'docente'}
+                <Button color="light" size="lg" onclick={() => fileInput.click()}>
+                    <CloudArrowUpOutline class="mr-2 h-5 w-5"/>
+                    Subir Planificación
+                </Button>
+            {/if}
             <form method="POST" action="?/notas" use:enhance={handleSubmit} class="space-y-6">
                 <Button color="primary" size="lg" class="w-full" type="submit">
                     <FileLinesOutline class="mr-2 h-5 w-5"/>
