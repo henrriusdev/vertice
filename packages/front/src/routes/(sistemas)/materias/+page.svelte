@@ -234,7 +234,8 @@
             <Button pill class="p-1.5!" size="xs" color="red" onclick={() => confirmarEliminarMateria(row)}>
                 <TrashBinOutline class="w-5 h-5"/>
             </Button>
-        {:else if ['control', 'superusuario', 'coordnador'].includes(data.rol.toLowerCase())}
+            {/if}
+        {#if ['control', 'superusuario', 'coordinador'].includes(data.rol.toLowerCase())}
             <Button
                     pill
                     class="p-1.5!"
