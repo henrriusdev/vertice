@@ -45,6 +45,7 @@ export const actions: Actions = {
 				id_docente: usuario?.id ?? 1,
 				id_estudiante: payload.cedula_estudiante,
 				id_materia: payload.materia,
+				valor: payload.valor
 			};
 
 			try {
