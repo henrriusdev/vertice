@@ -2,7 +2,7 @@
   import {DataTable, nota as notaMask} from '$lib';
   import {Button, Input, Modal, Select, Textarea} from 'flowbite-svelte';
   import {imask} from '@imask/svelte';
-  import {FileLinesOutline, PenOutline, ReceiptOutline} from 'flowbite-svelte-icons';
+  import {FileLinesOutline, PenOutline, ReceiptOutline, CloudArrowUpOutline} from 'flowbite-svelte-icons';
   import type {Nota} from '../../../../app';
   import {enhance} from '$app/forms';
   import type {SubmitFunction} from '@sveltejs/kit';
@@ -27,8 +27,7 @@
   let esPeticion = $state(false);
   let formDrop: HTMLFormElement;
   let archivosDrop: FileList | null = $state(null);
-  let dropVisible = $state(false);
-  let dragCounter = 0;
+  let fileInput: HTMLInputElement;
 
   const handleEdit = (row: Nota) => {
     mostrarFormulario = true;
@@ -53,12 +52,14 @@
   };
 
   const handleFileUpload: SubmitFunction = ({formData}) => {
+    if (!archivosDrop || archivosDrop.length === 0) return;
     formData.set('folder', data.materia.materia.id);
     formData.set('ciclo', data.materia.ciclo);
     formData.set('file', archivosDrop[0], archivosDrop[0].name);
     return async ({update}) => {
       await update();
-      dropVisible = false;
+      archivosDrop = null;
+      if (fileInput) fileInput.value = '';
     };
   };
 
@@ -72,57 +73,12 @@
     }
   });
 
-  onMount(() => {
-    const handleDragOver = (e: DragEvent) => {
-      if (!mostrarFormulario) {
-        e.preventDefault();
-      }
-    };
-
-    const handleDragEnter = (e: DragEvent) => {
-      if (!mostrarFormulario) {
-        e.preventDefault();
-        dragCounter++;
-        dropVisible = true;
-      }
-    };
-
-    const handleDragLeave = (e: DragEvent) => {
-      if (!mostrarFormulario) {
-        dragCounter--;
-        if (dragCounter === 0) {
-          dropVisible = false;
-        }
-      }
-    };
-
-    const handleDrop = (e: DragEvent) => {
-      if (!mostrarFormulario) {
-        e.preventDefault();
-        dragCounter = 0;
-        dropVisible = false;
-        const file = e.dataTransfer?.files?.[0];
-        if (file && formDrop) {
-          const dt = new DataTransfer();
-          dt.items.add(file);
-          archivosDrop = dt.files;
-          formDrop.requestSubmit();
-        }
-      }
-    };
-
-    window.addEventListener('dragenter', handleDragEnter);
-    window.addEventListener('dragleave', handleDragLeave);
-    window.addEventListener('dragover', handleDragOver);
-    window.addEventListener('drop', handleDrop);
-
-    return () => {
-      window.removeEventListener('dragenter', handleDragEnter);
-      window.removeEventListener('dragleave', handleDragLeave);
-      window.removeEventListener('dragover', handleDragOver);
-      window.removeEventListener('drop', handleDrop);
-    };
-  });
+  const handleFileSelect = () => {
+    if (fileInput.files && fileInput.files.length > 0) {
+      archivosDrop = fileInput.files;
+      formDrop.requestSubmit();
+    }
+  };
 </script>
 
 <div class="container mx-auto p-4">
@@ -130,12 +86,18 @@
         <h1 class="text-3xl font-bold">
             Notas de estudiantes en <span class="text-blue-600">{data.materia.materia.nombre}</span>
         </h1>
-        <form method="POST" action="?/notas" use:enhance={handleSubmit} class="space-y-6">
-            <Button color="primary" size="lg" class="w-full" type="submit">
-                <FileLinesOutline class="mr-2 h-5 w-5"/>
-                Descargar Reporte
+        <div class="flex gap-2">
+            <Button color="light" size="lg" onclick={() => fileInput.click()}>
+                <CloudArrowUpOutline class="mr-2 h-5 w-5"/>
+                Subir Planificación
             </Button>
-        </form>
+            <form method="POST" action="?/notas" use:enhance={handleSubmit} class="space-y-6">
+                <Button color="primary" size="lg" class="w-full" type="submit">
+                    <FileLinesOutline class="mr-2 h-5 w-5"/>
+                    Descargar Reporte
+                </Button>
+            </form>
+        </div>
     </div>
     {#snippet actions(row: Nota)}
         <div class="flex gap-2">
@@ -166,7 +128,7 @@
         </div>
     {/snippet}
 
-    <!-- FORMULARIO OCULTO PARA SUBIR ARCHIVO -->
+    <!-- FORMULARIO PARA SUBIR ARCHIVO -->
     <form
             bind:this={formDrop}
             use:enhance={handleFileUpload}
@@ -174,11 +136,15 @@
             enctype="multipart/form-data"
             class="hidden"
             action="?/subir"
-    ></form>
-
-    <Modal bind:open={dropVisible} size="lg">
-        <h3 class="text-2xl font-bold py-60 text-center">ARRASTRA AQUÍ</h3>
-    </Modal>
+    >
+        <input
+                bind:this={fileInput}
+                type="file"
+                onchange={handleFileSelect}
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+                class="hidden"
+        />
+    </form>
 
     <DataTable data={estudiantes} {actions}/>
 
