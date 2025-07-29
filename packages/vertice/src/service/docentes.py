@@ -7,7 +7,7 @@ from tortoise.exceptions import DoesNotExist
 
 async def get_docentes():
     try:
-        docentes = await Docente.all().prefetch_related("usuario")
+        docentes = await Docente.all().prefetch_related("usuario").order_by("usuario__fecha_creacion")
         resultado = []
         for d in docentes:
             resultado.append({

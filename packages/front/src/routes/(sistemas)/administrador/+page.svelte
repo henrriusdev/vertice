@@ -9,27 +9,6 @@
   const pagosData = $derived(pagosPorDia.map(([, monto]) => monto));
 
   const pagosPorTipoData = $derived(Object.entries(data.pagosPorTipo));
-
-  const donutChartOptions: ApexCharts.ApexOptions = $derived({
-    series: pagosPorTipoData.map(([, monto]) => monto),
-    colors: ['#1C64F2', '#16BDCA', '#9061F9'], // Customize colors
-    chart: {
-      height: 420,
-      width: '100%',
-      type: 'donut'
-    },
-    labels: pagosPorTipoData.map(([tipo]) => tipo),
-    legend: {
-      position: 'bottom',
-      fontFamily: 'Inter, sans-serif'
-    },
-    dataLabels: {
-      enabled: true,
-      style: {
-        fontFamily: 'Inter, sans-serif'
-      }
-    }
-  });
 </script>
 
 <div class="p-4 space-y-8">
@@ -57,14 +36,6 @@
         {/each}
       </ul>
     </div>
-  </div>
-
-  <!-- Pagos por tipo (Torta) -->
-  <div class="bg-white p-4 rounded shadow">
-    <h2 class="text-lg font-semibold mb-4">Pagos por tipo</h2>
-    <Chart
-      options={donutChartOptions}
-    />
   </div>
 
   <!-- Pagos por día (Barras) -->

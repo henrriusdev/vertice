@@ -32,6 +32,7 @@
 
   const handleEdit = (row: Nota) => {
     mostrarFormulario = true;
+    esPeticion = false;
   };
 
   const handlePeticion = (row: Nota) => {
@@ -63,7 +64,7 @@
   };
 
   const handleSubmit: SubmitFunction = () => {
-    return resolver(() => (mostrarFormulario = false));
+    return resolver(() => {mostrarFormulario = false; esPeticion = false;});
   };
 
   $effect(() => {

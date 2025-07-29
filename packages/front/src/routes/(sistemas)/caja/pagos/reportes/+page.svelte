@@ -5,6 +5,7 @@
 	import { resolver } from '$lib/utilidades/resolver';
 
 	let reportType = $state('dia');
+	$inspect(reportType)
 	let paymentSelection = $state('todos');
 	let reportDate: Date | { from?: Date; to?: Date } | undefined = $state(new Date());
 </script>
@@ -63,7 +64,7 @@
 				<Label for="report-date" class="mb-2">Fecha de pagos</Label>
 				<Datepicker
 					bind:value={reportDate}
-					dateRange={reportType !== 'dia'}
+					range={reportType !== 'dia'}
 					availableTo={new Date()}
 					placeholder="Seleccione una fecha"
 					translationLocale="es-VE" locale="fr-FR"

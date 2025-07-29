@@ -1,7 +1,9 @@
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from werkzeug.security import check_password_hash
 
+from src.service.estudiantes import validar_pagos_estudiante
 from src.model.usuario import Usuario
+import time
 
 
 async def login(correo: str, password: str):
@@ -12,8 +14,8 @@ async def login(correo: str, password: str):
         if not usuario or not check_password_hash(usuario.password, password):
             return None
 
-        # if usuario.rol.nombre.lower() == "estudiante":
-        #     await validar_pagos_estudiante(usuario)
+        if usuario.rol.nombre.lower() == "estudiante":
+            await validar_pagos_estudiante(usuario)
 
         return usuario
 
@@ -28,13 +30,12 @@ _usuarios_cache = {"data": None, "timestamp": 0, "ttl": 60}  # 60 seconds TTL
 
 async def get_usuarios():
     try:
-        import time
         current_time = time.time()
         
         if _usuarios_cache["data"] is not None and (current_time - _usuarios_cache["timestamp"] < _usuarios_cache["ttl"]):
             return _usuarios_cache["data"]
             
-        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).select_related("rol")
+        data = await Usuario.filter(rol__nombre__in=["control", "caja"]).select_related("rol").order_by("usuario__fecha_creacion")
         
         response = []
         for u in data:

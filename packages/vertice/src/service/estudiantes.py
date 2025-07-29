@@ -11,9 +11,9 @@ from tortoise.exceptions import DoesNotExist
 async def get_students(carrera_id=None):
     try:
         if carrera_id is not None:
-            estudiantes = await Estudiante.filter(carrera_id=carrera_id).prefetch_related("usuario", "carrera").order_by("usuario__cedula")
+            estudiantes = await Estudiante.filter(carrera_id=carrera_id).prefetch_related("usuario", "carrera").order_by("usuario__fecha_creacion")
         else:
-            estudiantes = await Estudiante.all().prefetch_related("usuario", "carrera").order_by("usuario__cedula")
+            estudiantes = await Estudiante.all().prefetch_related("usuario", "carrera").order_by("usuario__fecha_creacion")
         return [
             {
                 "cedula": e.usuario.cedula,

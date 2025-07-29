@@ -18,7 +18,7 @@
     TableHeadCell,
     Toggle
   } from 'flowbite-svelte';
-  import {addToast} from '$lib/utilidades';
+  import {addToast, resolver} from '$lib/utilidades';
   import {
     CreditCardOutline,
     DownloadOutline,
@@ -169,33 +169,8 @@
       formData.append('fecha_pago', new Date().toISOString().split('T')[0]);
     }
 
-    return async ({result}: { result: any }) => {
-      closePaymentModal();
-
-      // Check if the result contains PDF data (the backend returns type: 'application/pdf')
-      if (result && result.type === 'application/pdf' && result.base64) {
-        // Store the PDF data for our modal
-        pdfData = {
-          base64: result.base64,
-          filename: 'constancia_pago.pdf'
-        };
-
-        // Show success message
-        if (result.message) {
-          addToast({type: 'success', message: result.message});
-        }
-
-        // Open the PDF modal after a small delay
-        setTimeout(() => {
-          pdfModalOpen = true;
-        }, 500); // Small delay to ensure the payment modal is closed first
-      } else if (result && result.type === 'failure') {
-        // Handle error
-        if (result.message) {
-          addToast({type: 'error', message: result.message});
-        }
-      }
-    };
+    return resolver(()=>{
+    })
   };
 
   function agregarBillete() {
@@ -468,7 +443,7 @@
                 {/if}
             </div>
             <!-- Form Actions -->
-            <div class="flex justify-end space-x-3 mt-6">
+            <div class="flex justify-start space-x-3 mt-6">
                 <Button color="alternative" onclick={closePaymentModal}>Cancelar</Button>
                 <Button type="submit" color="blue" disabled={!isFormValid}>
                     <CreditCardOutline class="w-5 h-5 mr-2"/>
