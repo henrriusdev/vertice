@@ -10,6 +10,7 @@ class Peticion(Model):
     id_materia = fields.ForeignKeyField("models.Materia", related_name='peticiones')
     campo = fields.CharField(max_length=10)
     valor = fields.DecimalField(max_digits=4,decimal_places=2, null=True)
+    activo = fields.BooleanField(default=True)  # Para borrado lógico
 
     class Meta:
         table = "peticiones"

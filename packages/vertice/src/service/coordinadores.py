@@ -9,7 +9,7 @@ from src.model.matricula import Matricula
 
 async def get_coordinadores():
     try:
-        coordinadores = await Coordinador.all().prefetch_related("usuario", "carrera").order_by("usuario__nombre")
+        coordinadores = await Coordinador.filter(usuario__activo=True).all().prefetch_related("usuario", "carrera").order_by("usuario__nombre")
         resultado = []
         for c in coordinadores:
             resultado.append({
@@ -28,7 +28,7 @@ async def get_coordinadores():
 
 async def get_coordinador(id: int):
     try:
-        c = await Coordinador.get(id=id).prefetch_related("usuario", "carrera")
+        c = await Coordinador.filter(usuario__activo=True).get(id=id).prefetch_related("usuario", "carrera")
         return {
             "id": c.id,
             "usuario": c.usuario.id,
@@ -47,7 +47,7 @@ async def get_coordinador(id: int):
 
 async def get_coordinador_by_usuario(usuario_id: int):
     try:
-        c = await Coordinador.get(usuario_id=usuario_id).prefetch_related("carrera")
+        c = await Coordinador.filter(usuario__activo=True).get(usuario_id=usuario_id).prefetch_related("carrera")
         return c
     except DoesNotExist:
         return None
@@ -89,8 +89,9 @@ async def update_coordinador(id: int, carrera_id: int = None, telefono: str = No
 async def delete_coordinador(cedula: str):
     try:
         coordinador = await Coordinador.get(usuario__cedula=cedula)
-        await coordinador.delete()
-        await coordinador.usuario.delete()
+        usuario = await coordinador.usuario
+        usuario.activo = False
+        await usuario.save()
         return True
     except DoesNotExist:
         return False

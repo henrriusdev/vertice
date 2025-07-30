@@ -231,6 +231,7 @@
 						name="rol"
 						value={usuarioActual?.rol?.id ?? 3}
 						required
+						placeholder="Seleccionar"
 						items={[
 							{ name: 'Personal de caja', value: 2 },
 							{ name: 'Personal de control de estudio', value: 3 }

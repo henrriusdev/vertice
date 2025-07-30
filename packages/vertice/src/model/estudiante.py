@@ -11,6 +11,7 @@ class Estudiante(Model):
     edad = fields.IntField()
     sexo = fields.CharField(max_length=20)
     estatus = fields.CharField(max_length=20, default="Activo")
+    activo = fields.BooleanField(default=True)  # Para borrado lógico
 
     class Meta:
         table = "estudiantes"

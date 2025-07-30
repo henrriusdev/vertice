@@ -1,5 +1,4 @@
 import datetime
-import pytz
 from num2words import num2words
 from src.settings import settings
 

@@ -253,6 +253,7 @@ async def generar_reporte():
 
     if tipo == "dia":
         fecha_str = request.args.get("d")
+        print(f"Fecha recibida para reporte de día: {fecha_str}")
         if not fecha_str:
             return Response("Parámetro 'd' (fecha) es requerido para reporte de día", status=400)
         html = await generar_reporte_dia(fecha_str, filtro_backend, usuario)

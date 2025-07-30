@@ -96,7 +96,7 @@
 
             <TableBody class="divide-y">
                 {#each paginated as row}
-                    <TableBodyRow>
+                    <TableBodyRow class="align-middle">
                         {#each headers.length ? headers : Object.keys(row) as h}
                             {#if ['nombre'].includes(h)}
                                 <TableBodyCell class="capitalize">{row[h]}</TableBodyCell>
@@ -136,6 +136,7 @@
                     items={pageOptions}
                     id="perPage"
                     class="ml-2 w-20"
+                    placeholder="Seleccionar"
             />
         </Label>
 

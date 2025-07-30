@@ -7,7 +7,7 @@ from tortoise.exceptions import DoesNotExist
 
 async def get_docentes():
     try:
-        docentes = await Docente.all().prefetch_related("usuario").order_by("usuario__nombre")
+        docentes = await Docente.filter(usuario__activo=True).all().prefetch_related("usuario").order_by("usuario__nombre")
         resultado = []
         for d in docentes:
             resultado.append({
@@ -26,7 +26,7 @@ async def get_docentes():
 
 async def get_docente(id: int):
     try:
-        d = await Docente.get(id=id).prefetch_related("usuario")
+        d = await Docente.get(id=id, usuario__activo=True).prefetch_related("usuario")
         return {
             "id": d.id,
             "cedula": d.usuario.cedula,
@@ -74,8 +74,9 @@ async def update_docente(id: int, **kwargs):
 async def delete_docente(cedula: str):
     try:
         docente = await Docente.get(usuario__cedula=cedula)
-        await docente.delete()
-        await docente.usuario.delete()
+        usuario = await docente.usuario
+        usuario.activo = False
+        await usuario.save()
         return True
     except DoesNotExist:
         return False

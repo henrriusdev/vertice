@@ -3,7 +3,7 @@ from datetime import datetime
 from src.model.pago import Pago
 from tortoise.expressions import Q
 from src.utils.reporte_pdf import generar_html_reporte, generar_html_montos
-from src.utils.fecha import to_venezuela_timezone
+from src.utils.fecha import to_venezuela_timezone, parse_fecha_with_timezone
 
 async def get_all_pagos():
     result = {"pagos": [], "metodos": []}
@@ -68,12 +68,12 @@ async def update_pago(pago_id: int, data: dict):
 
 
 async def delete_pago(pago_id: int):
-    deleted = await Pago.filter(id=pago_id).delete()
-    return deleted
+    pago = await Pago.get(id=pago_id)
+    pago.activo = False
+    await pago.save()
+    return 1
 
-async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):
-    from src.utils.fecha import parse_fecha_with_timezone
-    
+async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):    
     fecha = parse_fecha_with_timezone(fecha_str, "%Y-%m-%d")
     
     # Create start and end of day in Venezuela timezone
@@ -92,8 +92,6 @@ async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):
 
 
 async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str | None, usuario: str):
-    from src.utils.fecha import parse_fecha_with_timezone
-    
     fi = parse_fecha_with_timezone(fi_str, "%Y-%m-%d")
     ff = parse_fecha_with_timezone(ff_str, "%Y-%m-%d")
 
@@ -114,8 +112,6 @@ async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str | None, u
 
 
 async def generar_reporte_monto(fi_str: str, ff_str: str, usuario: str):
-    from src.utils.fecha import parse_fecha_with_timezone
-    
     fi = parse_fecha_with_timezone(fi_str, "%Y-%m-%d")
     ff = parse_fecha_with_timezone(ff_str, "%Y-%m-%d")
 
@@ -129,4 +125,3 @@ async def generar_reporte_monto(fi_str: str, ff_str: str, usuario: str):
     return generar_html_montos(
         pagos, usuario, f"{fi.strftime('%d/%m/%Y')} a {ff.strftime('%d/%m/%Y')}"
     )
-    

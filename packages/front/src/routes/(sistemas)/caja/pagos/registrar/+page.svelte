@@ -295,6 +295,7 @@
                         <Select
                                 id="payment-concept"
                                 name="payment-concept"
+                                placeholder="Seleccionar"
                                 items={paymentConcepts}
                                 bind:value={paymentConcept}
                                 class="bg-white border-gray-300"
@@ -366,6 +367,7 @@
                             id="payment-method"
                             name="payment-method"
                             items={paymentMethods}
+                            placeholder="Seleccionar"
                             bind:value={paymentMethod}
                             class="bg-white border-gray-300"
                     />
@@ -387,6 +389,7 @@
                             <div class="flex-1">
                                 <Label for="monto" class="mb-2 font-medium">Denominación</Label>
                                 <Select
+                                placeholder="Seleccionar"
                                         id="monto"
                                         bind:value={monto}
                                         items={[

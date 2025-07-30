@@ -66,6 +66,7 @@
 					<div class="flex gap-2 items-center">
 						<Select
 							name="cicloYear"
+							placeholder="Seleccionar"
 							bind:value={cicloYear}
 							class="flex-1"
 							items={Array.from({ length: 5 }, (_, i) => ({
@@ -76,6 +77,7 @@
 						<span class="font-bold text-gray-700">-</span>
 						<Select
 							bind:value={cicloPeriodo}
+							placeholder="Seleccionar"
 							name="cicloPeriodo"
 							class="w-24"
 							items={[

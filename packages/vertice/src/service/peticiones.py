@@ -107,7 +107,9 @@ async def update_peticion(peticion: dict):
 
 async def delete_peticion(peticion):
     try:
-        eliminado = await Peticion.filter(id=peticion["id"]).delete()
-        return eliminado[0]
+        pet = await Peticion.get(id=peticion["id"])
+        pet.activo = False
+        await pet.save()
+        return 1
     except Exception as ex:
         raise Exception(ex)

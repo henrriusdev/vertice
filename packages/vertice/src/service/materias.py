@@ -259,8 +259,10 @@ async def get_materia(id: str):
 
 async def delete_materia(materia_id):
     try:
-        eliminado = await Materia.filter(id=materia_id).delete()
-        return eliminado  # cantidad de filas eliminadas
+        materia = await Materia.get(id=materia_id)
+        materia.activo = False
+        await materia.save()
+        return 1
     except Exception as ex:
         raise Exception(ex)
 
@@ -342,9 +344,9 @@ async def listar_materias_asignadas():
         raise Exception(ex)
 
 
-async def get_materia_con_nombre_y_config(materia_id: str, correo: str):
+async def get_materia_con_nombre_y_config(materia_id: str):
     try:
-        materia = await Materia.get_or_none(id=materia_id, id_docente__usuario__correo=correo).prefetch_related("id_carrera")
+        materia = await Materia.get_or_none(id=materia_id).prefetch_related("id_carrera")
         if not materia:
             return None
 

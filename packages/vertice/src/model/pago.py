@@ -11,6 +11,7 @@ class Pago(Model):
     referencia_transferencia = fields.CharField(max_length=50, null=True)
     ciclo = fields.CharField(max_length=10)
     tasa_divisa = fields.DecimalField(max_digits=12, decimal_places=2, null=True)
+    activo = fields.BooleanField(default=True)  # Para borrado lógico
 
     class Meta:
       table = "pagos"

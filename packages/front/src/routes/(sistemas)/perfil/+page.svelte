@@ -181,6 +181,7 @@
 										name="pregunta{i}"
 										id="pregunta{i}"
 										bind:value={question.pregunta}
+										placeholder="Seleccionar"
 										required
 									>
 										{#each PREGUNTAS_SEGURIDAD.filter(p => 

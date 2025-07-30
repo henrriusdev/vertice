@@ -70,6 +70,7 @@
 		<div>
 			<Label>Estado</Label>
 			<Select
+				placeholder="Seleccionar"
 				bind:value={estado}
 				items={[
 					{ value: 'Todas', name: 'Todas' },
@@ -82,6 +83,7 @@
 		<div>
 			<Label>Docente</Label>
 			<Select
+				placeholder="Seleccionar"
 				bind:value={docente}
 				items={[
 					{ value: '', name: 'Todos' },
@@ -92,6 +94,7 @@
 		<div>
 			<Label>Estudiante</Label>
 			<Select
+				placeholder="Seleccionar"
 				bind:value={estudiante}
 				items={[
 					{ value: '', name: 'Todos' },

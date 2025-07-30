@@ -16,7 +16,7 @@
 		TableHeadCell,
 		Tooltip
 	} from 'flowbite-svelte';
-	import { FileLinesOutline } from 'flowbite-svelte-icons';
+	import { ArrowDownToBracketOutline } from 'flowbite-svelte-icons';
 	import type { PageData } from './$types';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 
@@ -133,7 +133,7 @@
 					<Spinner class="me-3" size="4" color="gray" />
 					Cargando ...
 				{:else}
-					<FileLinesOutline class="h-5 w-5" />
+					<ArrowDownToBracketOutline class="h-5 w-5" />
 					Generar constancia
 				{/if}
 			</Button>
@@ -175,7 +175,7 @@
 			<Chart {options} />
 		</Card>
 		<!-- Materias inscritas -->
-		<Card class="mb-6 p-4 max-w-full col-span-2">
+		<Card class="mb-6 p-4 max-w-full {data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'}">
 			<h3 class="text-lg font-semibold mb-4">Materias Inscritas</h3>
 
 			{#if data.materiasInscritas.length > 0}
@@ -214,7 +214,7 @@
 											{#if loadingPlanificacion}
 												<Spinner class="me-3" size="4" color="gray" />
 											{:else}
-												<FileLinesOutline class="h-5 w-5" />
+												<ArrowDownToBracketOutline class="h-5 w-5" />
 											{/if}
 										</Button>
 										<Tooltip>
@@ -243,7 +243,7 @@
 
 		<!-- Histórico de materias -->
 		{#if data.historicoMaterias.length > 0}
-			<Card class="col-span-2 max-w-full p-4">
+			<Card class="{data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'} max-w-full p-4">
 				<h3 class="text-lg font-semibold mb-4">Histórico de Materias</h3>
 
 				<Table striped={true} hoverable={true}>
@@ -278,10 +278,10 @@
 		{/if}
 
 		<!-- Materias disponibles -->
+		{#if data.materiasDisponibles.length > 0}
 		<Card class="col-span-2 max-w-full p-4">
 			<h3 class="text-lg font-semibold mb-4">Materias Disponibles</h3>
 			
-			{#if data.materiasDisponibles.length > 0}
 				<Table striped={true} hoverable={true}>
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
@@ -302,9 +302,7 @@
 						{/each}
 					</TableBody>
 				</Table>
-			{:else}
-			<p class="text-gray-500">No hay materias disponibles actualmente</p>
-				{/if}
 			</Card>
+			{/if}
 	</div>
 </div>

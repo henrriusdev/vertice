@@ -200,7 +200,7 @@
 			titulo: 'Peticiones',
 			icono: ChalkboardUserOutline,
 			href: '/peticiones',
-			roles: ['docente', 'control']
+			roles: ['control']
 		}
 	];
 
@@ -467,5 +467,9 @@
 
 	:global(input + div.flex.absolute) {
 		padding: 0 !important;
+	}
+	
+	:global(button[type='submit']) {
+		margin-bottom: 0;
 	}
 </style>

@@ -29,13 +29,13 @@
 			use:enhance={({ formData }) => {
 				formData.append('tipo', reportType);
 				formData.append('filtro', paymentSelection);
-				console.log('Report Type:', reportDate);
+				console.log('Report Type:', (reportDate as Date)?.toISOString().split('T')[0]);
 				if (reportType === 'dia') {
-					formData.append('fecha', (reportDate as Date)?.toISOString().split('T')[0]);
+					formData.append('fecha', (reportDate as Date)?.toLocaleDateString('en-CA'));
 				}
 				if (reportType === 'fechas' || reportType === 'monto') {
-					formData.append('fi', (reportDate as any).from.toISOString().split('T')[0]);
-					formData.append('ff', (reportDate as any).to.toISOString().split('T')[0]);
+					formData.append('fi', (reportDate as any).from?.toLocaleDateString('en-CA'));
+					formData.append('ff', (reportDate as any).to?.toLocaleDateString('en-CA'));
 				}
 				return resolver(() => {});
 			}}
@@ -44,6 +44,7 @@
 			<div>
 				<Label for="report-type" class="mb-2">Seleccione su tipo de reporte</Label>
 				<Select
+					placeholder="Seleccionar"
 					id="report-type"
 					bind:value={reportType}
 					items={[
@@ -59,6 +60,7 @@
 					¿Cuáles pagos desea que estén en el reporte?
 				</Label>
 				<Select
+					placeholder="Seleccionar"
 					id="payment-selection"
 					bind:value={paymentSelection}
 					items={[

@@ -11,9 +11,9 @@ from tortoise.exceptions import DoesNotExist
 async def get_students(carrera_id=None):
     try:
         if carrera_id is not None:
-            estudiantes = await Estudiante.filter(carrera_id=carrera_id).prefetch_related("usuario", "carrera").order_by("usuario__fecha_creacion")
+            estudiantes = await Estudiante.filter(carrera_id=carrera_id, usuario__activo=True).prefetch_related("usuario", "carrera").order_by("usuario__nombre")
         else:
-            estudiantes = await Estudiante.all().prefetch_related("usuario", "carrera").order_by("usuario__fecha_creacion")
+            estudiantes = await Estudiante.filter(usuario__activo=True).prefetch_related("usuario", "carrera").order_by("usuario__nombre")
         return [
             {
                 "cedula": e.usuario.cedula,
@@ -40,7 +40,7 @@ async def get_students(carrera_id=None):
 
 async def get_student(cedula: str):
     try:
-        estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario", "carrera")
+        estudiante = await Estudiante.get(usuario__cedula=cedula, usuario__activo=True).prefetch_related("usuario", "carrera")
         return {
             "cedula": estudiante.usuario.cedula,
             "nombre": estudiante.usuario.nombre,
@@ -100,8 +100,9 @@ async def update_student(id_estudiante: int, data: dict):
 async def delete_student(cedula: str):
     try:
         estudiante = await Estudiante.get(usuario__cedula=cedula)
-        await estudiante.delete()
-        await estudiante.usuario.delete()
+        usuario = await estudiante.usuario
+        usuario.activo = False
+        await usuario.save()
         return 1
     except Exception as ex:
         raise Exception(ex)
@@ -276,7 +277,7 @@ async def validar_pagos_estudiante(usuario):
         ciclo_actual = config.ciclo
         fecha_actual = now_in_venezuela().date()
 
-        conceptos_requeridos = ["pre_inscripcion", "inscripcion"]
+        conceptos_requeridos = ["inscripcion","servicios"]
         
         for concepto in conceptos_requeridos:
             if not any(p.concepto == concepto and p.ciclo == ciclo_actual for p in pagos):
@@ -285,7 +286,12 @@ async def validar_pagos_estudiante(usuario):
         # Validar cuotas
         cuotas = config.cuotas or []
         for idx, fecha_cuota in enumerate(cuotas):
-            if fecha_actual >= fecha_cuota.date():
+            # Parse fecha_cuota if it's a string
+            if isinstance(fecha_cuota, str):
+                fecha_cuota_dt = parse_fecha(fecha_cuota)
+            else:
+                fecha_cuota_dt = fecha_cuota
+            if fecha_actual >= fecha_cuota_dt.date():
                 concepto_cuota = f"cuota{idx + 1}"
                 if not any(p.concepto == concepto_cuota and p.ciclo == ciclo_actual for p in pagos):
                     raise Exception(f"No has realizado el pago de la {concepto_cuota}")
@@ -317,3 +323,7 @@ async def obtener_info_estudiante_para_constancia(cedula: str):
         return None
     except Exception as ex:
         raise Exception(ex)
+
+
+async def get_active_estudiantes():
+    return await Estudiante.filter(usuario__activo=True)

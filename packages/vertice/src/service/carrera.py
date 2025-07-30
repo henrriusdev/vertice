@@ -23,7 +23,7 @@ async def update_carrera(id: int, data):
     return updated
 
 async def delete_carrera(id: int):
-    deleted = await Carrera.filter(id=id).delete()
-    if deleted == 0:
-        raise Exception("Carrera no encontrada")
-    return deleted
+    carrera = await Carrera.get(id=id)
+    carrera.activo = False
+    await carrera.save()
+    return 1

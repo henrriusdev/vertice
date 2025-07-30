@@ -38,7 +38,6 @@
 	let paginaActual = $state(1);
 	let elementosPorPagina = $state(10);
 	let cargando = $state(false);
-	let exportando = $state(false);
 	let formatoExportacion = $state('');
 	let exportarForm: HTMLFormElement | null = $state(null);
 	let filtroForm: HTMLFormElement | null = $state(null);
@@ -77,6 +76,7 @@
 	async function exportar(formato: string) {
 		formatoExportacion = formato;
 		await tick();
+		exportando = true;
 		exportarForm!.requestSubmit();
 	}
 
@@ -164,7 +164,7 @@
 				<!-- Rol -->
 				<div>
 					<Label for="rol" class="mb-2">Rol</Label>
-					<Select id="rol" name="rol" bind:value={rolSeleccionado} items={roles} />
+					<Select id="rol" name="rol" bind:value={rolSeleccionado} items={roles} placeholder="Seleccionar" />
 				</div>
 			</div>
 
@@ -181,17 +181,17 @@
 
 				<!-- Botones de exportación -->
 				<div class="flex gap-2">
-					<Button color="green" onclick={() => exportar('csv')} disabled={exportando || cargando}>
+					<Button color="green" onclick={() => exportar('csv')} disabled={cargando}>
 						<FileLinesOutline class="w-4 h-4 mr-2" />
-						{exportando ? 'Exportando...' : 'CSV'}
+						CSV
 					</Button>
-					<Button color="green" onclick={() => exportar('xlsx')} disabled={exportando || cargando}>
+					<Button color="green" onclick={() => exportar('xlsx')} disabled={cargando}>
 						<FileExportOutline class="w-4 h-4 mr-2" />
-						{exportando ? 'Exportando...' : 'XLSX'}
+						XLSX
 					</Button>
-					<Button color="green" onclick={() => exportar('pdf')} disabled={exportando || cargando}>
+					<Button color="green" onclick={() => exportar('pdf')} disabled={cargando}>
 						<FilePdfOutline class="w-4 h-4 mr-2" />
-						{exportando ? 'Exportando...' : 'PDF'}
+						PDF
 					</Button>
 				</div>
 			</div>
@@ -204,20 +204,8 @@
 		method="POST"
 		action="?/exportar"
 		use:enhance={() => {
-			exportando = true;
-			
-			return async ({ result, update }) => {
-				try {
-					// Use the resolver with proper error handling
-					await resolver(() => {
-						exportando = false;
-					})({ result, update });
-				} catch (error) {
-					// Failsafe: always reset exportando on any error
-					console.error('Export error:', error);
-					exportando = false;
-				}
-			};
+			return resolver(() => {
+			});
 		}}
 		style="display: none;"
 	>
@@ -234,11 +222,6 @@
 			<div class="flex justify-center items-center p-12">
 				<Spinner size="12" />
 				<p class="ml-4 text-lg">Cargando resultados...</p>
-			</div>
-		{:else if exportando}
-			<div class="flex justify-center items-center p-12">
-				<Spinner size="12" />
-				<p class="ml-4 text-lg">Exportando archivo...</p>
 			</div>
 		{:else if data.registros?.length === 0}
 			<div class="flex flex-col items-center justify-center p-12 text-gray-500">

@@ -184,6 +184,7 @@
 							value: carrera.id,
 							name: carrera.nombre
 						}))}
+						placeholder="Seleccionar"
 					/>
 				</div>
 				<div class="md:col-span-3">

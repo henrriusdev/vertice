@@ -162,10 +162,11 @@ async def reactivar_usuario(correo: str):
 
 async def delete_usuario(cedula: str):
     try:
-        await Usuario.filter(cedula=cedula).delete()
+        usuario = await Usuario.get(cedula=cedula)
+        usuario.activo = False
+        await usuario.save()
         return True
     except DoesNotExist:
         raise Exception("Usuario no encontrado")
     except Exception as ex:
         raise Exception(f"Error al eliminar usuario: {ex}")
-    

@@ -166,11 +166,10 @@ def materias_asignadas():
 async def reporte_notas_pdf(materia_id):
     try:
         claims = get_jwt()
-        correo = claims.get("sub")
         nombre_docente = claims.get("nombre")
 
         # 1. Obtener datos necesarios
-        materia = await get_materia_con_nombre_y_config(materia_id, correo)
+        materia = await get_materia_con_nombre_y_config(materia_id)
         estudiantes = await get_estudiantes_con_notas(materia_id)
 
         if not materia or not estudiantes:

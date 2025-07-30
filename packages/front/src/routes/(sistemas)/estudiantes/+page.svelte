@@ -21,6 +21,7 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { enhance } from '$app/forms';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
+	import { pl } from 'date-fns/locale';
 
 	// Datos de la página
 	let { data } = $props();
@@ -234,6 +235,7 @@
 						bind:value={estudianteActual.fecha_nac}
 						translationLocale="es-VE"
 						locale="fr-FR"
+						inputmode="numeric"
 						dateFormat={{ year: 'numeric', month: '2-digit', day: '2-digit' }}
 					/>
 					<input
@@ -258,6 +260,7 @@
 					<Select
 						id="carrera"
 						name="carrera"
+						placeholder="Seleccionar"
 						value={estudianteActual?.carrera}
 						required
 						items={data.carreras.map((carrera) => ({
@@ -271,8 +274,8 @@
 					<Select
 						id="sexo"
 						name="sexo"
+						placeholder="Seleccionar"
 						value={estudianteActual?.sexo}
-						placeholder=""
 						required
 						items={[
 							{ value: 'M', name: 'Masculino' },
@@ -285,8 +288,8 @@
 					<Select
 						id="semestre"
 						name="semestre"
+						placeholder="Seleccionar"
 						value={estudianteActual?.semestre}
-						placeholder=""
 						required
 						items={Array(10)
 							.fill(null)

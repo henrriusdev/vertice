@@ -1,7 +1,7 @@
 from src.model.trazabilidad import Trazabilidad
-from datetime import datetime, time
+from datetime import datetime, time, date
 from tortoise.expressions import Q
-from src.utils.fecha import now_in_venezuela, to_venezuela_timezone
+from src.utils.fecha import now_in_venezuela, to_venezuela_timezone, parse_fecha_with_timezone
 
 async def add_trazabilidad(data: dict):
     await Trazabilidad.create(
@@ -25,15 +25,21 @@ async def get_trazabilidad(filtros: dict):
         query &= Q(usuario__rol__nombre__iexact=filtros["rol"])
 
     if filtros.get("fechaDesde"):
-        from src.utils.fecha import parse_fecha_with_timezone
-        fecha = parse_fecha_with_timezone(filtros["fechaDesde"], "%Y-%m-%d")
-        desde = fecha.replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_desde = filtros["fechaDesde"]
+        if isinstance(fecha_desde, date) and not isinstance(fecha_desde, datetime):
+            desde = datetime.combine(fecha_desde, time.min)
+        else:
+            fecha = parse_fecha_with_timezone(fecha_desde, "%Y-%m-%d")
+            desde = fecha.replace(hour=0, minute=0, second=0, microsecond=0)
         query &= Q(fecha__gte=desde)
 
     if filtros.get("fechaHasta"):
-        from src.utils.fecha import parse_fecha_with_timezone
-        fecha = parse_fecha_with_timezone(filtros["fechaHasta"], "%Y-%m-%d")
-        hasta = fecha.replace(hour=23, minute=59, second=59, microsecond=999999)
+        fecha_hasta = filtros["fechaHasta"]
+        if isinstance(fecha_hasta, date) and not isinstance(fecha_hasta, datetime):
+            hasta = datetime.combine(fecha_hasta, time.max)
+        else:
+            fecha = parse_fecha_with_timezone(fecha_hasta, "%Y-%m-%d")
+            hasta = fecha.replace(hour=23, minute=59, second=59, microsecond=999999)
         query &= Q(fecha__lte=hasta)
 
     trazas = await Trazabilidad.filter(query).order_by("-fecha").prefetch_related("usuario", "usuario__rol")
