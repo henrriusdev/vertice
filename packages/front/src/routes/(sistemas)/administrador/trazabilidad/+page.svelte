@@ -15,7 +15,8 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell,
+		Tooltip
 	} from 'flowbite-svelte';
 	import {
 		CalendarEditOutline,
@@ -186,18 +187,27 @@
 
 				<!-- Botones de exportación -->
 				<div class="flex gap-2">
-					<Button color="green" onclick={() => exportar('csv')} disabled={cargando}>
-						<FileLinesOutline class="w-4 h-4 mr-2" />
-						CSV
-					</Button>
-					<Button color="green" onclick={() => exportar('xlsx')} disabled={cargando}>
-						<FileExportOutline class="w-4 h-4 mr-2" />
-						XLSX
-					</Button>
-					<Button color="green" onclick={() => exportar('pdf')} disabled={cargando}>
-						<FilePdfOutline class="w-4 h-4 mr-2" />
-						PDF
-					</Button>
+					<div class="relative">
+						<Button color="green" onclick={() => exportar('csv')} disabled={cargando}>
+							<FileLinesOutline class="w-4 h-4 mr-2" />
+							CSV
+						</Button>
+						<Tooltip placement="top">Exportar como CSV</Tooltip>
+					</div>
+					<div class="relative">
+						<Button color="green" onclick={() => exportar('xlsx')} disabled={cargando}>
+							<FileExportOutline class="w-4 h-4 mr-2" />
+							XLSX
+						</Button>
+						<Tooltip placement="top">Exportar como Excel</Tooltip>
+					</div>
+					<div class="relative">
+						<Button color="green" onclick={() => exportar('pdf')} disabled={cargando}>
+							<FilePdfOutline class="w-4 h-4 mr-2" />
+							PDF
+						</Button>
+						<Tooltip placement="top">Exportar como PDF</Tooltip>
+					</div>
 				</div>
 			</div>
 		</form>

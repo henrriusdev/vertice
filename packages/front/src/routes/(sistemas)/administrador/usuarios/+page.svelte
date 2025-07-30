@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cedulaMask, DataTable, ConfirmDeleteModal } from '$lib';
 	import { imask } from '@imask/svelte';
-	import { Button, Input, Label, Modal, Select, Spinner, TableSearch } from 'flowbite-svelte';
+	import { Button, Input, Label, Modal, Select, Spinner, TableSearch, Tooltip } from 'flowbite-svelte';
 	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import type { Usuario } from '../../../../app';
 	import type { ActionData, PageData } from './$types';
@@ -142,7 +142,12 @@
 					type="file"
 					accept=".xls,.xlsx,.xlsm"
 					class="hidden"
-					onchange={() => document.getElementById('uploadForm')?.requestSubmit()}
+					onchange={() => {
+						const exportarForm = document.getElementById('uploadForm');
+						if (exportarForm instanceof HTMLFormElement) {
+							exportarForm.requestSubmit();
+						}
+					}}
 				/>
 				<Button
 					type="button"
@@ -167,12 +172,18 @@
 
 	{#snippet actions(row: Usuario)}
 		<div class="flex gap-2">
-			<Button size="xs" color="light" onclick={() => editarUsuario(row)}>
-				<PenOutline class="w-4 h-4" />
-			</Button>
-			<Button size="xs" color="red" onclick={() => confirmarEliminarUsuario(row)}>
-				<TrashBinOutline class="w-4 h-4" />
-			</Button>
+			<div class="relative">
+				<Button size="xs" color="light" onclick={() => editarUsuario(row)}>
+					<PenOutline class="w-4 h-4" />
+				</Button>
+				<Tooltip placement="top">Editar usuario</Tooltip>
+			</div>
+			<div class="relative">
+				<Button size="xs" color="red" onclick={() => confirmarEliminarUsuario(row)}>
+					<TrashBinOutline class="w-4 h-4" />
+				</Button>
+				<Tooltip placement="top">Eliminar usuario</Tooltip>
+			</div>
 		</div>
 	{/snippet}
 	<DataTable data={usuariosFiltrados} {actions} {onSearch}></DataTable>
@@ -211,8 +222,9 @@
 						placeholder="Ingrese el nombre completo"
 						value={usuarioActual!.nombre}
 						required
-						oninput={(e) => {
-							if (usuarioActual) usuarioActual.nombre = e.target.value.replace(/\d+/g, '');
+						oninput={(e: Event) => {
+							const target = e.currentTarget as HTMLInputElement;
+							if (usuarioActual && target) usuarioActual.nombre = target.value.replace(/\d+/g, '');
 						}}
 					/>
 				</div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DataTable } from '$lib';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import { Button, ButtonGroup, Input, Label, Modal, TableSearch } from 'flowbite-svelte';
+	import { Button, ButtonGroup, Input, Label, Modal, TableSearch, Tooltip } from 'flowbite-svelte';
 	import { PenOutline, PlusOutline } from 'flowbite-svelte-icons';
 	import type { Carrera } from '../../../../app';
 	import type { PageData } from './$types';
@@ -76,9 +76,12 @@
 
 	{#snippet actions(row: Carrera)}
 		<div class="flex gap-2">
-			<Button size="xs" color="light" onclick={() => editarEstudiante(row)}>
-				<PenOutline class="w-4 h-4" />
-			</Button>
+			<div class="relative">
+				<Button size="xs" color="light" onclick={() => editarEstudiante(row)}>
+					<PenOutline class="w-4 h-4" />
+				</Button>
+				<Tooltip placement="top">Editar carrera</Tooltip>
+			</div>
 		</div>
 	{/snippet}
 	<DataTable data={carrerasFiltradas} {actions}></DataTable>
