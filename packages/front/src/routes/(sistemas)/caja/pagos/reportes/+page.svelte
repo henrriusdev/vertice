@@ -29,7 +29,6 @@
 			use:enhance={({ formData }) => {
 				formData.append('tipo', reportType);
 				formData.append('filtro', paymentSelection);
-				console.log('Report Type:', (reportDate as Date)?.toISOString().split('T')[0]);
 				if (reportType === 'dia') {
 					formData.append('fecha', (reportDate as Date)?.toLocaleDateString('en-CA'));
 				}

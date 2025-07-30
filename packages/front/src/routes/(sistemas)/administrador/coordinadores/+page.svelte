@@ -160,6 +160,9 @@
 						placeholder="Ingrese el nombre completo"
 						value={coordinadorActual!.nombre}
 						required
+						oninput={(e) => {
+							if (coordinadorActual) coordinadorActual.nombre = e.target.value.replace(/\d+/g, '');
+						}}
 					/>
 				</div>
 				<div class="md:col-span-2">

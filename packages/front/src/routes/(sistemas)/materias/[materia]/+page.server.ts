@@ -46,7 +46,6 @@ export const actions: Actions = {
 				id_materia: payload.materia,
 				valor: payload.valor
 			};
-			console.log(body);
 
 			try {
 				await crearPeticion(fetch, body as Omit<Peticion, "id">);

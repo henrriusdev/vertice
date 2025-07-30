@@ -225,6 +225,9 @@
 						placeholder="Ingrese el nombre completo"
 						value={estudianteActual!.nombre}
 						required
+						oninput={(e) => {
+							if (estudianteActual) estudianteActual.nombre = e.target.value.replace(/\d+/g, '');
+						}}
 					/>
 				</div>
 				<div class="md:col-span-2">
