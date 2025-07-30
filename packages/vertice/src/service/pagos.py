@@ -3,6 +3,7 @@ from datetime import datetime
 from src.model.pago import Pago
 from tortoise.expressions import Q
 from src.utils.reporte_pdf import generar_html_reporte, generar_html_montos
+from src.utils.fecha import to_venezuela_timezone
 
 async def get_all_pagos():
     result = {"pagos": [], "metodos": []}
@@ -10,12 +11,15 @@ async def get_all_pagos():
     pagos = await Pago.all().prefetch_related("metodo_pago", "cedula_estudiante__usuario")
 
     for pago in pagos:
+        # Convert the stored datetime to Venezuela timezone for display
+        fecha_venezuela = to_venezuela_timezone(pago.fecha_pago)
+        
         result["pagos"].append({
             "id": pago.id,
             "cedula_estudiante": pago.cedula_estudiante.usuario.cedula,
             "monto": pago.monto,
             "concepto": pago.concepto,
-            "fecha_pago": pago.fecha_pago,
+            "fecha_pago": fecha_venezuela,
             "ciclo": pago.ciclo,
             "metodo_pago": pago.metodo_pago.nombre,
         })
@@ -29,13 +33,16 @@ async def get_pago_by_id(pago_id: int):
     if not pago:
         return None
 
+    # Convert the stored datetime to Venezuela timezone for display
+    fecha_venezuela = to_venezuela_timezone(pago.fecha_pago)
+
     return {
         "pago": {
             "id": pago.id,
             "cedula_estudiante": pago.cedula_estudiante.usuario.cedula,
             "monto": pago.monto,
             "concepto": pago.concepto,
-            "fecha_pago": pago.fecha_pago,
+            "fecha_pago": fecha_venezuela,
             "ciclo": pago.ciclo
         },
         "estudiante": {
@@ -65,10 +72,13 @@ async def delete_pago(pago_id: int):
     return deleted
 
 async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):
-    fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
-    inicio_dia = datetime.combine(fecha.date(), datetime.min.time())
-    fin_dia = datetime.combine(fecha.date(), datetime.max.time())
-    print(f"Rango de búsqueda: {inicio_dia} a {fin_dia}")
+    from src.utils.fecha import parse_fecha_with_timezone
+    
+    fecha = parse_fecha_with_timezone(fecha_str, "%Y-%m-%d")
+    
+    # Create start and end of day in Venezuela timezone
+    inicio_dia = fecha.replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_dia = fecha.replace(hour=23, minute=59, second=59, microsecond=999999)
 
     q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
     if filtro:
@@ -82,11 +92,14 @@ async def generar_reporte_dia(fecha_str: str, filtro: str | None, usuario: str):
 
 
 async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str | None, usuario: str):
-    fi = datetime.strptime(fi_str, "%Y-%m-%d")
-    ff = datetime.strptime(ff_str, "%Y-%m-%d")
+    from src.utils.fecha import parse_fecha_with_timezone
+    
+    fi = parse_fecha_with_timezone(fi_str, "%Y-%m-%d")
+    ff = parse_fecha_with_timezone(ff_str, "%Y-%m-%d")
 
-    inicio_dia = datetime.combine(fi.date(), datetime.min.time())
-    fin_dia = datetime.combine(ff.date(), datetime.max.time())
+    # Create start and end of day range in Venezuela timezone
+    inicio_dia = fi.replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_dia = ff.replace(hour=23, minute=59, second=59, microsecond=999999)
     
     q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
     if filtro:
@@ -101,12 +114,14 @@ async def generar_reporte_fechas(fi_str: str, ff_str: str, filtro: str | None, u
 
 
 async def generar_reporte_monto(fi_str: str, ff_str: str, usuario: str):
-    fi = datetime.strptime(fi_str, "%Y-%m-%d")
-    ff = datetime.strptime(ff_str, "%Y-%m-%d")
+    from src.utils.fecha import parse_fecha_with_timezone
+    
+    fi = parse_fecha_with_timezone(fi_str, "%Y-%m-%d")
+    ff = parse_fecha_with_timezone(ff_str, "%Y-%m-%d")
 
-    # Fix: Use datetime objects directly instead of date__gte/date__lte operators
-    inicio_dia = datetime.combine(fi.date(), datetime.min.time())
-    fin_dia = datetime.combine(ff.date(), datetime.max.time())
+    # Create start and end of day range in Venezuela timezone
+    inicio_dia = fi.replace(hour=0, minute=0, second=0, microsecond=0)
+    fin_dia = ff.replace(hour=23, minute=59, second=59, microsecond=999999)
     
     q = Q(fecha_pago__gte=inicio_dia, fecha_pago__lte=fin_dia)
     pagos = await Pago.filter(q).prefetch_related("metodo_pago")

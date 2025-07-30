@@ -2,6 +2,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from collections import defaultdict
+from src.utils.fecha import now_in_venezuela
 
 # Configura el loader apuntando a la carpeta templates
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "template"
@@ -15,7 +16,7 @@ def generar_html_reporte(pagos, usuario, tipo_reporte, metodo, fecha_filtro):
 
     return template.render(
         usuario=usuario,
-        fecha_actual=datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        fecha_actual=now_in_venezuela().strftime("%d/%m/%Y %H:%M:%S"),
         tipo_reporte=tipo_reporte,
         metodo=metodo,
         fecha_filtro=fecha_filtro,
@@ -36,7 +37,7 @@ def generar_html_montos(pagos, usuario, fecha_rango):
 
     return template.render(
         usuario=usuario,
-        fecha_actual=datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        fecha_actual=now_in_venezuela().strftime("%d/%m/%Y %H:%M:%S"),
         fecha_rango=fecha_rango,
         totales=totales,
         gran_total=gran_total

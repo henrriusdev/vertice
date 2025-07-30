@@ -34,7 +34,6 @@ async def add_config():
         await add_trazabilidad({
             "accion": f"Añadir Configuración con ciclo: {payload['ciclo']}",
             "usuario": usuario,
-            "fecha": datetime.now(),
             "modulo": "General",
             "nivel_alerta": 2
         })
@@ -57,7 +56,6 @@ async def update_config():
         await add_trazabilidad({
             "accion": f"Actualizar Configuración",
             "usuario": usuario,
-            "fecha": datetime.now(),
             "modulo": "General",
             "nivel_alerta": 2
         })
