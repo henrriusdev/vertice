@@ -82,8 +82,8 @@ async def crear_pago():
         # Mapear método de pago a ID
         metodo_pago_id = {
             "transfer": 1,
-            "cash": 2,
-            "point": 3
+            "cash": 3,
+            "point": 2
         }.get(metodo_pago, 3)
         
         # Mapear método de pago a nombre legible
@@ -93,9 +93,6 @@ async def crear_pago():
             "point": "Punto de Venta"
         }.get(metodo_pago, "Otro")
 
-        # Crear el pago
-        from src.utils.fecha import parse_fecha_with_timezone
-        
         pago_id = await add_pago({
             "cedula_estudiante": estudiante,
             "metodo_pago_id": metodo_pago_id,

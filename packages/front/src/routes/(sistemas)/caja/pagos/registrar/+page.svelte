@@ -334,6 +334,7 @@
                                 type="number"
                                 placeholder="Monto en bolívares"
                                 bind:value={amount}
+                                min="0"
                                 class="bg-white border-gray-300"
                         />
                     </div>
@@ -347,6 +348,7 @@
                                     name="tasa_divisa"
                                     type="number"
                                     step="0.01"
+                                    min="0"
                                     placeholder="Tasa actual"
                                     bind:value={exchangeRate}
                                     class="bg-white border-gray-300"
