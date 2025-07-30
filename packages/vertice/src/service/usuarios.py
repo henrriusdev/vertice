@@ -8,9 +8,8 @@ import time
 
 async def login(correo: str, password: str):
     try:
-        usuario = await Usuario.filter(correo=correo).prefetch_related("rol").first()
-        print(f"Usuario encontrado: {usuario}")
-
+        usuario = await Usuario.filter(correo=correo, activo=True).prefetch_related("rol").first()
+    
         if not usuario or not check_password_hash(usuario.password, password):
             return None
 

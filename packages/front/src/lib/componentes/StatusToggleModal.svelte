@@ -2,8 +2,9 @@
 	import { Modal, Button } from 'flowbite-svelte';
 	import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
 	import { addToast } from '$lib';
-	import { enhance } from '$app/forms';
+	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
 
 	let { 
 		open = $bindable(false),
@@ -30,28 +31,10 @@
 
 	const handleSubmit: SubmitFunction = () => {
 		loading = true;
-		return async ({ result, update }) => {
+		return resolver(() => {
 			loading = false;
-			
-			if (result.type === 'success') {
-				addToast({
-					type: 'success',
-					message: isActivating ? 'Elemento activado exitosamente' : 'Elemento inactivado exitosamente'
-				});
-				open = false;
-				onSuccess?.();
-				await update();
-			} else if (result.type === 'failure') {
-				const errorMessage = result.data?.message || 'Error al cambiar el estado del elemento';
-				addToast({
-					type: 'error',
-					message: errorMessage
-				});
-				onError?.(errorMessage);
-			} else {
-				await update();
-			}
-		};
+			onSuccess?.();
+		});
 	};
 
 	function handleCancel() {

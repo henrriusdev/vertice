@@ -17,10 +17,6 @@
 	let isEditing = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
-	let deleteForm: HTMLFormElement;
-	let deleteFormSubmitting = $state(false);
-	let statusForm: HTMLFormElement;
-	let statusFormSubmitting = $state(false);
 	// Estado para el modal de confirmación de activación/desactivación
 	let statusModalOpen = $state(false);
 	let statusModalTitle = $state('');
