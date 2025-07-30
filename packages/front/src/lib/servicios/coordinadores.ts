@@ -43,3 +43,11 @@ export const eliminarCoordinador = async (fetch: typeof window.fetch, cedula: st
   const coordinadorEliminado = await res.json();
   return coordinadorEliminado.data as Coordinador;
 };
+
+export const toggleStatusCoordinador = async (fetch: typeof window.fetch, cedula: string) => {
+  const res = await fetch(`${API}toggle-status/${cedula}`, {
+    method: 'PUT'
+  });
+  const resultado = await res.json();
+  return resultado;
+};

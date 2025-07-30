@@ -5,6 +5,7 @@ import {
 	crearCoordinador,
 	crearUsuario,
 	eliminarCoordinador,
+	toggleStatusCoordinador,
 	obtenerCarreras,
 	obtenerCoordinadores
 } from '$lib';
@@ -129,6 +130,26 @@ export const actions: Actions = {
 			return {
 				type: 'failure',
 				message: 'Error al eliminar el coordinador'
+			};
+		}
+	},
+
+	toggleStatus: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const cedula = formData.get('cedula')?.toString() || '';
+
+		try {
+			await toggleStatusCoordinador(fetch, cedula);
+			return {
+				type: 'success',
+				message: 'Estado del coordinador actualizado exitosamente',
+				invalidate: true
+			};
+		} catch (error: any) {
+			console.error('Error al cambiar estado del coordinador:', error);
+			return {
+				type: 'failure',
+				message: 'Error al cambiar estado del coordinador'
 			};
 		}
 	}

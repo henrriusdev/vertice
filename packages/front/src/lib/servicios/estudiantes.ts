@@ -47,6 +47,14 @@ export const eliminarEstudiante = async (fetch: typeof window.fetch, cedula: str
 	return estudianteEliminado.data as Estudiante;
 };
 
+export const toggleEstudianteStatus = async (fetch: typeof window.fetch, cedula: string) => {
+	const res = await fetch(`${API}toggle-status/${cedula}`, {
+		method: 'PUT'
+	});
+	const response = await res.json();
+	return response;
+};
+
 export const obtenerMateriasInscritas = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}horario`);
 	const materias = await res.json();

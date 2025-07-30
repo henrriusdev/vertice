@@ -7,10 +7,11 @@
 
 	let { 
 		open = $bindable(false),
-		title = 'Confirmar inactivación',
-		message = '¿Estás seguro de que deseas inactivar este elemento?',
+		title = 'Cambiar estado',
+		message = '¿Estás seguro de que deseas cambiar el estado de este elemento?',
 		action,
 		formData = {},
+		isActivating = false,
 		onSuccess,
 		onError
 	} = $props<{
@@ -19,6 +20,7 @@
 		message?: string;
 		action: string;
 		formData?: Record<string, string | number>;
+		isActivating?: boolean;
 		onSuccess?: () => void;
 		onError?: (error: string) => void;
 	}>();
@@ -34,13 +36,13 @@
 			if (result.type === 'success') {
 				addToast({
 					type: 'success',
-					message: 'Elemento inactivado exitosamente'
+					message: isActivating ? 'Elemento activado exitosamente' : 'Elemento inactivado exitosamente'
 				});
 				open = false;
 				onSuccess?.();
 				await update();
 			} else if (result.type === 'failure') {
-				const errorMessage = result.data?.message || 'Error al inactivar el elemento';
+				const errorMessage = result.data?.message || 'Error al cambiar el estado del elemento';
 				addToast({
 					type: 'error',
 					message: errorMessage
@@ -61,7 +63,7 @@
 <Modal bind:open size="sm">
 	{#snippet header()}
 		<div class="flex items-center">
-			<ExclamationCircleOutline class="h-6 w-6 text-red-600 mr-3" />
+			<ExclamationCircleOutline class="h-6 w-6 text-{isActivating ? 'green' : 'red'}-600 mr-3" />
 			<h3 class="text-lg font-semibold text-gray-900">{title}</h3>
 		</div>
 	{/snippet}
@@ -88,11 +90,11 @@
 			</Button>
 			<Button 
 				type="button" 
-				color="red" 
+				color={isActivating ? "green" : "red"}
 				onclick={() => formEl?.requestSubmit()}
 				disabled={loading}
 			>
-				{loading ? 'Inactivando...' : 'Inactivar'}
+				{loading ? (isActivating ? 'Activando...' : 'Inactivando...') : (isActivating ? 'Activar' : 'Inactivar')}
 			</Button>
 		</div>
 	{/snippet}

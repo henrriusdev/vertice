@@ -4,6 +4,7 @@ import {
 	crearEstudiante,
 	crearUsuario,
 	eliminarEstudiante,
+	toggleEstudianteStatus,
 	obtenerCarreras,
 	obtenerEstudiantes,
 	type EstudianteReq
@@ -181,6 +182,36 @@ export const actions: Actions = {
 			};
 		} catch (error) {
 			console.error('Error al eliminar estudiante:', error);
+			return { 
+				type: 'failure', 
+				message: error instanceof Error ? error.message : 'Error desconocido' 
+			};
+		}
+	},
+
+	toggleStatus: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const cedula = formData.get('cedula')?.toString() || '';
+
+		try {
+			const response = await toggleEstudianteStatus(fetch, cedula);
+			if (!response.ok) {
+				return {
+					type: 'failure',
+					message: response.data?.message || 'Error al cambiar el estado del estudiante'
+				};
+			}
+			
+			const isActivating = response.data?.activo;
+			const statusMessage = isActivating ? 'Estudiante activado exitosamente' : 'Estudiante inactivado exitosamente';
+			
+			return {
+				type: 'success',
+				message: statusMessage,
+				invalidate: true
+			};
+		} catch (error) {
+			console.error('Error al cambiar el estado del estudiante:', error);
 			return { 
 				type: 'failure', 
 				message: error instanceof Error ? error.message : 'Error desconocido' 

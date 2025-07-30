@@ -76,7 +76,6 @@
 	async function exportar(formato: string) {
 		formatoExportacion = formato;
 		await tick();
-		exportando = true;
 		exportarForm!.requestSubmit();
 	}
 
@@ -164,7 +163,13 @@
 				<!-- Rol -->
 				<div>
 					<Label for="rol" class="mb-2">Rol</Label>
-					<Select id="rol" name="rol" bind:value={rolSeleccionado} items={roles} placeholder="Seleccionar" />
+					<Select
+						id="rol"
+						name="rol"
+						bind:value={rolSeleccionado}
+						items={roles}
+						placeholder="Seleccionar"
+					/>
 				</div>
 			</div>
 
@@ -204,8 +209,7 @@
 		method="POST"
 		action="?/exportar"
 		use:enhance={() => {
-			return resolver(() => {
-			});
+			return resolver(() => {});
 		}}
 		style="display: none;"
 	>

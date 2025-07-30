@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, telefono, ConfirmDeleteModal } from '$lib';
+	import { cedulaMask, DataTable, telefono, StatusToggleModal } from '$lib';
 	import { imask } from '@imask/svelte';
-	import { Button, Input, Label, Modal, Select, TableSearch } from 'flowbite-svelte';
+	import { Button, Input, Label, Modal, Select, TableSearch, Tooltip } from 'flowbite-svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { PenOutline, PlusOutline, CheckOutline, CloseOutline } from 'flowbite-svelte-icons';
 	import type { Coordinador } from '../../../../app';
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -17,42 +17,39 @@
 	let isEditing = $state(false);
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
-	// Estado para el modal de confirmación de eliminación
-	let deleteModalOpen = $state(false);
-	let selectedCoordinadorForDelete: Coordinador | null = $state(null);
-	let coordinadorActual: Partial<{
-		id: number;
-		cedula: string;
-		nombre: string;
-		correo: string;
-		telefono: string;
-		carrera: number;
-		usuario: number;
-	}> = $state({
+	let deleteForm: HTMLFormElement;
+	let deleteFormSubmitting = $state(false);
+	let statusForm: HTMLFormElement;
+	let statusFormSubmitting = $state(false);
+	// Estado para el modal de confirmación de activación/desactivación
+	let statusModalOpen = $state(false);
+	let statusModalTitle = $state('');
+	let statusModalMessage = $state('');
+	let coordinadorActual = $state({
 		cedula: '',
 		nombre: '',
 		correo: '',
 		telefono: '',
 		carrera: 0,
-		usuario: 0
+		usuario: 0,
+		activo: true,
+		// Internal tracking properties
+		id_coordinador: 0
 	});
+	let selectedCoordinadorForStatus: Coordinador | null = $state(null);
 
 	$effect(() => {
 		if (!modalVisible) {
-			coordinadorActual = {};
-		}
-	});
-
-	$effect(() => {
-		if (data.coordinadores) {
-			coordinadoresFiltrados =
-				data?.coordinadores.filter(
-					(est) =>
-						est?.cedula?.includes(searchTerm) ||
-						est?.telefono?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
-				) ?? [];
+			coordinadorActual = {
+				cedula: '',
+				nombre: '',
+				correo: '',
+				telefono: '',
+				carrera: 0,
+				usuario: 0,
+				activo: true,
+				id_coordinador: 0
+			};
 		}
 	});
 
@@ -70,8 +67,14 @@
 	// Función para abrir el modal en modo edición
 	function editarCoordinador(coordinador: any) {
 		coordinadorActual = {
-			...coordinador,
-			carrera: data.carreras.find((car) => car.nombre === coordinador.carrera)?.id
+			cedula: coordinador.cedula || '',
+			nombre: coordinador.nombre || '',
+			correo: coordinador.correo || '',
+			telefono: coordinador.telefono || '',
+			carrera: data.carreras.find((car: any) => car.nombre === coordinador.carrera)?.id || 0,
+			usuario: coordinador.usuario || 0,
+			activo: coordinador.activo || false,
+			id_coordinador: coordinador.id_coordinador || 0
 		};
 		isEditing = true;
 		modalVisible = true;
@@ -83,16 +86,25 @@
 		modalVisible = true;
 	}
 
-	// Función para abrir el modal de eliminación
-	function confirmarEliminarCoordinador(coordinador: Coordinador) {
-		selectedCoordinadorForDelete = coordinador;
-		deleteModalOpen = true;
+	// Función para abrir el modal de activación/desactivación
+	function confirmarCambiarEstadoCoordinador(coordinador: Coordinador) {
+		selectedCoordinadorForStatus = coordinador;
+		statusModalTitle = coordinador.activo ? "Inactivar Coordinador" : "Activar Coordinador";
+		statusModalMessage = coordinador.activo ? 
+			`¿Estás seguro de que deseas inactivar al coordinador ${coordinador.nombre}?` : 
+			`¿Estás seguro de que deseas activar al coordinador ${coordinador.nombre}?`;
+		statusModalOpen = true;
 	}
 
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => {
 			modalVisible = false;
 		});
+	};
+
+	const handleSuccess = () => {
+		// Refresh data after successful toggle
+		coordinadores = data.coordinadores;
 	};
 </script>
 
@@ -111,12 +123,22 @@
 
 	{#snippet actions(row: Coordinador)}
 		<div class="flex gap-2">
-			<Button size="xs" color="light" onclick={() => editarCoordinador(row)}>
-				<PenOutline class="w-4 h-4" />
-			</Button>
-			<Button size="xs" color="red" onclick={() => confirmarEliminarCoordinador(row)}>
-				<TrashBinOutline class="w-4 h-4" />
-			</Button>
+			<div class="relative">
+				<Button size="xs" color="light" onclick={() => editarCoordinador(row)}>
+					<PenOutline class="w-4 h-4" />
+				</Button>
+				<Tooltip placement="top">Editar coordinador</Tooltip>
+			</div>
+			<div class="relative">
+				<Button size="xs" color={row.activo ? "red" : "green"} onclick={() => confirmarCambiarEstadoCoordinador(row)}>
+					{#if row.activo}
+						<CloseOutline class="w-4 h-4" />
+					{:else}
+						<CheckOutline class="w-4 h-4" />
+					{/if}
+				</Button>
+				<Tooltip placement="top">{row.activo ? 'Inactivar coordinador' : 'Activar coordinador'}</Tooltip>
+			</div>
 		</div>
 	{/snippet}
 	<DataTable data={coordinadoresFiltrados} {actions}></DataTable>
@@ -133,8 +155,8 @@
 			bind:this={formEl}
 		>
 			{#if isEditing}
-				<input type="hidden" name="id_coordinador" value={coordinadorActual!.id} />
-				<input type="hidden" name="id" value={coordinadorActual!?.usuario} />
+				<input type="hidden" name="id_coordinador" value={coordinadorActual.id_coordinador} />
+				<input type="hidden" name="id" value={coordinadorActual.usuario} />
 			{/if}
 			<div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
 				<div class="md:col-span-2">
@@ -158,10 +180,11 @@
 						id="nombre"
 						name="nombre"
 						placeholder="Ingrese el nombre completo"
-						value={coordinadorActual!.nombre}
+						value={coordinadorActual.nombre}
 						required
-						oninput={(e) => {
-							if (coordinadorActual) coordinadorActual.nombre = e.target.value.replace(/\d+/g, '');
+						oninput={(e: Event) => {
+							const target = e.currentTarget as HTMLInputElement;
+							coordinadorActual.nombre = target.value.replace(/\d+/g, '');
 						}}
 					/>
 				</div>
@@ -172,7 +195,11 @@
 						name="correo"
 						type="email"
 						placeholder="correo@ejemplo.com"
-						value={coordinadorActual?.correo}
+						value={coordinadorActual.correo}
+						oninput={(e: Event) => {
+							const target = e.currentTarget as HTMLInputElement;
+							coordinadorActual.correo = target.value;
+						}}
 						required
 					/>
 				</div>
@@ -181,9 +208,9 @@
 					<Select
 						id="carrera"
 						name="carrera_id"
-						value={coordinadorActual?.carrera}
+						value={coordinadorActual.carrera}
 						required
-						items={data.carreras.map((carrera) => ({
+						items={data.carreras.map((carrera: any) => ({
 							value: carrera.id,
 							name: carrera.nombre
 						}))}
@@ -196,7 +223,11 @@
 						id="telefono"
 						name="telefono"
 						placeholder="Ingrese el teléfono"
-						value={coordinadorActual?.telefono}
+						value={coordinadorActual.telefono}
+						oninput={(e: Event) => {
+							const target = e.currentTarget as HTMLInputElement;
+							coordinadorActual.telefono = target.value;
+						}}
 						required
 						use:imask={telefono}
 						class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
@@ -219,15 +250,16 @@
 		{/snippet}
 	</Modal>
 
-	<!-- Modal de confirmación de eliminación -->
-	<ConfirmDeleteModal
-		bind:open={deleteModalOpen}
-		title="Eliminar Coordinador"
-		message="¿Estás seguro de que deseas eliminar al coordinador {selectedCoordinadorForDelete?.nombre}? Esta acción no se puede deshacer."
-		action="?/delete"
-		formData={{ cedula: selectedCoordinadorForDelete?.cedula || '' }}
-		onSuccess={() => {
-			selectedCoordinadorForDelete = null;
+	<!-- Modal de confirmación de activación/desactivación -->
+	<StatusToggleModal
+		bind:open={statusModalOpen}
+		title={statusModalTitle}
+		message={statusModalMessage}
+		action="?/toggleStatus"
+		formData={{
+			cedula: selectedCoordinadorForStatus?.cedula || ''
 		}}
+		isActivating={selectedCoordinadorForStatus ? !selectedCoordinadorForStatus.activo : false}
+		onSuccess={handleSuccess}
 	/>
 </div>

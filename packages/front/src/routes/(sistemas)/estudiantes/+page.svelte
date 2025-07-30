@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, maxYearDate, nota, ConfirmDeleteModal } from '$lib';
+	import { cedulaMask, DataTable, maxYearDate, nota, ConfirmDeleteModal, StatusToggleModal } from '$lib';
 	import { imask } from '@imask/svelte';
 	import {
 		Button,
@@ -15,7 +15,7 @@
 		Tooltip
 
 	} from 'flowbite-svelte';
-	import { EyeOutline, FileCopyOutline, PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { EyeOutline, FileCopyOutline, PenOutline, PlusOutline, UsersOutline, CheckOutline } from 'flowbite-svelte-icons';
 	import type { Estudiante } from '../../../app';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -34,6 +34,12 @@
 	// Estado para el modal de confirmación de eliminación
 	let deleteModalOpen = $state(false);
 	let selectedStudentForDelete: Estudiante | null = $state(null);
+	
+	// Estado para el modal de activación/desactivación
+	let statusModalOpen = $state(false);
+	let selectedStudentForStatus: Estudiante | null = $state(null);
+	let statusModalTitle = $state('');
+	let statusModalMessage = $state('');
 	let estudianteActual: Partial<{
 		id: number;
 		cedula: string;
@@ -85,7 +91,7 @@
 	function editarEstudiante(estudiante: any) {
 		estudianteActual = {
 			...estudiante,
-			carrera: data.carreras.find((car) => car.nombre === estudiante.carrera)?.id,
+			carrera: data.carreras.find((car) => car.nombre === estudiante.carrera)?.id || 1,
 			fecha_nac: new Date(estudiante.fecha_nacimiento),
 			fecha_nacimiento: undefined
 		};
@@ -129,13 +135,28 @@
 	}
 
 	// Actualizar edad cuando cambia la fecha de nacimiento
-	let edad = $derived(calcularEdad(estudianteActual!.fecha_nac));
+	let edad = $derived(calcularEdad(estudianteActual?.fecha_nac || null));
 
-	// Función para abrir el modal de eliminación
+	// Función para abrir el modal de confirmación de eliminación
 	function confirmarEliminarEstudiante(estudiante: Estudiante) {
 		selectedStudentForDelete = estudiante;
 		deleteModalOpen = true;
 	}
+	
+	// Función para abrir el modal de activación/desactivación
+	function confirmarCambiarEstadoEstudiante(estudiante: Estudiante) {
+		selectedStudentForStatus = estudiante;
+		statusModalTitle = estudiante.activo ? "Inactivar Estudiante" : "Activar Estudiante";
+		statusModalMessage = estudiante.activo ? 
+			`¿Estás seguro de que deseas inactivar al estudiante ${estudiante.nombre}?` : 
+			`¿Estás seguro de que deseas activar al estudiante ${estudiante.nombre}?`;
+		statusModalOpen = true;
+	}
+	
+	const handleSuccess = () => {
+		// Refresh data after successful toggle
+		estudiantes = data.estudiantes;
+	};
 
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => {
@@ -164,23 +185,35 @@
 	{#snippet actions(row: Estudiante)}
 		<div class="flex gap-2">
 			{#if data.rol !== 'coordinador' && data.rol !== 'caja'}
-				<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
-					<PenOutline class="w-5 h-5" />
-				</Button>
-				<Button
-					pill
-					class="p-1.5!"
-					size="xs"
-					color="red"
-					onclick={() => confirmarEliminarEstudiante(row)}
-				>
-					<TrashBinOutline class="w-5 h-5" />
-				</Button>
+				<div class="relative">
+					<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
+						<PenOutline class="w-5 h-5" />
+					</Button>
+					<Tooltip placement="top">Editar estudiante</Tooltip>
+				</div>
+				<div class="relative">
+					<Button
+						pill
+						class="p-1.5!"
+						size="xs"
+						color={row.activo ? "red" : "green"}
+						onclick={() => confirmarCambiarEstadoEstudiante(row)}
+					>
+						{#if row.activo}
+							<UsersOutline class="w-5 h-5" />
+						{:else}
+							<CheckOutline class="w-5 h-5" />
+						{/if}
+					</Button>
+					<Tooltip placement="top">{row.activo ? "Inactivar estudiante" : "Activar estudiante"}</Tooltip>
+				</div>
 			{/if}
-			<Button pill size="xs" class="p-1.5!" color="blue" onclick={() => navigator.clipboard.writeText(row.cedula)}>
-				<FileCopyOutline class="w-5 h-5" />
-			</Button>
-			<Tooltip placement="top">Copiar cédula</Tooltip>
+			<div class="relative">
+				<Button pill size="xs" class="p-1.5!" color="blue" onclick={() => navigator.clipboard.writeText(row.cedula || '')}>
+					<FileCopyOutline class="w-5 h-5" />
+				</Button>
+				<Tooltip placement="top">Copiar cédula</Tooltip>
+			</div>
 		</div>
 	{/snippet}
 	<DataTable data={estudiantesFiltrados} {actions}></DataTable>
@@ -223,10 +256,11 @@
 						id="nombre"
 						name="nombre"
 						placeholder="Ingrese el nombre completo"
-						value={estudianteActual!.nombre}
+						value={estudianteActual?.nombre || ''}
 						required
-						oninput={(e) => {
-							if (estudianteActual) estudianteActual.nombre = e.target.value.replace(/\d+/g, '');
+						oninput={(e: Event) => {
+							const target = e.currentTarget as HTMLInputElement;
+							if (estudianteActual && target) estudianteActual.nombre = target.value.replace(/\d+/g, '');
 						}}
 					/>
 				</div>
@@ -244,7 +278,7 @@
 					<input
 						type="hidden"
 						name="fecha_nac"
-						value={estudianteActual.fecha_nac?.toISOString().split('T')[0] ?? ''}
+						value={estudianteActual.fecha_nac ? estudianteActual.fecha_nac.toISOString().split('T')[0] : ''}
 					/>
 				</div>
 				<div class="md:col-span-2">
@@ -307,7 +341,7 @@
 						type="number"
 						class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
 						use:imask={nota}
-						value={estudianteActual?.promedio}
+						value={estudianteActual?.promedio || 0}
 						required
 					/>
 				</div>
@@ -358,5 +392,18 @@
 		onSuccess={() => {
 			selectedStudentForDelete = null;
 		}}
+	/>
+	
+	<!-- Modal de confirmación de activación/desactivación -->
+	<StatusToggleModal
+		bind:open={statusModalOpen}
+		title={statusModalTitle}
+		message={statusModalMessage}
+		action="?/toggleStatus"
+		formData={{
+			cedula: selectedStudentForStatus?.cedula || ''
+		}}
+		isActivating={selectedStudentForStatus ? !selectedStudentForStatus.activo : false}
+		onSuccess={handleSuccess}
 	/>
 </div>

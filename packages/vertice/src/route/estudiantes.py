@@ -7,6 +7,7 @@ from src.service.estudiantes import (
     add_student,
     update_student,
     delete_student,
+    toggle_student_status,
     add_materia,
     get_notas_estudiante,
     get_historico,
@@ -166,6 +167,24 @@ async def remove_student(cedula):
         "nivel_alerta": 3
     })
     return jsonify({"ok": True, "status": 200})
+
+
+@est.route('/toggle-status/<cedula>', methods=["PUT"])
+@jwt_required()
+async def toggle_status(cedula):
+    claims = get_jwt()
+    new_status = await toggle_student_status(cedula)
+    if new_status is False:  # If False is explicitly returned (not None or boolean False)
+        return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
+    
+    status_text = "activado" if new_status else "inactivado"
+    await add_trazabilidad({
+        "accion": f"Estudiante con cédula: {cedula} {status_text}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "modulo": "Estudiantes",
+        "nivel_alerta": 2
+    })
+    return jsonify({"ok": True, "status": 200, "data": {"activo": new_status}})
 
 
 @est.route("/add-materia", methods=["POST"])

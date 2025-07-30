@@ -11,9 +11,9 @@ from tortoise.exceptions import DoesNotExist
 async def get_students(carrera_id=None):
     try:
         if carrera_id is not None:
-            estudiantes = await Estudiante.filter(carrera_id=carrera_id, usuario__activo=True).prefetch_related("usuario", "carrera").order_by("usuario__nombre")
+            estudiantes = await Estudiante.filter(carrera_id=carrera_id).prefetch_related("usuario", "carrera").order_by("usuario__nombre")
         else:
-            estudiantes = await Estudiante.filter(usuario__activo=True).prefetch_related("usuario", "carrera").order_by("usuario__nombre")
+            estudiantes = await Estudiante.all().prefetch_related("usuario", "carrera").order_by("usuario__nombre")
         return [
             {
                 "cedula": e.usuario.cedula,
@@ -40,7 +40,7 @@ async def get_students(carrera_id=None):
 
 async def get_student(cedula: str):
     try:
-        estudiante = await Estudiante.get(usuario__cedula=cedula, usuario__activo=True).prefetch_related("usuario", "carrera")
+        estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario", "carrera")
         return {
             "cedula": estudiante.usuario.cedula,
             "nombre": estudiante.usuario.nombre,
@@ -104,6 +104,23 @@ async def delete_student(cedula: str):
         usuario.activo = False
         await usuario.save()
         return 1
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def toggle_student_status(cedula: str):
+    """
+    Toggle the active status of a student (activate/deactivate)
+    """
+    try:
+        estudiante = await Estudiante.get(usuario__cedula=cedula)
+        usuario = await estudiante.usuario
+        # Toggle the active status
+        usuario.activo = not usuario.activo
+        await usuario.save()
+        return usuario.activo  # Return the new status
+    except DoesNotExist:
+        return False
     except Exception as ex:
         raise Exception(ex)
 

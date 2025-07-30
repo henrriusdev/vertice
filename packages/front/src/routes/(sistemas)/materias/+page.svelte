@@ -4,7 +4,7 @@
 	import { DataTable, ConfirmDeleteModal } from '$lib/componentes';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import { Button, Input, Label, Modal, MultiSelect, Select } from 'flowbite-svelte';
+	import { Button, Input, Label, Modal, MultiSelect, Select, Tooltip } from 'flowbite-svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import {
 		CalendarMonthOutline,
@@ -236,33 +236,45 @@
 {#snippet action(row: Materia)}
 	<div class="flex justify-between items-center">
 		{#if ['coordinador', 'administrador'].includes(data.rol.toLowerCase())}
-			<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
-				<PenOutline class="w-5 h-5" />
-			</Button>
-			<Button
-				pill
-				class="p-1.5!"
-				size="xs"
-				color="red"
-				onclick={() => confirmarEliminarMateria(row)}
-			>
-				<TrashBinOutline class="w-5 h-5" />
-			</Button>
+			<div class="relative">
+				<Button pill class="p-1.5!" size="xs" color="light" onclick={() => openModal(row)}>
+					<PenOutline class="w-5 h-5" />
+				</Button>
+				<Tooltip placement="top">Editar materia</Tooltip>
+			</div>
+			<div class="relative">
+				<Button
+					pill
+					class="p-1.5!"
+					size="xs"
+					color="red"
+					onclick={() => confirmarEliminarMateria(row)}
+				>
+					<TrashBinOutline class="w-5 h-5" />
+				</Button>
+				<Tooltip placement="top">Eliminar materia</Tooltip>
+			</div>
 		{/if}
 		{#if ['control', 'superusuario', 'coordinador'].includes(data.rol.toLowerCase())}
-			<Button
-				pill
-				class="p-1.5!"
-				size="xs"
-				color="primary"
-				onclick={() => goto(`/materias/${row.id}`)}
-			>
-				<UsersGroupOutline class="w-5 h-5" />
-			</Button>
+			<div class="relative">
+				<Button
+					pill
+					class="p-1.5!"
+					size="xs"
+					color="primary"
+					onclick={() => goto(`/materias/${row.id}`)}
+				>
+					<UsersGroupOutline class="w-5 h-5" />
+				</Button>
+				<Tooltip placement="top">Ver estudiantes</Tooltip>
+			</div>
 		{/if}
-		<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
-			<CalendarMonthOutline class="w-5 h-5" />
-		</Button>
+		<div class="relative">
+			<Button pill class="p-1.5!" size="xs" color="alternative" onclick={() => openHorario(row)}>
+				<CalendarMonthOutline class="w-5 h-5" />
+			</Button>
+			<Tooltip placement="top">Ver horario</Tooltip>
+		</div>
 	</div>
 {/snippet}
 

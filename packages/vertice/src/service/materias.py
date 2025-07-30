@@ -32,7 +32,8 @@ async def get_materias(carrera_id=None):
                 "id_carrera": m.id_carrera_id,  # usar el id directamente
                 "maximo": m.maximo,
                 "id_docente": m.id_docente_id,
-                "horarios": horarios
+                "horarios": horarios,
+                "activo": m.activo if hasattr(m, 'activo') else True
             })
 
         return join

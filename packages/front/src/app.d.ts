@@ -21,6 +21,7 @@ export type Coordinador = {
 	usuario: number;
 	carrera: number;
 	telefono: string;
+	activo: boolean;
 };
 
 export type Docente = {
@@ -34,6 +35,7 @@ export type Docente = {
 	estatus: string;
 	fecha_ingreso: string;
 	observaciones: string;
+	activo: boolean;
 };
 
 export type Estudiante = {
@@ -48,6 +50,7 @@ export type Estudiante = {
 	cedula?: string;
 	nombre?: string;
 	correo?: string;
+	activo?: boolean;
 };
 
 export type Horario = {
@@ -69,6 +72,7 @@ export type Materia = {
 	ciclo: string;
 	maximo: number;
 	id_docente: number;
+	activo: boolean;
 };
 
 export type Metodo_pago = {

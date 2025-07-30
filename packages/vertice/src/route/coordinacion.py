@@ -9,6 +9,7 @@ from src.service.coordinadores import (
     add_coordinador,
     update_coordinador,
     delete_coordinador,
+    toggle_coordinador_status,
     calcular_promedio_ponderado_estudiante
 )
 from src.service.estudiantes import get_notas_estudiante
@@ -65,6 +66,17 @@ async def eliminar_coordinador(cedula):
     await delete_coordinador(cedula)
     await add_trazabilidad({"accion": f"Eliminar Coordinador {cedula}", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 3})
     return jsonify({"ok": True, "status": 200})
+
+@crd.route('/toggle-status/<cedula>', methods=['PUT'])
+@jwt_required()
+async def toggle_status_coordinador(cedula):
+    claims = get_jwt()
+    usuario = await get_usuario_por_correo(claims.get('sub'))
+    result = await toggle_coordinador_status(cedula)
+    if result:
+        await add_trazabilidad({"accion": f"Cambiar Estado de Coordinador {cedula}", "usuario": usuario, "modulo": "Coordinacion", "nivel_alerta": 2})
+        return jsonify({"ok": True, "status": 200})
+    return jsonify({"ok": False, "status": 404, "data": {"message": "Coordinador no encontrado"}}), 404
 
 @crd.route('/materias/<cedula>', methods=['GET'])
 @jwt_required()

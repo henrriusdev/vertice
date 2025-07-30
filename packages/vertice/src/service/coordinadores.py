@@ -9,7 +9,7 @@ from src.model.matricula import Matricula
 
 async def get_coordinadores():
     try:
-        coordinadores = await Coordinador.filter(usuario__activo=True).all().prefetch_related("usuario", "carrera").order_by("usuario__nombre")
+        coordinadores = await Coordinador.all().prefetch_related("usuario", "carrera").order_by("usuario__nombre")
         resultado = []
         for c in coordinadores:
             resultado.append({
@@ -19,7 +19,8 @@ async def get_coordinadores():
                 "nombre": c.usuario.nombre,
                 "correo": c.usuario.correo,
                 "telefono": c.telefono,
-                "carrera": c.carrera.nombre
+                "carrera": c.carrera.nombre,
+                "activo": c.usuario.activo
             })
         return resultado
     except Exception as ex:
@@ -28,7 +29,7 @@ async def get_coordinadores():
 
 async def get_coordinador(id: int):
     try:
-        c = await Coordinador.filter(usuario__activo=True).get(id=id).prefetch_related("usuario", "carrera")
+        c = await Coordinador.get(id=id).prefetch_related("usuario", "carrera")
         return {
             "id": c.id,
             "usuario": c.usuario.id,
@@ -47,7 +48,7 @@ async def get_coordinador(id: int):
 
 async def get_coordinador_by_usuario(usuario_id: int):
     try:
-        c = await Coordinador.filter(usuario__activo=True).get(usuario_id=usuario_id).prefetch_related("carrera")
+        c = await Coordinador.get(usuario_id=usuario_id).prefetch_related("carrera")
         return c
     except DoesNotExist:
         return None
@@ -91,6 +92,19 @@ async def delete_coordinador(cedula: str):
         coordinador = await Coordinador.get(usuario__cedula=cedula)
         usuario = await coordinador.usuario
         usuario.activo = False
+        await usuario.save()
+        return True
+    except DoesNotExist:
+        return False
+    except Exception as ex:
+        raise Exception(ex)
+
+
+async def toggle_coordinador_status(cedula: str):
+    try:
+        coordinador = await Coordinador.get(usuario__cedula=cedula)
+        usuario = await coordinador.usuario
+        usuario.activo = not usuario.activo
         await usuario.save()
         return True
     except DoesNotExist:

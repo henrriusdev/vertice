@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cedulaMask, DataTable, ConfirmDeleteModal } from '$lib';
 	import { imask } from '@imask/svelte';
-	import { Button, Input, Label, Modal, TableSearch, Datepicker } from 'flowbite-svelte';
+	import { Button, Input, Label, Modal, TableSearch, Datepicker, Tooltip } from 'flowbite-svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import type { Docente } from '../../../app';
@@ -123,12 +123,18 @@
 
 	{#snippet actions(row: Docente)}
 		<div class="flex gap-2">
-			<Button size="xs" color="light" onclick={() => editarDocente(row)}>
-				<PenOutline class="w-4 h-4" />
-			</Button>
-			<Button size="xs" color="red" onclick={() => confirmarEliminarDocente(row)}>
-				<TrashBinOutline class="w-4 h-4" />
-			</Button>
+			<div class="relative">
+				<Button size="xs" color="light" onclick={() => editarDocente(row)}>
+					<PenOutline class="w-4 h-4" />
+				</Button>
+				<Tooltip placement="top">Editar docente</Tooltip>
+			</div>
+			<div class="relative">
+				<Button size="xs" color="red" onclick={() => confirmarEliminarDocente(row)}>
+					<TrashBinOutline class="w-4 h-4" />
+				</Button>
+				<Tooltip placement="top">Eliminar docente</Tooltip>
+			</div>
 		</div>
 	{/snippet}
 	<DataTable data={docentesFiltrados} {actions}></DataTable>
@@ -170,8 +176,9 @@
 						placeholder="Ingrese el nombre completo"
 						value={docenteActual!.nombre}
 						required
-						oninput={(e) => {
-							if (docenteActual) docenteActual.nombre = e.target.value.replace(/\d+/g, '');
+						oninput={(e: Event) => {
+							const target = e.currentTarget as HTMLInputElement;
+							if (docenteActual && target) docenteActual.nombre = target.value.replace(/\d+/g, '');
 						}}
 					/>
 				</div>
