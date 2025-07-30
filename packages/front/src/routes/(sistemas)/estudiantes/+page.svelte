@@ -10,9 +10,12 @@
 		Select,
 		TableSearch,
 		Textarea,
-		Datepicker
+		Datepicker,
+
+		Tooltip
+
 	} from 'flowbite-svelte';
-	import { EyeOutline, PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { EyeOutline, FileCopyOutline, PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 	import type { Estudiante } from '../../../app';
 	import { resolver } from '$lib/utilidades/resolver';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -173,6 +176,10 @@
 					<TrashBinOutline class="w-5 h-5" />
 				</Button>
 			{/if}
+			<Button pill size="xs" class="p-1.5!" color="blue" onclick={() => navigator.clipboard.writeText(row.cedula)}>
+				<FileCopyOutline class="w-5 h-5" />
+			</Button>
+			<Tooltip placement="top">Copiar cédula</Tooltip>
 		</div>
 	{/snippet}
 	<DataTable data={estudiantesFiltrados} {actions}></DataTable>
