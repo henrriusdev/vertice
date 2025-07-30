@@ -359,19 +359,40 @@ async def pagos_por_tipo():
     
     pagos = (await get_all_pagos())["pagos"]
 
+    # Initialize counters with readable names that match the frontend
     tipos = {"transferencia": 0, "efectivo": 0, "punto": 0}
+    
+    # Debug information
+    payment_methods_found = set()
+    total_payments = 0
+    filtered_payments = 0
+    
     for p in pagos:
+        total_payments += 1
         fecha_pago = p["fecha_pago"]
+        payment_methods_found.add(p["metodo_pago"])
+        
         if desde <= fecha_pago <= hasta:
+            filtered_payments += 1
             nombre = p["metodo_pago"]
+            
+            # Map payment method names to the keys in our tipos dictionary
             if nombre == "Transferencia":
                 tipos["transferencia"] += float(p["monto"])
             elif nombre == "Efectivo":
                 tipos["efectivo"] += float(p["monto"])
-            elif nombre == "Punto":
+            elif nombre == "Punto de Venta":
                 tipos["punto"] += float(p["monto"])
-
-    return jsonify({"ok": True, "status": 200, "data": tipos})
+    
+    print("DEBUG - Payment methods found:", payment_methods_found)
+    print(f"DEBUG - Total payments: {total_payments}, Filtered: {filtered_payments}")
+    print("DEBUG - Payment totals:", tipos)
+    
+    return jsonify({
+        "ok": True, 
+        "status": 200, 
+        "data": tipos,
+    })
 
 
 @pago.route("/por-dia")

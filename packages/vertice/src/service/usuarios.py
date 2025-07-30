@@ -8,10 +8,19 @@ import time
 
 async def login(correo: str, password: str):
     try:
-        usuario = await Usuario.filter(correo=correo, activo=True).prefetch_related("rol").first()
-    
-        if not usuario or not check_password_hash(usuario.password, password):
-            return None
+        # First check if user exists with this email
+        usuario = await Usuario.filter(correo=correo).prefetch_related("rol").first()
+        
+        if not usuario:
+            return {"error": "EMAIL_NOT_FOUND", "message": "El correo electrónico no está registrado"}
+            
+        # Then check if user is active
+        if not usuario.activo:
+            return {"error": "ACCOUNT_INACTIVE", "message": "Esta cuenta ha sido desactivada"}
+            
+        # Finally check password
+        if not check_password_hash(usuario.password, password):
+            return {"error": "INVALID_PASSWORD", "message": "La contraseña es incorrecta"}
 
         if usuario.rol.nombre.lower() == "estudiante":
             await validar_pagos_estudiante(usuario)

@@ -174,8 +174,6 @@ async def remove_student(cedula):
 async def toggle_status(cedula):
     claims = get_jwt()
     new_status = await toggle_student_status(cedula)
-    if new_status is False:  # If False is explicitly returned (not None or boolean False)
-        return jsonify({"ok": False, "status": 404, "data": {"message": "Estudiante no encontrado"}}), 404
     
     status_text = "activado" if new_status else "inactivado"
     await add_trazabilidad({

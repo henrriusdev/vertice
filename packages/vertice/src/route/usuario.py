@@ -21,10 +21,27 @@ async def login_usuario():
         correo = data.get('correo')
         password = data.get('password')
 
-        usuario = await login(correo, password)
-        print(not usuario)
-        if not usuario:
-            return jsonify({"ok": False, "status": 401, "data": {"message": "Correo y/o clave incorrectos"}}), 401
+        result = await login(correo, password)
+        
+        # Check if result is an error object
+        if isinstance(result, dict) and "error" in result:
+            error_code = 401  # Default unauthorized
+            if result["error"] == "EMAIL_NOT_FOUND":
+                error_code = 404  # Not found
+            elif result["error"] == "ACCOUNT_INACTIVE":
+                error_code = 403  # Forbidden
+            
+            return jsonify({
+                "ok": False, 
+                "status": error_code, 
+                "data": {
+                    "message": result["message"],
+                    "error_code": result["error"]
+                }
+            }), error_code
+            
+        # If we get here, result is a valid user object
+        usuario = result
 
         claims = {
             'sub': usuario.correo,

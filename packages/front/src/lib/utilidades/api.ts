@@ -63,6 +63,16 @@ export async function apiJson<T = any>(
         }
         
         const error = await response.json().catch(() => ({ data: { message: 'Error en la respuesta del servidor' } }));
+        
+        // Enhanced error handling with error codes
+        if (error?.data?.error_code) {
+            throw {
+                message: error.data.message || `HTTP ${response.status}: ${response.statusText}`,
+                code: error.data.error_code,
+                status: response.status
+            };
+        }
+        
         throw new Error(error?.data?.message || `HTTP ${response.status}: ${response.statusText}`);
     }
     
