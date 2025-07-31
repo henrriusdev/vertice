@@ -33,7 +33,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.locals.usuario = usuario;
 
 		} catch {
-			event.cookies.delete('sesion', { path: '/' });
 			event.locals.usuario = null;
 		}
 	} else {

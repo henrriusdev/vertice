@@ -27,7 +27,13 @@ export const obtenerReporteNotas = async (fetch: typeof window.fetch, id_materia
 
 export const obtenerPlanificacion = async (fetch: typeof window.fetch, id_materia: string) => {
 	const res = await fetch(`${API}/download/${id_materia}`);
-	if (!res.ok) throw new Error('Error al obtener la planificación');
+	if (!res.ok) {
+		if (res.status === 404) {
+			throw new Error('Planificación aún no subida');
+		}
+
+		throw new Error('Error al obtener la planificación');
+	}
 
 	const contentType = res.headers.get('Content-Type') || 'application/octet-stream';
 	const arrayBuffer = await res.arrayBuffer();

@@ -35,12 +35,10 @@ async def init_db():
     # Roles
     for nombre in roles:
         obj, created = await Rol.get_or_create(nombre=nombre)
-        print(f"Rol: {obj.nombre}, creado: {created}")
 
     # Métodos
     for nombre in metodos:
         obj, created = await MetodoPago.get_or_create(nombre=nombre)
-        print(f"Metodo: {obj.nombre}, creado: {created}")
 
     # Superusuario
     print("Creando superusuario...")
@@ -54,5 +52,3 @@ async def init_db():
             "rol": rol_super,
         }
     )
-
-    print(f"Usuario: {obj.correo}, creado: {created}")

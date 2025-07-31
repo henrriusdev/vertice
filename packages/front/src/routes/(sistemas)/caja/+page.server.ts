@@ -7,7 +7,7 @@ import {
 } from '$lib';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const today = new Date().toISOString().split('T')[0];
+	const today = new Date().toLocaleDateString("en-CA").split('T')[0];
 
 	const [estudiantes, totalRecaudado, pagosPorTipo, pagosPorDia] = await Promise.all([
 		obtenerEstudiantes(fetch),

@@ -27,9 +27,9 @@ export const actions = {
                         cookies.set('sesion', token, {
                                 path: '/',
                                 httpOnly: true,
-                                sameSite: 'strict',
+                                sameSite: 'lax',
                                 secure: false, // true en producción
-                                maxAge: 60 * 60 * 8 // 8h
+                                maxAge: 60 * 60 * 24 // 24h
                         });
 
 			destino = `/${usuario.rol.nombre.toLowerCase()}`;

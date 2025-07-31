@@ -21,11 +21,6 @@ export async function apiCall(
                     url: input.toString(),
                     method: init?.method || 'GET'
                 });
-                // Clear any existing session data immediately
-                if (typeof document !== 'undefined') {
-                    // Clear cookies
-                    document.cookie = 'sesion=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                }
                 // Redirect to logout
                 goto('/logout');
             }

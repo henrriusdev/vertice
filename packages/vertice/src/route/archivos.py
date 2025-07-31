@@ -91,11 +91,12 @@ async def download_file(folder: str):
             return jsonify({"ok": False, "status": 404, "data": {"message": "No hay archivos en la carpeta"}}), 404
 
         if len(archivos) > 1:
-            return jsonify({"ok": False, "status": 400, "data": {"message": "Hay más de un archivo en la carpeta"}}), 400
+            # Return the latest file based on modification time
+            archivo = max(archivos, key=lambda f: path.getmtime(path.join(folder_path, f)))
+        else:
+            archivo = archivos[0]
 
-        archivo = archivos[0]
         file_path = path.join(folder_path, archivo)
-        print("Descargando:", file_path)
 
         # Trazabilidad
         await add_trazabilidad({
@@ -245,7 +246,6 @@ async def exportar_archivo_trazabilidad():
             "fechaHasta": data.get("fechaHasta", "").strip(),
             "rol": data.get("rol", "").strip()
         }
-        print(filtros)
 
         if filtros["fechaDesde"]:
             filtros["fechaDesde"] = datetime.strptime(filtros["fechaDesde"], "%Y-%m-%d").date()

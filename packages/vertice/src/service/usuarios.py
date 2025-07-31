@@ -178,3 +178,14 @@ async def delete_usuario(cedula: str):
         raise Exception("Usuario no encontrado")
     except Exception as ex:
         raise Exception(f"Error al eliminar usuario: {ex}")
+
+async def toggle_usuario_status(cedula: str):
+    try:
+        usuario = await Usuario.get(cedula=cedula)
+        usuario.activo = not usuario.activo
+        await usuario.save()
+        return usuario
+    except DoesNotExist:
+        return None
+    except Exception as ex:
+        raise Exception(ex)

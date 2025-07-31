@@ -119,6 +119,18 @@ export async function obtenerUsuarios(fetch: typeof window.fetch) {
 	return data.data as Usuario[];
 }
 
+// Toggle usuario status
+export async function toggleUsuarioStatus(fetch: typeof window.fetch, cedula: string): Promise<Usuario> {
+	const response = await apiCall(fetch, `${API}toggle-status/${cedula}`, {
+		method: 'GET',
+		credentials: 'include'
+	});
+
+	if (!response.ok) throw new Error('Error al cambiar el estado del usuario');
+	const json = await response.json();
+	return json.data as Usuario;
+}
+
 export async function obtenerUsuario(fetch: typeof window.fetch, cedula: string) {
 	const res = await fetch(`${API}${cedula}`);
 	if (!res.ok) {

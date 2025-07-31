@@ -112,7 +112,6 @@ async def update_materia(materia: dict):
             return 0
 
         horarios = []
-        print(materia["horarios"])
         if materia["horarios"]:
             for horario in materia["horarios"]:
                 horarios.append({

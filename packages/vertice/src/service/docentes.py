@@ -140,3 +140,15 @@ async def obtener_materias_por_email_docente(email: str):
         return resultado
     except Exception as ex:
         raise Exception(ex)
+
+async def toggle_docente_status(cedula: str):
+    try:
+        docente = await Docente.get(usuario__cedula=cedula)
+        usuario = await docente.usuario
+        usuario.activo = not usuario.activo
+        await usuario.save()
+        return docente
+    except DoesNotExist:
+        return None
+    except Exception as ex:
+        raise Exception(ex)

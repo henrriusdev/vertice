@@ -16,7 +16,7 @@ from src.service.pagos import (
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.utils.reporte_pdf import env
-from src.utils.fecha import to_venezuela_timezone
+from src.utils.fecha import to_venezuela_timezone, now_in_venezuela, parse_fecha_with_timezone
 
 pago = Blueprint("pagos_blueprint", __name__)
 
@@ -72,7 +72,6 @@ async def crear_pago():
         tasa_divisa: float | None = body.get('exchange_rate')
         ciclo: str = body.get('ciclo', '2025-1')
         billetes = body.get('billetes', [])
-        print(cedula_str)
 
         # Buscar estudiante
         estudiante = await Estudiante.get(usuario__cedula=cedula_str).prefetch_related("usuario", "carrera")
@@ -93,12 +92,13 @@ async def crear_pago():
             "point": "Punto de Venta"
         }.get(metodo_pago, "Otro")
 
+        fecha_pago = parse_fecha_with_timezone(fecha_pago_str)
         pago_id = await add_pago({
             "cedula_estudiante": estudiante,
             "metodo_pago_id": metodo_pago_id,
             "monto": Decimal(monto),
             "concepto": concepto,
-            "fecha_pago": parse_fecha_with_timezone(fecha_pago_str),
+            "fecha_pago": fecha_pago,
             "referencia_transferencia": referencia,
             "ciclo": ciclo,
             "tasa_divisa": Decimal(tasa_divisa) if tasa_divisa else None
@@ -141,7 +141,7 @@ async def crear_pago():
         }
         
         # Generar HTML para la constancia de pago
-        from src.utils.fecha import now_in_venezuela, parse_fecha_with_timezone
+        # Using now_in_venezuela and parse_fecha_with_timezone imported at the top of the file
         
         template = env.get_template("constancia_pago.html")
         fecha_emision_vz = now_in_venezuela()
@@ -250,7 +250,6 @@ async def generar_reporte():
 
     if tipo == "dia":
         fecha_str = request.args.get("d")
-        print(f"Fecha recibida para reporte de día: {fecha_str}")
         if not fecha_str:
             return Response("Parámetro 'd' (fecha) es requerido para reporte de día", status=400)
         html = await generar_reporte_dia(fecha_str, filtro_backend, usuario)
@@ -324,8 +323,6 @@ async def get_pagos_by_estudiante():
 @pago.route("/total")
 @jwt_required()
 async def total_recaudado():
-    from src.utils.fecha import parse_fecha_with_timezone
-    
     desde = parse_fecha_with_timezone(request.args.get("desde"))
     hasta = parse_fecha_with_timezone(request.args.get("hasta"))
     # Adjust hasta to end of day
@@ -344,8 +341,6 @@ async def total_recaudado():
 @pago.route("/por-tipo")
 @jwt_required()
 async def pagos_por_tipo():
-    from src.utils.fecha import parse_fecha_with_timezone
-    
     desde_str = request.args.get("desde")
     hasta_str = request.args.get("hasta")
     
@@ -381,10 +376,6 @@ async def pagos_por_tipo():
             elif nombre == "Punto de Venta":
                 tipos["punto"] += float(p["monto"])
     
-    print("DEBUG - Payment methods found:", payment_methods_found)
-    print(f"DEBUG - Total payments: {total_payments}, Filtered: {filtered_payments}")
-    print("DEBUG - Payment totals:", tipos)
-    
     return jsonify({
         "ok": True, 
         "status": 200, 
@@ -395,8 +386,6 @@ async def pagos_por_tipo():
 @pago.route("/por-dia")
 @jwt_required()
 async def pagos_por_dia():
-    from src.utils.fecha import now_in_venezuela
-    
     dias = int(request.args.get("dias", 7))
     pagos = (await get_all_pagos())["pagos"]
 

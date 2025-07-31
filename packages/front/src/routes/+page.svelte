@@ -1,13 +1,12 @@
 <script lang="ts">
   import {enhance} from '$app/forms';
+	import { addToast } from '$lib';
   import {resolver} from '$lib/utilidades/resolver';
   import type {SubmitFunction} from '@sveltejs/kit';
   import {Alert, Button, Input, Label} from 'flowbite-svelte';
   import {EyeSlashSolid, EyeSolid, ExclamationCircleOutline, LockSolid, EnvelopeSolid} from 'flowbite-svelte-icons';
 
   let password = $state('');
-  let error = $state('');
-  let errorCode = $state('');
   let visible = $state(false);
   let loading = $state(false);
 
@@ -15,15 +14,21 @@
 
   const handleSubmit: SubmitFunction = () => {
     loading = true;
-    error = '';
-    errorCode = '';
     
-    return async ({ result }) => {
+    return async ({ result, update }) => {
+        await update();
       loading = false;
-      
-      if (result.type === 'failure') {
-        error = result.data?.message || 'Error al iniciar sesión';
-        errorCode = result.data?.error_code || '';
+      console.log(result);
+      if (result.data.type === 'failure') {
+        addToast({
+          type: 'error',
+          message: result.data.message
+        });
+      } else{
+        addToast({
+          type: 'success',
+          message: 'Inicio de sesión exitoso'
+        });
       }
     };
   };
@@ -38,20 +43,10 @@
     >
         <h1 class="text-2xl font-bold text-center text-blue-700 dark:text-white">Iniciar sesión</h1>
 
-        {#if error}
-            <Alert color="red" class="text-sm flex items-center gap-2">
-                <ExclamationCircleOutline class="w-4 h-4" />
-                <span>{error}</span>
-            </Alert>
-        {/if}
-
         <div>
             <Label for="correo">Correo</Label>
             <div class="relative">
                 <Input id="correo" name="correo" type="email" placeholder="usuario@ejemplo.com" required>
-                    {#snippet left()}
-                        <EnvelopeSolid class="w-4 h-4 text-gray-500" />
-                    {/snippet}
                 </Input>
             </div>
         </div>
@@ -67,15 +62,12 @@
                         placeholder="••••••••"
                         required
                 >
-                    {#snippet left()}
-                        <LockSolid class="w-4 h-4 text-gray-500" />
-                    {/snippet}
                     {#snippet right()}
                         <Button
                                 type="button"
                                 outline
                                 size="xs"
-                                class="!p-2"
+                                class="!p-2 mr-[-10px]"
                                 onclick={toggleVisibility}
                         >
                             {#if visible}

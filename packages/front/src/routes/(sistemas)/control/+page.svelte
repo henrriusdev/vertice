@@ -63,7 +63,7 @@
 		series: [
 			{
 				name: 'Promedio',
-				data: data.promediosCarreras?.map((c: PromedioCarrera) => c.promedio) || []
+				data: data.promediosCarreras?.map((c: PromedioCarrera) => parseFloat(c.promedio.toFixed(2))) || []
 			}
 		],
 		xaxis: {
@@ -138,14 +138,14 @@
 				<Table striped={true}>
 					<TableHead>
 						<TableHeadCell>Estudiante</TableHeadCell>
-						<TableHeadCell>Tipo</TableHeadCell>
+						<TableHeadCell>Corte</TableHeadCell>
 						<TableHeadCell>Estado</TableHeadCell>
 					</TableHead>
 					<TableBody>
 						{#each data.peticiones as peticion}
 							<TableBodyRow>
 								<TableBodyCell>{peticion.estudiante}</TableBodyCell>
-								<TableBodyCell>{peticion.tipo}</TableBodyCell>
+								<TableBodyCell>{peticion.campo}</TableBodyCell>
 								<TableBodyCell>
 									<Badge color="yellow">{peticion.estado}</Badge>
 								</TableBodyCell>

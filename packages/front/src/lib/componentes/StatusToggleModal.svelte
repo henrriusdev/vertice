@@ -33,6 +33,7 @@
 		loading = true;
 		return resolver(() => {
 			loading = false;
+			open = false;
 			onSuccess?.();
 		});
 	};

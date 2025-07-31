@@ -3,10 +3,11 @@
 	import { imask } from '@imask/svelte';
 	import { Button, Input, Label, Modal, TableSearch, Datepicker, Tooltip } from 'flowbite-svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { CheckOutline, PenOutline, PlusOutline, TrashBinOutline, UsersOutline } from 'flowbite-svelte-icons';
 	import type { Docente } from '../../../app';
 	import { resolver } from '$lib/utilidades/resolver';
 	import { enhance } from '$app/forms';
+	import StatusToggleModal from '$lib/componentes/StatusToggleModal.svelte';
 
 	// Datos de la página
 	let { data } = $props();
@@ -17,8 +18,10 @@
 	let searchTerm = $state('');
 	let formEl: HTMLFormElement | undefined = $state();
 	// Estado para el modal de confirmación de eliminación
-	let deleteModalOpen = $state(false);
-	let selectedDocenteForDelete: Docente | null = $state(null);
+	let statusModalOpen = $state(false);
+	let selectedDocenteForStatus: Docente | null = $state(null);
+	let statusModalTitle = $state('');
+	let statusModalMessage = $state('');
 	let docenteActual: Partial<{
 		id: number;
 		cedula: string;
@@ -98,8 +101,12 @@
 
 	// Función para abrir el modal de eliminación
 	function confirmarEliminarDocente(docente: Docente) {
-		selectedDocenteForDelete = docente;
-		deleteModalOpen = true;
+		selectedDocenteForStatus = docente;
+		statusModalTitle = docente.activo ? "Inactivar Docente" : "Activar Docente";
+		statusModalMessage = docente.activo ? 
+			`¿Estás seguro de que deseas inactivar al docente ${docente.nombre}?` : 
+			`¿Estás seguro de que deseas activar al docente ${docente.nombre}?`;
+		statusModalOpen = true;
 	}
 
 	function handleSubmit() {
@@ -107,6 +114,11 @@
 			modalVisible = false;
 		});
 	}
+
+	const handleSuccess = () => {
+		// Refresh data after successful toggle
+		docentes = data.docentes;
+	};
 </script>
 
 <div class="w-full">
@@ -130,10 +142,14 @@
 				<Tooltip placement="top">Editar docente</Tooltip>
 			</div>
 			<div class="relative">
-				<Button size="xs" color="red" onclick={() => confirmarEliminarDocente(row)}>
-					<TrashBinOutline class="w-4 h-4" />
+				<Button size="xs" color={row.activo ? "red" : "green"} onclick={() => confirmarEliminarDocente(row)}>
+					{#if row.activo}
+						<UsersOutline class="w-5 h-5" />
+					{:else}
+						<CheckOutline class="w-5 h-5" />
+					{/if}
 				</Button>
-				<Tooltip placement="top">Eliminar docente</Tooltip>
+				<Tooltip placement="top">{row.activo ? "Inactivar docente" : "Activar docente"}</Tooltip>
 			</div>
 		</div>
 	{/snippet}
@@ -239,14 +255,15 @@
 	</Modal>
 
 	<!-- Modal de confirmación de eliminación -->
-	<ConfirmDeleteModal
-		bind:open={deleteModalOpen}
-		title="Eliminar Docente"
-		message="¿Estás seguro de que deseas eliminar al docente {selectedDocenteForDelete?.nombre}? Esta acción no se puede deshacer."
-		action="?/delete"
-		formData={{ cedula: selectedDocenteForDelete?.cedula || '' }}
-		onSuccess={() => {
-			selectedDocenteForDelete = null;
+	<StatusToggleModal
+		bind:open={statusModalOpen}
+		title={statusModalTitle}
+		message={statusModalMessage}
+		action="?/toggleStatus"
+		formData={{
+			cedula: selectedDocenteForStatus?.cedula || ''
 		}}
+		isActivating={selectedDocenteForStatus ? !selectedDocenteForStatus.activo : false}
+		onSuccess={handleSuccess}
 	/>
 </div>

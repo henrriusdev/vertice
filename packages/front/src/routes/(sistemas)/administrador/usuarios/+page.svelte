@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, ConfirmDeleteModal } from '$lib';
+	import { enhance } from '$app/forms';
+	import { cedulaMask, DataTable } from '$lib';
+	import StatusToggleModal from '$lib/componentes/StatusToggleModal.svelte';
+	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
+	import { resolver } from '$lib/utilidades/resolver';
 	import { imask } from '@imask/svelte';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Button, Input, Label, Modal, Select, Spinner, TableSearch, Tooltip } from 'flowbite-svelte';
-	import { PenOutline, PlusOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { CheckOutline, PenOutline, PlusOutline, UsersOutline } from 'flowbite-svelte-icons';
 	import type { Usuario } from '../../../../app';
 	import type { ActionData, PageData } from './$types';
-	import { resolver } from '$lib/utilidades/resolver';
-	import type { SubmitFunction } from '@sveltejs/kit';
-	import { enhance } from '$app/forms';
-	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 
 	// Datos de la página
 	let { data }: { data: PageData; form: ActionData } = $props<{
@@ -17,6 +18,10 @@
 	}>();
 
 	// Estado para el modal
+	let statusModalOpen = $state(false);
+	let selectedUsuarioForStatus: Usuario | null = $state(null);
+	let statusModalTitle = $state('');
+	let statusModalMessage = $state('');
 	let modalVisible = $state(false);
 	let descargando = $state(false);
 	let cargando = $state(false);
@@ -74,8 +79,12 @@
 
 	// Función para abrir el modal de eliminación
 	function confirmarEliminarUsuario(usuario: Usuario) {
-		selectedUsuarioForDelete = usuario;
-		deleteModalOpen = true;
+		selectedUsuarioForStatus = usuario;
+		statusModalTitle = usuario.activo ? "Inactivar Usuario" : "Activar Usuario";
+		statusModalMessage = usuario.activo ? 
+			`¿Estás seguro de que deseas inactivar al usuario ${usuario.nombre}?` : 
+			`¿Estás seguro de que deseas activar al usuario ${usuario.nombre}?`;
+		statusModalOpen = true;
 	}
 
 	// Función para abrir el modal en modo creación
@@ -106,6 +115,11 @@
 		}
 
 		return '';
+	};
+
+	const handleSuccess = () => {
+		statusModalOpen = false;
+		usuarios = data.usuarios;
 	};
 </script>
 
@@ -179,10 +193,14 @@
 				<Tooltip placement="top">Editar usuario</Tooltip>
 			</div>
 			<div class="relative">
-				<Button size="xs" color="red" onclick={() => confirmarEliminarUsuario(row)}>
-					<TrashBinOutline class="w-4 h-4" />
+				<Button size="xs" color={row.activo ? "red" : "green"} onclick={() => confirmarEliminarUsuario(row)}>
+					{#if row.activo}
+						<UsersOutline class="w-5 h-5" />
+					{:else}
+						<CheckOutline class="w-5 h-5" />
+					{/if}
 				</Button>
-				<Tooltip placement="top">Eliminar usuario</Tooltip>
+				<Tooltip placement="top">{row.activo ? "Inactivar usuario" : "Activar usuario"}</Tooltip>
 			</div>
 		</div>
 	{/snippet}
@@ -270,15 +288,15 @@
 		{/snippet}
 	</Modal>
 
-	<!-- Modal de confirmación de eliminación -->
-	<ConfirmDeleteModal
-		bind:open={deleteModalOpen}
-		title="Eliminar Usuario"
-		message="¿Estás seguro de que deseas eliminar al usuario {selectedUsuarioForDelete?.nombre}? Esta acción no se puede deshacer."
-		action="?/delete"
-		formData={{ cedula: selectedUsuarioForDelete?.cedula || '' }}
-		onSuccess={() => {
-			selectedUsuarioForDelete = null;
+	<StatusToggleModal
+		bind:open={statusModalOpen}
+		title={statusModalTitle}
+		message={statusModalMessage}
+		action="?/toggleStatus"
+		formData={{
+			cedula: selectedUsuarioForStatus?.cedula || ''
 		}}
+		isActivating={selectedUsuarioForStatus ? !selectedUsuarioForStatus.activo : false}
+		onSuccess={handleSuccess}
 	/>
 </div>

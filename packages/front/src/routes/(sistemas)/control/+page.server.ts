@@ -56,7 +56,7 @@ export const load = (async ({ fetch }) => {
         })).slice(0, 5),
         peticiones: peticiones.slice(0, 5).filter(p => p.peticion.estado === 'Pendiente').map(p => ({
             estudiante: p.estudiante.nombre,
-            tipo: p.peticion.campo,
+            campo: p.peticion.campo,
             estado: p.peticion.estado
         }))
     };

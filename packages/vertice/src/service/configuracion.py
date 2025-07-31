@@ -37,7 +37,6 @@ async def add_configuracion(config_data: dict):
 
 async def update_configuracion(config_data: dict):
     try:
-        print(config_data)
         config = await Configuracion.get_or_none(id=1)
         if not config:
             return 0

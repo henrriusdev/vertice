@@ -27,13 +27,10 @@ async def list_students():
     correo = claims.get('sub')
     rol = claims.get('rol')
     carrera_id = None
-    print(rol)
     if rol == 'coordinador' and correo is not None:
         usuario = await get_usuario_por_correo(correo)
-        print(usuario)
         if usuario:
             coordinador = await get_coordinador_by_usuario(usuario.id)
-            print(coordinador)
             if coordinador:
                 carrera_id = coordinador.carrera_id
     await add_trazabilidad({

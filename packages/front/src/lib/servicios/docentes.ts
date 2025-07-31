@@ -1,5 +1,5 @@
-// import type { DocenteReq } from "$lib/types";
 import type { DocenteReq } from '$lib/types';
+import { apiCall } from '$lib/utilidades';
 import type { Docente, MateriaDocente } from '../../app';
 
 const API = 'http://127.0.0.1:8000/api/docentes/';
@@ -53,3 +53,14 @@ export const obtenerMateriasAsignadas = async (fetch: typeof window.fetch) => {
 	const response = await res.json();
 	return response.data as MateriaDocente[];
 };
+
+export async function toggleDocenteStatus(fetch: typeof window.fetch, cedula: string): Promise<Docente> {
+    const response = await apiCall(fetch, `${API}toggle-status/${cedula}`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    if (!response.ok) throw new Error('Error al cambiar el estado del docente');
+    const json = await response.json();
+    return json.data as Docente;
+}

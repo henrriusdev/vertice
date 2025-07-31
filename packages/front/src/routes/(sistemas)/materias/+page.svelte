@@ -242,7 +242,7 @@
 				</Button>
 				<Tooltip placement="top">Editar materia</Tooltip>
 			</div>
-			<div class="relative">
+			<!--<div class="relative">
 				<Button
 					pill
 					class="p-1.5!"
@@ -253,7 +253,7 @@
 					<TrashBinOutline class="w-5 h-5" />
 				</Button>
 				<Tooltip placement="top">Eliminar materia</Tooltip>
-			</div>
+			</div>-->
 		{/if}
 		{#if ['control', 'superusuario', 'coordinador'].includes(data.rol.toLowerCase())}
 			<div class="relative">

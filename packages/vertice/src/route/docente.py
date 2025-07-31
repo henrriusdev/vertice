@@ -11,10 +11,12 @@ from src.service.docentes import (
     obtener_materias_por_email_docente,
     update_docente,
     delete_docente,
+    toggle_docente_status,
 )
 from src.service.materias import modificar_materia_estudiante
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
+from src.utils.fecha import now_in_venezuela
 
 doc = Blueprint('docentes_blueprint', __name__)
 
@@ -32,6 +34,42 @@ async def get_all_docentes():
     return jsonify({"ok": True, "status": 200, "data": data})
 
 
+
+@doc.route('/toggle-status/<cedula>')
+@jwt_required()
+async def toggle_docente_status_route(cedula: str):
+    try:
+        claims = get_jwt()
+        usuario = await get_usuario_por_correo(claims.get('sub'))
+        
+        # Toggle the docente's status
+        docente = await toggle_docente_status(cedula)
+        if not docente:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Docente no encontrado"}}), 404
+
+        await add_trazabilidad({
+            "accion": f"Cambiar estado de docente {cedula} a {'activo' if docente.activo else 'inactivo'}",
+            "usuario": usuario,
+            "modulo": "Docentes",
+            "nivel_alerta": 2
+        })
+
+        return jsonify({
+            "ok": True,
+            "status": 200,
+            "data": {
+                "activo": docente.activo,
+                "message": f"Estado del docente actualizado exitosamente"
+            }
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "ok": False,
+            "status": 500,
+            "data": {"message": str(e)}
+        }), 500
 
 @doc.route('/<cedula>')
 @jwt_required()

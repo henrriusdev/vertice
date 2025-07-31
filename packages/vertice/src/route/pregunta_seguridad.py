@@ -18,7 +18,6 @@ async def configurar_pregunta():
         claims = get_jwt()
         correo = claims.get('sub')
         datos = request.json
-        print(datos)
 
         if not isinstance(datos, list) or len(datos) != 3:
             return jsonify({"ok": False, "status": 400, "data": {"message": "Debe proporcionar exactamente 3 preguntas y respuestas"}}), 400

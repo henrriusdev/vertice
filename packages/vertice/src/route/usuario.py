@@ -8,11 +8,47 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from src.model.usuario import Usuario
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import bloquear_usuario, delete_usuario, get_usuarios, login, reactivar_usuario, \
-    update_password, get_usuario_por_correo, registrar_usuario, update_usuario
+    update_password, get_usuario_por_correo, registrar_usuario, update_usuario, toggle_usuario_status
 from src.utils.fecha import now_in_venezuela
 
 usr = Blueprint('usuario_blueprint', __name__)
 
+
+@usr.route('/toggle-status/<cedula>')
+@jwt_required()
+async def toggle_usuario_status_route(cedula: str):
+    try:
+        claims = get_jwt()
+        usuario = await get_usuario_por_correo(claims.get('sub'))
+        
+        # Toggle the usuario's status
+        result = await toggle_usuario_status(cedula)
+        if not result:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
+
+        await add_trazabilidad({
+            "accion": f"Cambiar estado de usuario {cedula} a {'activo' if result.activo else 'inactivo'}",
+            "usuario": usuario,
+            "modulo": "Usuarios",
+            "nivel_alerta": 2
+        })
+
+        return jsonify({
+            "ok": True,
+            "status": 200,
+            "data": {
+                "activo": result.activo,
+                "message": f"Estado del usuario actualizado exitosamente"
+            }
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "ok": False,
+            "status": 500,
+            "data": {"message": str(e)}
+        }), 500
 
 @usr.post('/login')
 async def login_usuario():
@@ -51,7 +87,7 @@ async def login_usuario():
 
         access_token = create_access_token(
             identity=usuario.correo,
-            expires_delta=timedelta(hours=8),
+            expires_delta=timedelta(hours=24),
             additional_claims=claims
         )
 
@@ -316,7 +352,6 @@ async def first_reset_password():
         if not password:
             return jsonify({"ok": False, "status": 400, "data": {"message": "Token y nueva contraseña son requeridos"}}), 400
 
-        print(correo)
         usuario = await get_usuario_por_correo(correo)
         if not usuario:
             return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404

@@ -5,6 +5,7 @@ import {
 	crearUsuario,
 	eliminarDocente,
 	obtenerDocentes,
+	toggleDocenteStatus,
 	type DocenteReq
 } from '$lib';
 import { redirect } from '@sveltejs/kit';
@@ -38,6 +39,35 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 };
 
 export const actions: Actions = {
+	// Acción para cambiar el estado del docente
+	toggleStatus: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const cedula = formData.get('cedula')?.toString() || '';
+
+		try {
+			const docente = await toggleDocenteStatus(fetch, cedula);
+			if (!docente) {
+				return {
+					type: 'failure',
+					message: 'Error al cambiar el estado del docente'
+				};
+			}
+
+			const statusMessage = docente.activo ? 'Docente activado exitosamente' : 'Docente inactivado exitosamente';
+			
+			return {
+				type: 'success',
+				message: statusMessage,
+				invalidate: true
+			};
+		} catch (error) {
+			console.error('Error al cambiar el estado del docente:', error);
+			return { 
+				type: 'failure', 
+				message: error instanceof Error ? error.message : 'Error desconocido' 
+			};
+		}
+	},
 	// Acción para crear un usuario y un docente
 	create: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as DocenteReq & Usuario;

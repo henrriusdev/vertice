@@ -1,4 +1,4 @@
-import { actualizarUsuario, crearUsuario, eliminarUsuario, obtenerUsuarios } from '$lib';
+import { actualizarUsuario, crearUsuario, eliminarUsuario, obtenerUsuarios, toggleUsuarioStatus } from '$lib';
 import { descargarExcel, subirExcelUsuarios } from '$lib/servicios/archivos';
 import type { Usuario } from '../../../../app';
 import type { Actions, PageServerLoad } from './$types';
@@ -14,6 +14,35 @@ export const load: PageServerLoad = async ({ fetch }) => {
 };
 
 export const actions: Actions = {
+	// Acción para cambiar el estado del usuario
+	toggleStatus: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const cedula = formData.get('cedula')?.toString() || '';
+
+		try {
+			const usuario = await toggleUsuarioStatus(fetch, cedula);
+			if (!usuario) {
+				return {
+					type: 'failure',
+					message: 'Error al cambiar el estado del usuario'
+				};
+			}
+
+			const statusMessage = usuario.activo ? 'Usuario activado exitosamente' : 'Usuario inactivado exitosamente';
+			
+			return {
+				type: 'success',
+				message: statusMessage,
+				invalidate: true
+			};
+		} catch (error) {
+			console.error('Error al cambiar el estado del usuario:', error);
+			return { 
+				type: 'failure', 
+				message: error instanceof Error ? error.message : 'Error desconocido' 
+			};
+		}
+	},
 	// Acción para crear un usuario y un usuario
 	create: async ({ request, fetch }) => {
 		const payload = Object.fromEntries(await request.formData()) as unknown as Omit<Usuario, "rol"> & { rol: number };

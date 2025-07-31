@@ -42,7 +42,6 @@ async def add_new():
 @car.route('/update/<int:id>', methods=['PUT'])
 @jwt_required()
 async def update_one(id: int):
-    print(id)
     payload = request.json
     claims = get_jwt()
     usuario = await get_usuario_por_correo(claims.get('sub'))
