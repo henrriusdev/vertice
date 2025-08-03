@@ -20,7 +20,7 @@
 	let creditosObtenidos = $derived(
 		data.historicoMaterias
 			?.filter((materia) => materia.estatus === 'Aprobada')
-			?.reduce((total, materia) => total + (materia.creditos || 0), 0) || 0
+			?.reduce((total, materia) => total + 3, 0) || 0 // Assuming 3 credits per subject as default
 	);
 
 	let materiasAplazadas = $derived(

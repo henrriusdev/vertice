@@ -1,6 +1,12 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { obtenerEstudiantes } from '$lib';
+import { 
+	obtenerEstudiantes,
+	obtenerEstudiantePorCedula, 
+	obtenerMateriasInscritasPorCedula, 
+	obtenerHistoricoMateriasPorCedula,
+	obtenerMateriasDisponibles
+} from '$lib';
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const { rol } = await parent();
@@ -13,25 +19,63 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const cedula = params.estudiante;
 
 	try {
-		// Get all students and find the one with the matching cedula
-		const estudiantes = await obtenerEstudiantes(fetch);
-		const estudiante = estudiantes.find(est => est.cedula === cedula);
+		let estudiante;
+		
+		// Try to get student by cedula, fallback to searching all students
+		try {
+			estudiante = await obtenerEstudiantePorCedula(fetch, cedula);
+		} catch (e) {
+			console.warn('Direct student lookup failed, searching all students:', e);
+			const estudiantes = await obtenerEstudiantes(fetch);
+			estudiante = estudiantes.find(est => est.cedula === cedula);
+			
+			if (!estudiante) {
+				throw error(404, 'Estudiante no encontrado');
+			}
+		}
+		
+		// Get student's academic data with fallbacks
+		let materiasInscritas = [];
+		let historicoMaterias = [];
+		let materiasDisponibles = [];
 
-		if (!estudiante) {
-			throw error(404, 'Estudiante no encontrado');
+		try {
+			materiasInscritas = await obtenerMateriasInscritasPorCedula(fetch, cedula);
+		} catch (e) {
+			console.warn('Error fetching enrolled subjects for student, using empty array:', e);
 		}
 
-		// For now, return basic student data
-		// TODO: Add functions to get student's academic history
+		try {
+			historicoMaterias = await obtenerHistoricoMateriasPorCedula(fetch, cedula);
+		} catch (e) {
+			console.warn('Error fetching academic history for student, using empty array:', e);
+		}
+
+		try {
+			materiasDisponibles = await obtenerMateriasDisponibles(fetch, cedula);
+		} catch (e) {
+			console.warn('Error fetching available subjects for student, using empty array:', e);
+		}
+
+		// Determine if inscription is open based on number of enrolled subjects
+		const inscripcionAbierta = materiasInscritas.length <= 2;
+
 		return {
 			estudiante,
-			materiasInscritas: [], // TODO: fetch student's enrolled subjects
-			historicoMaterias: [], // TODO: fetch student's academic history
-			materiasDisponibles: [], // TODO: fetch available subjects for student
-			inscripcionAbierta: false
+			materiasInscritas,
+			historicoMaterias,
+			materiasDisponibles,
+			inscripcionAbierta
 		};
 	} catch (err) {
 		console.error('Error loading student data:', err);
-		throw error(500, 'Error cargando datos del estudiante');
+		
+		// If it's already an error with status, re-throw
+		if (err.status) {
+			throw err;
+		}
+		
+		// Otherwise create a 404 error
+		throw error(404, 'Estudiante no encontrado');
 	}
 };
