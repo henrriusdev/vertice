@@ -2,10 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { 
 	obtenerEstudiantes,
-	obtenerEstudiantePorCedula, 
-	obtenerMateriasInscritasPorCedula, 
-	obtenerHistoricoMateriasPorCedula,
-	obtenerMateriasDisponibles
+	obtenerEstudiantePorCedula
 } from '$lib';
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
@@ -33,39 +30,9 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 				throw error(404, 'Estudiante no encontrado');
 			}
 		}
-		
-		// Get student's academic data with fallbacks
-		let materiasInscritas = [];
-		let historicoMaterias = [];
-		let materiasDisponibles = [];
-
-		try {
-			materiasInscritas = await obtenerMateriasInscritasPorCedula(fetch, cedula);
-		} catch (e) {
-			console.warn('Error fetching enrolled subjects for student, using empty array:', e);
-		}
-
-		try {
-			historicoMaterias = await obtenerHistoricoMateriasPorCedula(fetch, cedula);
-		} catch (e) {
-			console.warn('Error fetching academic history for student, using empty array:', e);
-		}
-
-		try {
-			materiasDisponibles = await obtenerMateriasDisponibles(fetch, cedula);
-		} catch (e) {
-			console.warn('Error fetching available subjects for student, using empty array:', e);
-		}
-
-		// Determine if inscription is open based on number of enrolled subjects
-		const inscripcionAbierta = materiasInscritas.length <= 2;
 
 		return {
-			estudiante,
-			materiasInscritas,
-			historicoMaterias,
-			materiasDisponibles,
-			inscripcionAbierta
+			estudiante
 		};
 	} catch (err) {
 		console.error('Error loading student data:', err);
