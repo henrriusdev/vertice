@@ -37,7 +37,7 @@
 
 	<div class="grid md:grid-cols-2 gap-6 mb-6">
 		<!-- Student Information -->
-		<Card class="p-6">
+		<Card class="p-6 max-w-full">
 			<h3 class="text-lg font-semibold mb-4">Información Personal</h3>
 			<div class="space-y-3">
 				<div class="flex justify-between">
@@ -72,12 +72,12 @@
 		</Card>
 
 		<!-- Academic Information -->
-		<Card class="p-6">
+		<Card class="p-6 max-w-full">
 			<h3 class="text-lg font-semibold mb-4">Información Académica</h3>
 			<div class="space-y-3">
 				<div class="flex justify-between">
 					<span class="font-medium">Carrera:</span>
-					<span>{data.estudiante.carrera?.nombre || 'N/A'}</span>
+					<span>{data.estudiante.carrera || 'N/A'}</span>
 				</div>
 				<div class="flex justify-between">
 					<span class="font-medium">Semestre:</span>
@@ -85,7 +85,7 @@
 				</div>
 				<div class="flex justify-between">
 					<span class="font-medium">Promedio:</span>
-					<span>{data.estudiante.promedio || 'N/A'}</span>
+					<span>{data.estudiante.promedio}</span>
 				</div>
 				<div class="flex justify-between">
 					<span class="font-medium">Estado:</span>
@@ -102,66 +102,38 @@
 	</div>
 
 	<!-- Academic Information Sections -->
-	<div class="grid gap-6 mb-6">
-		<!-- Current Enrolled Subjects -->
-		<Card class="p-6">
-			<h3 class="text-lg font-semibold mb-4">Materias Inscritas</h3>
-			{#if data.materiasInscritas && data.materiasInscritas.length > 0}
+	<div class="grid gap-6 mb-6 col-span-2">
+		<!-- Student Notes -->
+		<Card class="p-6 max-w-full">
+			<h3 class="text-lg font-semibold mb-4">Notas del Estudiante</h3>
+			{#if data.notasEstudiante && data.notasEstudiante.notas && data.notasEstudiante.notas.length > 0}
+				<div class="mb-4">
+					<p class="text-sm text-gray-600">Ciclo: {data.notasEstudiante.ciclo}</p>
+				</div>
 				<Table>
 					<TableHead>
 						<TableHeadCell>Materia</TableHeadCell>
 						<TableHeadCell>Código</TableHeadCell>
-						<TableHeadCell>Créditos</TableHeadCell>
-						<TableHeadCell>Semestre</TableHeadCell>
+						{#each data.notasEstudiante.notas[0].notas as nota, index}
+							<TableHeadCell>Corte {index + 1}</TableHeadCell>
+						{/each}
+						<TableHeadCell>Promedio</TableHeadCell>
 					</TableHead>
 					<TableBody>
-						{#each data.materiasInscritas as materia}
+						{#each data.notasEstudiante.notas as materia}
 							<TableBodyRow>
-								<TableBodyCell>{materia.nombre}</TableBodyCell>
-								<TableBodyCell>{materia.codigo}</TableBodyCell>
-								<TableBodyCell>{materia.creditos}</TableBodyCell>
-								<TableBodyCell>{materia.semestre}</TableBodyCell>
+								<TableBodyCell>{materia.materia}</TableBodyCell>
+								<TableBodyCell>{materia.id}</TableBodyCell>
+								{#each materia.notas as nota, index}
+									<TableBodyCell>{nota}</TableBodyCell>
+								{/each}
+								<TableBodyCell>{materia.promedio}</TableBodyCell>
 							</TableBodyRow>
 						{/each}
 					</TableBody>
 				</Table>
 			{:else}
-				<p class="text-gray-500">No hay materias inscritas disponibles.</p>
-			{/if}
-		</Card>
-
-		<!-- Academic History -->
-		<Card class="p-6">
-			<h3 class="text-lg font-semibold mb-4">Historial Académico</h3>
-			{#if data.historicoMaterias && data.historicoMaterias.length > 0}
-				<Table>
-					<TableHead>
-						<TableHeadCell>Materia</TableHeadCell>
-						<TableHeadCell>Código</TableHeadCell>
-						<TableHeadCell>Nota Final</TableHeadCell>
-						<TableHeadCell>Estado</TableHeadCell>
-						<TableHeadCell>Período</TableHeadCell>
-					</TableHead>
-					<TableBody>
-						{#each data.historicoMaterias as materia}
-							<TableBodyRow>
-								<TableBodyCell>{materia.nombre}</TableBodyCell>
-								<TableBodyCell>{materia.codigo}</TableBodyCell>
-								<TableBodyCell>{materia.nota_final}</TableBodyCell>
-								<TableBodyCell>
-									{#if materia.nota_final >= 70}
-										<Badge color="green">Aprobado</Badge>
-									{:else}
-										<Badge color="red">Reprobado</Badge>
-									{/if}
-								</TableBodyCell>
-								<TableBodyCell>{materia.periodo || 'N/A'}</TableBodyCell>
-							</TableBodyRow>
-						{/each}
-					</TableBody>
-				</Table>
-			{:else}
-				<p class="text-gray-500">No hay historial académico disponible.</p>
+				<p class="text-gray-500">No hay notas disponibles para este estudiante.</p>
 			{/if}
 		</Card>
 	</div>

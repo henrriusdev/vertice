@@ -112,34 +112,3 @@ async def toggle_coordinador_status(cedula: str):
     except Exception as ex:
         raise Exception(ex)
 
-
-async def calcular_promedio_ponderado_estudiante(cedula: str):
-    try:
-        estudiante = await Estudiante.get(usuario__cedula=cedula).prefetch_related("usuario")
-        config = await Configuracion.get(id=1)
-        porcentajes = config.porcentajes or []
-
-        matriculas = await Matricula.filter(cedula_estudiante=estudiante).prefetch_related("cod_materia")
-        total_uc = 0
-        total_ponderado = 0
-
-        for m in matriculas:
-            notas = m.notas or []
-            uc = m.uc or m.cod_materia.unidad_credito
-
-            if not notas or len(notas) != len(porcentajes):
-                continue  # Saltar si datos incompletos
-
-            promedio = sum(n * (p / 100) for n, p in zip(notas, porcentajes))
-            total_ponderado += promedio * uc
-            total_uc += uc
-
-        promedio_final = round(total_ponderado / total_uc, 2) if total_uc else 0
-
-        estudiante.promedio = promedio_final
-        await estudiante.save()
-
-        return promedio_final
-
-    except Exception as ex:
-        raise Exception(ex)

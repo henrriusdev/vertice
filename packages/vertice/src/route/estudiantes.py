@@ -231,3 +231,11 @@ async def inscribir_materia():
     })
     return jsonify({"ok": True, "status": 200})
 
+@est.route('/notas/<cedula>', methods=['GET'])
+@jwt_required()
+async def obtener_notas_estudiante_route(cedula):
+    claims = get_jwt()
+    usuario = await get_usuario_por_correo(claims.get('sub'))
+    data = await get_notas_estudiante(cedula)
+    await add_trazabilidad({"accion": f"Obtener Notas del Estudiante {cedula}", "usuario": usuario, "modulo": "Estudiante", "nivel_alerta": 1})
+    return jsonify({"ok": True, "status": 200, "data": data})

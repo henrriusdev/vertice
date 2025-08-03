@@ -9,8 +9,7 @@ from src.service.coordinadores import (
     add_coordinador,
     update_coordinador,
     delete_coordinador,
-    toggle_coordinador_status,
-    calcular_promedio_ponderado_estudiante
+    toggle_coordinador_status
 )
 from src.service.estudiantes import get_notas_estudiante
 from src.service.trazabilidad import add_trazabilidad
@@ -86,16 +85,3 @@ async def obtener_notas_estudiante(cedula):
     data = await get_notas_estudiante(cedula)
     await add_trazabilidad({"accion": f"Obtener Notas del Estudiante {cedula}", "usuario": usuario, "modulo": "Estudiante", "nivel_alerta": 1})
     return jsonify({"ok": True, "status": 200, "data": data})
-
-@crd.route('/promedio-ponderado/<cedula_estudiante>', methods=['GET'])
-@jwt_required()
-async def promedio_ponderado(cedula_estudiante):
-    usuario = get_jwt_identity()
-    if usuario != cedula_estudiante:
-        return jsonify({"ok": False, "status": 401, "data": {"message": "No autorizado"}}), 401
-
-    promedio = await calcular_promedio_ponderado_estudiante(cedula_estudiante)
-    if promedio is not None:
-        await add_trazabilidad({"accion": f"Obtener Promedio Ponderado del Estudiante {cedula_estudiante}", "usuario": usuario, "modulo": "Estudiante", "nivel_alerta": 1})
-        return jsonify({"ok": True, "status": 200, "data": {"promedio_ponderado": promedio}})
-    return jsonify({"ok": False, "status": 404, "data": {"message": "No se encontraron notas"}}), 404

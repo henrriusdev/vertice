@@ -65,7 +65,6 @@
 	});
 
 	let docentes: Docente[] = $state(data.docentes);
-	// Filtrar docentes por nombre, cédula o correo
 	let docentesFiltrados = $derived(
 		docentes.filter(
 			(docente) =>

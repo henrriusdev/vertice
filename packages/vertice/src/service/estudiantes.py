@@ -45,9 +45,8 @@ async def get_student(cedula: str):
             "cedula": estudiante.usuario.cedula,
             "nombre": estudiante.usuario.nombre,
             "correo": estudiante.usuario.correo,
-            "telefono": estudiante.usuario.telefono,
             "semestre": estudiante.semestre,
-            "estado": estudiante.usuario.rol.nombre,
+            "activo": estudiante.usuario.activo,
             "carrera": estudiante.carrera.nombre,
             "edad": estudiante.edad,
             "sexo": estudiante.sexo,
@@ -172,8 +171,9 @@ async def get_notas_estudiante(cedula_estudiante: str):
 
 async def get_historico(cedula_estudiante: str):
     try:
-        estudiante = await Estudiante.get(usuario__cedula=cedula_estudiante)
-        matriculas = await Matricula.filter(cedula_estudiante=estudiante).prefetch_related("cod_materia", "cod_materia__id_docente__usuario")
+        print(cedula_estudiante)
+        matriculas = await Matricula.filter(cedula_estudiante__usuario__cedula=cedula_estudiante).prefetch_related("cod_materia", "cod_materia__id_docente__usuario")
+        print(len(matriculas))
 
         historico = []
         for m in matriculas:
@@ -189,9 +189,7 @@ async def get_historico(cedula_estudiante: str):
                 "docente": m.cod_materia.id_docente.usuario.nombre
             })
 
-        return {
-            "notas": historico
-        }
+        return historico
 
     except Exception as ex:
         raise Exception(ex)
@@ -219,10 +217,9 @@ async def get_materias_inscritas(cedula: str):
 async def get_inscritas(cedula: str):
     try:
         ciclo = (await Configuracion.get(id=1)).ciclo
-        estudiante = await Estudiante.get(usuario__cedula=cedula)
 
         matriculas = await Matricula.filter(
-            cedula_estudiante=estudiante,
+            cedula_estudiante__usuario__cedula=cedula,
             ciclo=ciclo
         ).prefetch_related("cod_materia__id_docente__usuario")
 

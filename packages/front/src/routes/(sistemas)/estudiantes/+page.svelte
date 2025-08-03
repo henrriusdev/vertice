@@ -184,7 +184,7 @@
 
 	{#snippet actions(row: Estudiante)}
 		<div class="flex gap-2">
-			{#if data.rol !== 'coordinador' && data.rol !== 'caja'}
+			{#if ["administrador", "coordinador"].includes(data.rol)}
 				<div class="relative">
 					<Button pill size="xs" class="p-1.5!" color="light" onclick={() => editarEstudiante(row)}>
 						<PenOutline class="w-5 h-5" />

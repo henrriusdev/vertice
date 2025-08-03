@@ -85,6 +85,12 @@ export const obtenerHistoricoMateriasPorCedula = async (fetch: typeof window.fet
 	return materias.data?.notas as MateriaHistorico[] || [];
 };
 
+export const obtenerNotasEstudiantePorCedula = async (fetch: typeof window.fetch, cedula: string) => {
+	const res = await fetch(`${API}notas/${cedula}`);
+	const notas = await res.json();
+	return notas.data;
+};
+
 export const inscribirMaterias = async (
 	fetch: typeof window.fetch,
 	payload: { materias: string[] }
