@@ -46,7 +46,7 @@
 		<div class="max-w-4xl mx-auto space-y-8">
 			<h1 class="text-2xl font-bold text-center">Perfil</h1>
 			<!-- Información del Usuario -->
-			<Card class="p-8 shadow-lg max-w-full!">
+			<Card class="p-8 shadow-lg max-w-full! bg-blue-50">
 				<div class="flex flex-col items-center md:flex-row md:items-start gap-12">
 					<!-- Avatar grande -->
 					<div class="flex flex-col items-center gap-6">
@@ -56,11 +56,6 @@
 								size="xl"
 								class="w-40 h-40 ring-4 ring-primary-500 ring-offset-4 ring-offset-white"
 							/>
-							<div
-								class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-sm font-medium rounded-full"
-							>
-								{usuario?.activo ? 'Activo' : 'Inactivo'}
-							</div>
 						</div>
 						<div class="text-center">
 							<h2 class="text-2xl font-bold text-gray-900">{usuario?.nombre}</h2>

@@ -39,18 +39,18 @@
 
     <!-- Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-blue-50 p-4 rounded shadow">
             <p class="text-sm text-gray-500">Estudiantes registrados</p>
             <p class="text-2xl font-bold">{data.totalEstudiantes}</p>
         </div>
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-blue-50 p-4 rounded shadow">
             <p class="text-sm text-gray-500">Recaudado hoy</p>
             <p class="text-2xl font-bold">{data.totalRecaudado.toFixed(2)} Bs.</p>
         </div>
     </div>
 
     <!-- Pagos por tipo (Torta) -->
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-blue-50 p-4 rounded shadow">
         <h2 class="text-lg font-semibold mb-4">Pagos por tipo</h2>
         <Chart
                 options={donutChartOptions}
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Pagos por día (Barras) -->
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-blue-50 p-4 rounded shadow">
         <h2 class="text-lg font-semibold mb-4">Pagos últimos 7 días</h2>
         <Chart
                 options={{

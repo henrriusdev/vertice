@@ -281,9 +281,11 @@
 		activeUrl={rutaActual}
 		class="relative z-40 h-screen transition-all duration-300 {sidebarOpen
 			? 'w-72 min-w-72'
-			: 'w-16 min-w-16'} border-r border-gray-200 dark:border-gray-700"
+			: 'w-16 min-w-16'} border-r border-gray-200 dark:border-gray-700 bg-blue-50"
+			activeClass="bg-blue-400"
+			nonActiveClass="hover:bg-blue-200 transition-colors duration-300"
 	>
-		<SidebarWrapper class="h-full py-4 overflow-y-auto">
+		<SidebarWrapper class="h-full py-4 overflow-y-auto bg-blue-50">
 			<div class="flex items-center mb-5 pl-2.5 justify-start">
 				{#if sidebarOpen}
 					<span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
@@ -299,14 +301,14 @@
 					{#each elementosNav as item}
 						{#if hasAccess(item.roles, data.rol)}
 							{#if sidebarOpen}
-								<SidebarItem href={item.href} label={item.titulo}>
+								<SidebarItem href={item.href} label={item.titulo} >
 									{#snippet icon()}
 										<item.icono class="w-5 h-5" />
 									{/snippet}
 								</SidebarItem>
 							{:else}
 								<div class="mb-2">
-									<SidebarItem href={item.href} title={item.titulo}>
+									<SidebarItem href={item.href} title={item.titulo} active={item.href === rutaActual}>
 										{#snippet icon()}
 											<item.icono class="w-5 h-5" />
 										{/snippet}
@@ -325,7 +327,7 @@
 					<!-- User profile button that triggers the dropdown -->
 					<div class="relative">
 						<Button
-							color="alternative"
+							color="light"
 							class="flex items-center w-full gap-2 text-sm "
 							onclick={toggleUserDropdown}
 						>
@@ -380,7 +382,7 @@
 	<!-- Content area - flex column with fixed height -->
 	<div class="flex flex-col flex-1 h-screen overflow-hidden">
 		<!-- Navbar - fixed at top -->
-		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0">
+		<Navbar fluid class="w-full border-b border-gray-200 dark:border-gray-700 shrink-0 bg-blue-50">
 			<div class="flex items-center justify-start gap-6 w-full">
 				<Button color="light" class="!p-2" size="xs" onclick={toggleSidebar}>
 					{#if sidebarOpen}
@@ -471,5 +473,8 @@
 	
 	:global(button[type='submit']) {
 		margin-bottom: 0;
+	}
+	:global(aside > div){
+		background-color: #eff6ff;
 	}
 </style>
