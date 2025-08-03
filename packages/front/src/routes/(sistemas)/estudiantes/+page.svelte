@@ -209,10 +209,10 @@
 				</div>
 			{/if}
 			<div class="relative">
-				<Button pill size="xs" class="p-1.5!" color="blue" onclick={() => navigator.clipboard.writeText(row.cedula || '')}>
-					<FileCopyOutline class="w-5 h-5" />
+				<Button pill size="xs" class="p-1.5!" color="blue" onclick={() => window.location.href = `/estudiantes/${row.cedula}`}>
+					<EyeOutline class="w-5 h-5" />
 				</Button>
-				<Tooltip placement="top">Copiar cédula</Tooltip>
+				<Tooltip placement="top">Ver historial académico</Tooltip>
 			</div>
 		</div>
 	{/snippet}
