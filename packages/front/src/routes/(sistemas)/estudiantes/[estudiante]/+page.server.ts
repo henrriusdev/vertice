@@ -2,7 +2,9 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { 
 	obtenerEstudiantes,
-	obtenerEstudiantePorCedula
+	obtenerEstudiantePorCedula,
+	obtenerMateriasInscritasPorCedula,
+	obtenerHistoricoMateriasPorCedula
 } from '$lib';
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
@@ -32,7 +34,9 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 		}
 
 		return {
-			estudiante
+			estudiante,
+			materiasInscritas: await obtenerMateriasInscritasPorCedula(fetch, cedula).catch(() => []),
+			historicoMaterias: await obtenerHistoricoMateriasPorCedula(fetch, cedula).catch(() => [])
 		};
 	} catch (err) {
 		console.error('Error loading student data:', err);

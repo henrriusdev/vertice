@@ -99,6 +99,36 @@ async def listar_horario():
     return jsonify({"ok": True, "status": 200, "data": {"materias": data}})
 
 
+@est.route("/horario/<cedula>", methods=["GET"])
+@jwt_required()
+async def listar_horario_por_cedula(cedula):
+    claims = get_jwt()
+    data = await get_inscritas(cedula)
+
+    await add_trazabilidad({
+        "accion": f"Obtener horario del estudiante con cédula: {cedula}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "modulo": "Estudiantes",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": {"materias": data}})
+
+
+@est.route("/historico/<cedula>", methods=["GET"])
+@jwt_required()
+async def listar_historico_por_cedula(cedula):
+    claims = get_jwt()
+    data = await get_historico(cedula)
+
+    await add_trazabilidad({
+        "accion": f"Obtener histórico del estudiante con cédula: {cedula}",
+        "usuario": await get_usuario_por_correo(claims.get('sub')),
+        "modulo": "Estudiantes",
+        "nivel_alerta": 1
+    })
+    return jsonify({"ok": True, "status": 200, "data": {"notas": data}})
+
+
 
 @est.route('/<cedula>')
 @jwt_required()

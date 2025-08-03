@@ -3,7 +3,13 @@
 		Alert,
 		Badge,
 		Card,
-		Button
+		Button,
+		Table,
+		TableHead,
+		TableHeadCell,
+		TableBody,
+		TableBodyRow,
+		TableBodyCell
 	} from 'flowbite-svelte';
 	import { ArrowLeftOutline } from 'flowbite-svelte-icons';
 	import type { PageData } from './$types';
@@ -95,9 +101,68 @@
 		</Card>
 	</div>
 
-	<!-- Information Notice -->
-	<Alert color="blue" class="mb-4">
-		<span class="font-medium">Nota:</span> La información académica detallada (materias inscritas, histórico académico) 
-		no está disponible en esta vista. Esta funcionalidad requiere endpoints adicionales en el backend.
-	</Alert>
+	<!-- Academic Information Sections -->
+	<div class="grid gap-6 mb-6">
+		<!-- Current Enrolled Subjects -->
+		<Card class="p-6">
+			<h3 class="text-lg font-semibold mb-4">Materias Inscritas</h3>
+			{#if data.materiasInscritas && data.materiasInscritas.length > 0}
+				<Table>
+					<TableHead>
+						<TableHeadCell>Materia</TableHeadCell>
+						<TableHeadCell>Código</TableHeadCell>
+						<TableHeadCell>Créditos</TableHeadCell>
+						<TableHeadCell>Semestre</TableHeadCell>
+					</TableHead>
+					<TableBody>
+						{#each data.materiasInscritas as materia}
+							<TableBodyRow>
+								<TableBodyCell>{materia.nombre}</TableBodyCell>
+								<TableBodyCell>{materia.codigo}</TableBodyCell>
+								<TableBodyCell>{materia.creditos}</TableBodyCell>
+								<TableBodyCell>{materia.semestre}</TableBodyCell>
+							</TableBodyRow>
+						{/each}
+					</TableBody>
+				</Table>
+			{:else}
+				<p class="text-gray-500">No hay materias inscritas disponibles.</p>
+			{/if}
+		</Card>
+
+		<!-- Academic History -->
+		<Card class="p-6">
+			<h3 class="text-lg font-semibold mb-4">Historial Académico</h3>
+			{#if data.historicoMaterias && data.historicoMaterias.length > 0}
+				<Table>
+					<TableHead>
+						<TableHeadCell>Materia</TableHeadCell>
+						<TableHeadCell>Código</TableHeadCell>
+						<TableHeadCell>Nota Final</TableHeadCell>
+						<TableHeadCell>Estado</TableHeadCell>
+						<TableHeadCell>Período</TableHeadCell>
+					</TableHead>
+					<TableBody>
+						{#each data.historicoMaterias as materia}
+							<TableBodyRow>
+								<TableBodyCell>{materia.nombre}</TableBodyCell>
+								<TableBodyCell>{materia.codigo}</TableBodyCell>
+								<TableBodyCell>{materia.nota_final}</TableBodyCell>
+								<TableBodyCell>
+									{#if materia.nota_final >= 70}
+										<Badge color="green">Aprobado</Badge>
+									{:else}
+										<Badge color="red">Reprobado</Badge>
+									{/if}
+								</TableBodyCell>
+								<TableBodyCell>{materia.periodo || 'N/A'}</TableBodyCell>
+							</TableBodyRow>
+						{/each}
+					</TableBody>
+				</Table>
+			{:else}
+				<p class="text-gray-500">No hay historial académico disponible.</p>
+			{/if}
+		</Card>
+	</div>
 </div>

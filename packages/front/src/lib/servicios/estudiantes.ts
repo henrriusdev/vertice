@@ -67,10 +67,22 @@ export const obtenerMateriasInscritas = async (fetch: typeof window.fetch) => {
 	return materias.data.materias as MateriaInscrita[];
 };
 
+export const obtenerMateriasInscritasPorCedula = async (fetch: typeof window.fetch, cedula: string) => {
+	const res = await fetch(`${API}horario/${cedula}`);
+	const materias = await res.json();
+	return materias.data?.materias as MateriaInscrita[] || [];
+};
+
 export const obtenerHistoricoMaterias = async (fetch: typeof window.fetch) => {
 	const res = await fetch(`${API}historico`);
 	const materias = await res.json();
 	return materias.data.notas as MateriaHistorico[];
+};
+
+export const obtenerHistoricoMateriasPorCedula = async (fetch: typeof window.fetch, cedula: string) => {
+	const res = await fetch(`${API}historico/${cedula}`);
+	const materias = await res.json();
+	return materias.data?.notas as MateriaHistorico[] || [];
 };
 
 export const inscribirMaterias = async (
