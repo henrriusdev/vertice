@@ -55,6 +55,7 @@
 			usuariosFiltrados =
 				data?.usuarios.filter(
 					(est) =>
+						est?.cedula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 						est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 						est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
 				) ?? [];
@@ -65,6 +66,7 @@
 	let usuariosFiltrados = $derived(
 		usuarios.filter(
 			(est) =>
+				est?.cedula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				est?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 				est?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
 		) ?? []

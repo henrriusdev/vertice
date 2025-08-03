@@ -142,7 +142,7 @@
 
 	<div class="grid md:grid-cols-6 gap-4 mb-6">
 		<!-- Resumen estadístico -->
-		<Card class="col-span-2 p-4 max-w-full">
+		<Card class="col-span-2 p-4 max-w-full bg-blue-50">
 			<h3 class="text-lg font-semibold mb-4">Resumen Académico</h3>
 
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -170,17 +170,17 @@
 		</Card>
 
 		<!-- Gráfico de promedio por semestre -->
-		<Card class="col-span-4 p-4 max-w-full">
+		<Card class="col-span-4 p-4 max-w-full bg-blue-50">
 			<h3 class="text-lg font-semibold mb-4">Evolución del Promedio</h3>
 			<Chart {options} />
 		</Card>
 		<!-- Materias inscritas -->
-		<Card class="mb-6 p-4 max-w-full {data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'}">
+		<Card class="mb-6 p-4 max-w-full {data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'} bg-blue-50">
 			<h3 class="text-lg font-semibold mb-4">Materias Inscritas</h3>
 
 			{#if data.materiasInscritas.length > 0}
-				<Table striped={true}>
-					<TableHead>
+				<Table color="secondary" striped={true}>
+					<TableHead class="text-black font-extrabold">
 						<TableHeadCell>Materia</TableHeadCell>
 						<TableHeadCell>Código</TableHeadCell>
 						<TableHeadCell>Docente</TableHeadCell>
@@ -205,7 +205,7 @@
 										class="space-y-6"
 									>
 										<Button
-											color="primary"
+											color="light"
 											class="p-2! grid place-content-center"
 											pill
 											type="submit"
@@ -243,11 +243,11 @@
 
 		<!-- Histórico de materias -->
 		{#if data.historicoMaterias.length > 0}
-			<Card class="{data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'} max-w-full p-4">
+			<Card class="{data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'} max-w-full p-4 bg-blue-50">
 				<h3 class="text-lg font-semibold mb-4">Histórico de Materias</h3>
 
-				<Table striped={true} hoverable={true}>
-					<TableHead>
+				<Table color="secondary" striped={true}>
+					<TableHead class="text-black font-extrabold">
 						<TableHeadCell>Materia</TableHeadCell>
 						<TableHeadCell>Ciclo</TableHeadCell>
 						<TableHeadCell>Docente</TableHeadCell>
@@ -279,11 +279,11 @@
 
 		<!-- Materias disponibles -->
 		{#if data.materiasDisponibles.length > 0}
-		<Card class="col-span-2 max-w-full p-4">
+		<Card class="col-span-2 max-w-full p-4 bg-blue-50">
 			<h3 class="text-lg font-semibold mb-4">Materias Disponibles</h3>
 			
-				<Table striped={true} hoverable={true}>
-					<TableHead>
+				<Table color="secondary" striped={true}>
+					<TableHead class="text-black font-extrabold">
 						<TableHeadCell>Materia</TableHeadCell>
 						<TableHeadCell>Código</TableHeadCell>
 						<TableHeadCell>U. C.</TableHeadCell>

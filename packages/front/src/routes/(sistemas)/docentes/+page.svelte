@@ -3,7 +3,13 @@
 	import { imask } from '@imask/svelte';
 	import { Button, Input, Label, Modal, TableSearch, Datepicker, Tooltip } from 'flowbite-svelte';
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import { CheckOutline, PenOutline, PlusOutline, TrashBinOutline, UsersOutline } from 'flowbite-svelte-icons';
+	import {
+		CheckOutline,
+		PenOutline,
+		PlusOutline,
+		TrashBinOutline,
+		UsersOutline
+	} from 'flowbite-svelte-icons';
 	import type { Docente } from '../../../app';
 	import { resolver } from '$lib/utilidades/resolver';
 	import { enhance } from '$app/forms';
@@ -49,22 +55,24 @@
 		if (data.docentes) {
 			docentesFiltrados =
 				data?.docentes.filter(
-					(est) =>
-						est?.dedicacion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						est?.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-						est.fecha_ingreso.toLowerCase().includes(searchTerm.toLowerCase())
+					(docente) =>
+						docente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						docente?.cedula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						docente?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						docente?.titulo?.toLowerCase().includes(searchTerm.toLowerCase())
 				) ?? [];
 		}
 	});
 
 	let docentes: Docente[] = $state(data.docentes);
-	// Filtrar por carrera si es coordinador
+	// Filtrar docentes por nombre, cédula o correo
 	let docentesFiltrados = $derived(
 		docentes.filter(
-			(est) =>
-				est?.dedicacion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				est?.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				est.fecha_ingreso.toLowerCase().includes(searchTerm.toLowerCase())
+			(docente) =>
+				docente?.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				docente?.cedula?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				docente?.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				docente?.titulo?.toLowerCase().includes(searchTerm.toLowerCase())
 		) ?? []
 	);
 
@@ -102,10 +110,10 @@
 	// Función para abrir el modal de eliminación
 	function confirmarEliminarDocente(docente: Docente) {
 		selectedDocenteForStatus = docente;
-		statusModalTitle = docente.activo ? "Inactivar Docente" : "Activar Docente";
-		statusModalMessage = docente.activo ? 
-			`¿Estás seguro de que deseas inactivar al docente ${docente.nombre}?` : 
-			`¿Estás seguro de que deseas activar al docente ${docente.nombre}?`;
+		statusModalTitle = docente.activo ? 'Inactivar Docente' : 'Activar Docente';
+		statusModalMessage = docente.activo
+			? `¿Estás seguro de que deseas inactivar al docente ${docente.nombre}?`
+			: `¿Estás seguro de que deseas activar al docente ${docente.nombre}?`;
 		statusModalOpen = true;
 	}
 
@@ -142,14 +150,18 @@
 				<Tooltip placement="top">Editar docente</Tooltip>
 			</div>
 			<div class="relative">
-				<Button size="xs" color={row.activo ? "red" : "green"} onclick={() => confirmarEliminarDocente(row)}>
+				<Button
+					size="xs"
+					color={row.activo ? 'red' : 'green'}
+					onclick={() => confirmarEliminarDocente(row)}
+				>
 					{#if row.activo}
 						<UsersOutline class="w-5 h-5" />
 					{:else}
 						<CheckOutline class="w-5 h-5" />
 					{/if}
 				</Button>
-				<Tooltip placement="top">{row.activo ? "Inactivar docente" : "Activar docente"}</Tooltip>
+				<Tooltip placement="top">{row.activo ? 'Inactivar docente' : 'Activar docente'}</Tooltip>
 			</div>
 		</div>
 	{/snippet}

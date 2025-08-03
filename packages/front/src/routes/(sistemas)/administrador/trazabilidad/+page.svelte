@@ -93,7 +93,7 @@
 	<h1 class="text-3xl font-bold mb-6">Trazabilidad del Sistema</h1>
 
 	<!-- Filtros -->
-	<div class="bg-white rounded-lg shadow p-6 mb-6">
+	<div class="bg-blue-50 rounded-lg shadow p-6 mb-6">
 		<h2 class="text-xl font-semibold mb-4">Filtros</h2>
 
 		<form

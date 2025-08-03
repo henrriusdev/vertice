@@ -278,7 +278,7 @@
 					<input
 						type="hidden"
 						name="fecha_nac"
-						value={estudianteActual.fecha_nac ? estudianteActual.fecha_nac.toISOString().split('T')[0] : ''}
+						value={estudianteActual?.fecha_nac ? estudianteActual?.fecha_nac.toISOString().split('T')[0] : ''}
 					/>
 				</div>
 				<div class="md:col-span-2">
