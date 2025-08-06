@@ -294,11 +294,9 @@
 		<SidebarWrapper class="h-full py-4 overflow-y-auto bg-blue-50">
 			<div class="flex items-center mb-5 pl-2.5 justify-start">
 				{#if sidebarOpen}
-					<span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
-						>Vertice</span
-					>
+					<img src="/vertice-logo-full.svg" alt="VÉRTICE" class="h-8 w-auto" />
 				{:else}
-					<span class="text-xl font-semibold dark:text-white">V</span>
+					<img src="/vertice-logo-v.svg" alt="V" class="h-8 w-8" />
 				{/if}
 			</div>
 
