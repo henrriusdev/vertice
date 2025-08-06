@@ -195,3 +195,37 @@ export async function recuperarContrasena(
 
 	return await res.json();
 }
+
+export async function subirFotoPerfil(fetch: typeof window.fetch, file: File): Promise<string> {
+	const formData = new FormData();
+	formData.append('file', file);
+
+	const response = await apiCall(fetch, `${API}upload-photo`, {
+		method: 'POST',
+		body: formData
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error?.data?.message || 'Error al subir la foto');
+	}
+
+	const result = await response.json();
+	return result.data.filename;
+}
+
+export async function eliminarFotoPerfil(fetch: typeof window.fetch): Promise<void> {
+	const response = await apiCall(fetch, `${API}delete-photo`, {
+		method: 'DELETE'
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error?.data?.message || 'Error al eliminar la foto');
+	}
+}
+
+export function obtenerUrlFoto(filename: string | null): string | null {
+	if (!filename) return null;
+	return `${API}photo/${filename}`;
+}

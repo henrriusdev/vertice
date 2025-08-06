@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { PREGUNTAS_SEGURIDAD } from '$lib/servicios/pregunta-seguridad';
+	import { subirFotoPerfil, eliminarFotoPerfil, obtenerUrlFoto } from '$lib/servicios/autenticacion';
 	import { resolver } from '$lib/utilidades/resolver.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import { Avatar, Button, Card, Input, Label, Modal, Select } from 'flowbite-svelte';
-	import { EnvelopeOutline, ShieldCheckOutline } from 'flowbite-svelte-icons';
+	import { Avatar, Button, Card, Input, Label, Modal, Select, Fileupload } from 'flowbite-svelte';
+	import { EnvelopeOutline, ShieldCheckOutline, CameraOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 
 	// Props
 	let { data } = $props();
@@ -14,10 +15,13 @@
 	// Estado
 	let passwordModal = $state(false);
 	let securityQuestionsModal = $state(false);
+	let photoModal = $state(false);
 	let currentPassword = $state('');
 	let newPassword = $state('');
 	let confirmPassword = $state('');
 	let loading = $state(false);
+	let uploadingPhoto = $state(false);
+	let selectedFile: File | null = $state(null);
 
 	// Preguntas de seguridad
 	let securityQuestions = $state([
@@ -30,6 +34,11 @@
 	let isPasswordValid = $derived(newPassword === confirmPassword && newPassword.length > 0);
 	let canSubmitPassword = $derived(isPasswordValid);
 	let canSubmitQuestions = $derived(securityQuestions.every((q) => q.pregunta && q.respuesta));
+	let avatarSrc = $derived(
+		usuario?.foto && obtenerUrlFoto(usuario.foto) 
+			? obtenerUrlFoto(usuario.foto) 
+			: `https://unavatar.io/${usuario?.correo}`
+	);
 
 	const handleSubmit: SubmitFunction = () => {
 		loading = true;
@@ -39,6 +48,51 @@
 			securityQuestionsModal = false;
 		});
 	};
+
+	async function handlePhotoUpload() {
+		if (!selectedFile) return;
+		
+		uploadingPhoto = true;
+		try {
+			const filename = await subirFotoPerfil(fetch, selectedFile);
+			// Update user data locally
+			if (usuario) {
+				usuario.foto = filename;
+			}
+			photoModal = false;
+			selectedFile = null;
+		} catch (error) {
+			console.error('Error uploading photo:', error);
+			alert('Error al subir la foto');
+		} finally {
+			uploadingPhoto = false;
+		}
+	}
+
+	async function handlePhotoDelete() {
+		if (!usuario?.foto) return;
+		
+		uploadingPhoto = true;
+		try {
+			await eliminarFotoPerfil(fetch);
+			// Update user data locally
+			if (usuario) {
+				usuario.foto = null;
+			}
+		} catch (error) {
+			console.error('Error deleting photo:', error);
+			alert('Error al eliminar la foto');
+		} finally {
+			uploadingPhoto = false;
+		}
+	}
+
+	function onFileSelected(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (input.files && input.files[0]) {
+			selectedFile = input.files[0];
+		}
+	}
 </script>
 
 <div class="h-full bg-gray-50">
@@ -52,10 +106,32 @@
 					<div class="flex flex-col items-center gap-6">
 						<div class="relative">
 							<Avatar
-								src={`https://unavatar.io/${usuario?.correo}`}
+								src={avatarSrc}
 								size="xl"
 								class="w-40 h-40 ring-4 ring-primary-500 ring-offset-4 ring-offset-white"
 							/>
+							<div class="absolute bottom-2 right-2 flex gap-2">
+								<Button 
+									size="xs" 
+									pill 
+									color="primary"
+									onclick={() => (photoModal = true)}
+									disabled={uploadingPhoto}
+								>
+									<CameraOutline class="w-4 h-4" />
+								</Button>
+								{#if usuario?.foto}
+									<Button 
+										size="xs" 
+										pill 
+										color="red"
+										onclick={handlePhotoDelete}
+										disabled={uploadingPhoto}
+									>
+										<TrashBinOutline class="w-4 h-4" />
+									</Button>
+								{/if}
+							</div>
 						</div>
 						<div class="text-center">
 							<h2 class="text-2xl font-bold text-gray-900">{usuario?.nombre}</h2>
@@ -208,6 +284,50 @@
 						</div>
 					</div>
 				</form>
+			</Modal>
+
+			<!-- Modal de foto de perfil -->
+			<Modal bind:open={photoModal} size="md" autoclose={false}>
+				<div class="space-y-6">
+					<h3 class="text-xl font-medium">Actualizar Foto de Perfil</h3>
+					
+					<div class="space-y-4">
+						<div>
+							<Label for="photo-upload" class="mb-2">Seleccionar imagen</Label>
+							<Fileupload
+								id="photo-upload"
+								accept="image/*"
+								onchange={onFileSelected}
+								class="w-full"
+							/>
+							<p class="text-sm text-gray-500 mt-1">
+								Formatos permitidos: PNG, JPG, JPEG, GIF. Tamaño máximo: 5MB
+							</p>
+						</div>
+						
+						{#if selectedFile}
+							<div class="text-sm text-gray-700">
+								Archivo seleccionado: {selectedFile.name}
+							</div>
+						{/if}
+					</div>
+
+					<div class="flex justify-end gap-4">
+						<Button color="alternative" onclick={() => {
+							photoModal = false;
+							selectedFile = null;
+						}}>
+							Cancelar
+						</Button>
+						<Button 
+							color="primary" 
+							onclick={handlePhotoUpload}
+							disabled={!selectedFile || uploadingPhoto}
+						>
+							{uploadingPhoto ? 'Subiendo...' : 'Subir Foto'}
+						</Button>
+					</div>
+				</div>
 			</Modal>
 		</div>
 	</div>

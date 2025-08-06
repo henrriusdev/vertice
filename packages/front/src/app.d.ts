@@ -119,6 +119,7 @@ export type Usuario = {
 	cedula: string;
 	nombre: string;
 	correo: string;
+	foto?: string | null;
 	activo: boolean;
 	fecha_creacion: string;
 	cambiar_clave: boolean;
