@@ -134,7 +134,13 @@
 			titulo: 'Materias',
 			icono: ListOutline,
 			href: '/materias',
-			roles: ['administrador', 'coordinador', 'control']
+			roles: ['administrador', 'control']
+		},
+		{
+			titulo: 'Gestión de Materias',
+			icono: ListOutline,
+			href: '/coordinador/materias',
+			roles: ['coordinador']
 		},
 		{
 			titulo: 'Usuarios',
