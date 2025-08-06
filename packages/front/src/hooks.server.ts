@@ -29,8 +29,32 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (token) {
 		try {
-			const usuario = await refresh(event.fetch, token);
-			event.locals.usuario = usuario;
+			// Call refresh endpoint to extend session and get updated token
+			const response = await event.fetch(`http://127.0.0.1:8000/api/usuario/refresh`, {
+				method: 'GET',
+				headers: {
+					Authorization: token
+				}
+			});
+
+			if (response.ok) {
+				const json = await response.json();
+				const usuario = json.data.usuario;
+				event.locals.usuario = usuario;
+
+				// Update cookie with new token if provided (sliding window)
+				if (json.data.access_token) {
+					event.cookies.set('sesion', json.data.access_token, {
+						path: '/',
+						httpOnly: true,
+						sameSite: 'lax',
+						secure: false, // true en producción
+						maxAge: 60 * 60 * 24 * 7 // 7 days to match JWT expiration
+					});
+				}
+			} else {
+				event.locals.usuario = null;
+			}
 
 		} catch {
 			event.locals.usuario = null;

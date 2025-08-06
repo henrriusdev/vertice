@@ -102,7 +102,7 @@ async def login_usuario():
 
         access_token = create_access_token(
             identity=usuario.correo,
-            expires_delta=timedelta(hours=24),
+            expires_delta=timedelta(days=7),  # Extended to 7 days instead of 24 hours
             additional_claims=claims
         )
 
@@ -147,7 +147,27 @@ async def refresh_usuario():
         if not usuario:
             return jsonify({"ok": False, "status": 401, "data": {"message": "No autorizado"}}), 401
 
-        return jsonify({"ok": True, "status": 200, "data": usuario.to_dict()})
+        # Sliding window: Create new token to extend session on activity
+        claims = {
+            'sub': usuario.correo,
+            'rol': usuario.rol.nombre,
+            'nombre': usuario.nombre
+        }
+        
+        new_token = create_access_token(
+            identity=usuario.correo,
+            expires_delta=timedelta(days=7),  # Reset expiration to 7 days from now
+            additional_claims=claims
+        )
+
+        return jsonify({
+            "ok": True, 
+            "status": 200, 
+            "data": {
+                "usuario": usuario.to_dict(),
+                "access_token": f"Bearer {new_token}"  # Return new token for sliding window
+            }
+        })
 
     except Exception as ex:
         traceback.print_exc()

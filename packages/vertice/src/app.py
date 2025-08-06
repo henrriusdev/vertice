@@ -12,6 +12,10 @@ def create_app():
     app.config['SECRET_KEY'] = settings.SECRET_KEY
     app.config['JWT_SECRET_KEY'] = settings.JWT_SECRET_KEY
     
+    # JWT Configuration for better session management
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # Disable automatic expiration to handle it manually
+    app.config['JWT_ALGORITHM'] = 'HS256'
+    
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     JWTManager(app)
 

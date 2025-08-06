@@ -29,7 +29,7 @@ export const actions = {
                                 httpOnly: true,
                                 sameSite: 'lax',
                                 secure: false, // true en producción
-                                maxAge: 60 * 60 * 24 // 24h
+                                maxAge: 60 * 60 * 24 * 7 // 7 days to match JWT expiration
                         });
 
 			destino = `/${usuario.rol.nombre.toLowerCase()}`;
