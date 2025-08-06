@@ -30,14 +30,14 @@
 	);
 
 	let materiasAplazadas = $derived(
-		data?.historicoMaterias.filter((materia) => materia.estatus === 'Reprobada').length || 0
+		data?.historicoMaterias?.filter((materia) => materia.estatus === 'Reprobada')?.length || 0
 	);
 
 	let promedioGeneral = $derived(
 		data.historicoMaterias
 			?.filter((materia) => materia.estatus === 'Aprobada')
 			?.reduce((sum, materia) => sum + materia.nota_final, 0) /
-			data.historicoMaterias.filter((materia) => materia.estatus === 'Aprobada').length || 0
+			data.historicoMaterias?.filter((materia) => materia.estatus === 'Aprobada')?.length || 0
 	);
 
 	// Preparar datos para el gráfico
@@ -242,7 +242,7 @@
 		</Card>
 
 		<!-- Histórico de materias -->
-		{#if data.historicoMaterias.length > 0}
+		{#if data.historicoMaterias?.length > 0}
 			<Card class="{data.materiasDisponibles.length > 0 ? 'col-span-2' : 'col-span-3'} max-w-full p-4 bg-blue-50">
 				<h3 class="text-lg font-semibold mb-4">Histórico de Materias</h3>
 
