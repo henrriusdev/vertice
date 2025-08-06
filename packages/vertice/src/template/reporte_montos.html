@@ -15,9 +15,30 @@
       margin-bottom: 30px;
     }
 
+    .institution-header {
+      margin-bottom: 20px;
+    }
+
+    .institution-name {
+      color: #1e3a8a;
+      font-size: 28px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .institution-subtitle {
+      color: #666;
+      font-size: 14px;
+      margin: 0 0 20px 0;
+      font-style: italic;
+    }
+
     .title {
       font-size: 24px;
       color: #0b5394;
+      margin: 0 0 10px 0;
     }
 
     .info {
@@ -55,7 +76,11 @@
 <body>
 
   <div class="header">
-    <h1 class="title">Resumen de Montos por Método de Pago</h1>
+    <div class="institution-header">
+      <h1 class="institution-name">INSTITUTO VERTICE</h1>
+      <p class="institution-subtitle">Instituto Universitario de Tecnología</p>
+    </div>
+    <h2 class="title">Resumen de Montos por Método de Pago</h2>
     <div class="info">
       Generado por: <strong>{{ usuario }}</strong><br>
       Fecha del reporte: {{ fecha_actual }}<br>
