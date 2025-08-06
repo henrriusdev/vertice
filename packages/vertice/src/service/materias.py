@@ -227,7 +227,8 @@ async def get_materia(id: str):
                 "id": materia.id,
                 "nombre": materia.nombre,
                 "estudiantes": [],
-                "carrera": materia.id_carrera.nombre
+                "carrera": materia.id_carrera.nombre,
+                "activo": materia.activo
             }
         }
 

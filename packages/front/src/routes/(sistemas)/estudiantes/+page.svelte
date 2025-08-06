@@ -93,10 +93,24 @@
 
 	// Función para abrir el modal en modo edición
 	function editarEstudiante(estudiante: any) {
+		let fechaNacimiento: Date;
+		if (estudiante.fecha_nacimiento) {
+			// Try to parse DD/MM/YYYY format first
+			if (estudiante.fecha_nacimiento.includes('/')) {
+				const [day, month, year] = estudiante.fecha_nacimiento.split('/');
+				fechaNacimiento = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+			} else {
+				// Fallback to regular Date parsing
+				fechaNacimiento = new Date(estudiante.fecha_nacimiento);
+			}
+		} else {
+			fechaNacimiento = new Date();
+		}
+
 		estudianteActual = {
 			...estudiante,
 			carrera: data.carreras.find((car) => car.nombre === estudiante.carrera)?.id || 1,
-			fecha_nac: new Date(estudiante.fecha_nacimiento),
+			fecha_nac: fechaNacimiento,
 			fecha_nacimiento: undefined
 		};
 		isEditing = true;
@@ -335,7 +349,8 @@
 					<input
 						type="hidden"
 						name="fecha_nac"
-						value={estudianteActual?.fecha_nac ? estudianteActual?.fecha_nac.toISOString().split('T')[0] : ''}
+						value={(estudianteActual?.fecha_nac as Date | undefined)?.toISOString().split('T')[0] ??
+							''}
 					/>
 				</div>
 				<div class="md:col-span-2">
@@ -416,12 +431,6 @@
 						rows={3}
 					/>
 				</div>
-				{#if isEditing}
-					<div class="flex items-center">
-						<Checkbox id="activo" name="activo" checked={estudianteActual?.activo} />
-						<Label for="activo" class="ml-2">Usuario Activo</Label>
-					</div>
-				{/if}
 			</div>
 		</form>
 		{#snippet footer()}

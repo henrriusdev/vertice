@@ -1,14 +1,14 @@
 import {
-	crearMateria,
 	actualizarMateria,
-	eliminarMateria,
-	obtenerMaterias,
+	crearMateria,
 	obtenerCarreras,
 	obtenerDocentes,
+	obtenerMaterias,
+	toggleMateriaStatus
 } from '$lib';
+import type { MateriaReq } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import type { MateriaReq } from '$lib/types';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	const parentData = await parent();
@@ -42,6 +42,36 @@ export const load: PageServerLoad = async ({ fetch, parent }) => {
 };
 
 export const actions: Actions = {
+	toggleStatus: async ({ request, fetch }) => {
+		const formData = await request.formData();
+		const id = formData.get('id') as string;
+		
+		try {
+			const response = await toggleMateriaStatus(fetch, id);
+			
+			if (response.ok) {
+				const data = await response.json();
+				return {
+					type: 'success',
+					message: 'Estado de la materia actualizado exitosamente',
+					activo: data.data.activo
+				};
+			}
+			
+			const error = await response.json();
+			return {
+				type: 'failure',
+				message: error.data.message || 'Error al actualizar el estado de la materia'
+			};
+		} catch (error) {
+			console.error('Error en toggleStatus:', error);
+			return {
+				type: 'failure',
+				message: 'Error al actualizar el estado de la materia'
+			};
+		}
+	},
+	
 	create: async ({ request, fetch }) => {
 		const form = await request.formData();
 		// Helper function for safe number conversion
@@ -151,43 +181,6 @@ export const actions: Actions = {
 			return { type: 'failure', message: error instanceof Error ? error.message : 'Error desconocido' };
 		}
 	},
-
-	// Toggle active/inactive status
-	toggleStatus: async ({ request, fetch }) => {
-		const formData = await request.formData();
-		const id = formData.get('id')?.toString() || '';
-		const activo = formData.get('activo') === 'true';
-
-		try {
-			// Get current materia data and toggle active status
-			const materiasData = await obtenerMaterias(fetch);
-			const materia = materiasData.materias.find(m => m.id === id);
-			
-			if (!materia) {
-				return {
-					type: 'failure',
-					message: 'Materia no encontrada'
-				};
-			}
-
-			const payload = {
-				...materia,
-				activo: !activo,
-				id_carrera: materia.id_carrera.toString(),
-				id_docente: materia.id_docente.toString()
-			};
-
-			await actualizarMateria(fetch, id, payload);
-			return {
-				type: 'success',
-				message: `Materia ${!activo ? 'activada' : 'inactivada'} exitosamente`,
-				invalidate: true
-			};
-		} catch (error) {
-			console.error('Error al cambiar estado de materia:', error);
-			return { type: 'failure', message: error instanceof Error ? error.message : 'Error desconocido' };
-		}
-	}
 };
 
 async function validarConflictosHorario(

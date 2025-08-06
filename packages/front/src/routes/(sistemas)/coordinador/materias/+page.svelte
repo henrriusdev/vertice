@@ -55,6 +55,8 @@
 	let showModal = $state(false);
 	let editMode = $state(false);
 	let filtroSemestre = $state(1);
+	let toggleOutForm: HTMLFormElement | null = $state(null);
+	let toggleForm: HTMLFormElement | null = $state(null);
 
 	// Opciones de prelación calculadas dinámicamente
 	let opcionesPrelacion: { value: string; name: string }[] = $state([]);
@@ -132,7 +134,10 @@
 		}
 	}
 
-	function toggleMateriaStatus(materia: Materia) {
+	const toggleMateriaStatus: SubmitFunction = () => {
+		return resolver(() => {
+			
+		})
 		// Create a form element and submit it
 		const formData = new FormData();
 		formData.set('id', materia.id);
@@ -151,6 +156,8 @@
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => (showModal = false));
 	};
+
+	
 
 	$effect(() => {
 		if (form.semestre === 1) {
@@ -230,7 +237,7 @@
 								class="p-2!"
 								size="xs"
 								color={materia.activo ? 'red' : 'green'}
-								onclick={() => toggleMateriaStatus(materia)}
+								onclick={() => toggleOutForm.requestSubmit()}
 							>
 								{#if materia.activo}
 									<EyeSlashOutline class="w-4 h-4" />
@@ -241,6 +248,10 @@
 							<Tooltip placement="top">
 								{materia.activo ? 'Inactivar' : 'Activar'}
 							</Tooltip>
+							<form use:enhance={toggleMateriaStatus} action="?/toggleStatus" method="POST" bind:this={toggleOutForm}>
+								<input type="hidden" name="id" value={materia.id} />
+								<input type="hidden" name="activo" value={materia.activo.toString()} />
+							</form>
 						</div>
 					</div>
 				</div>
@@ -381,13 +392,17 @@
 						onclick={() => {
 							const materia = data.materias.find((m) => m.id === form.id);
 							if (materia) {
-								toggleMateriaStatus(materia);
+								toggleForm.requestSubmit();
 								showModal = false;
 							}
 						}}
 					>
 					{form.activo ? 'Inactivar' : 'Activar'}
 				</Button>
+				<form use:enhance={toggleMateriaStatus} action="?/toggleStatus" method="POST" class="hidden" bind:this={toggleForm}>
+					<input type="hidden" name="id" bind:value={form.id} />
+					<input type="hidden" name="activo" value={form.activo.toString()} />
+				</form>
 				<Button color="light" onclick={() => goto(`/materias/${form.id}`)}>Ver notas</Button>
 				{/if}
 			</div>

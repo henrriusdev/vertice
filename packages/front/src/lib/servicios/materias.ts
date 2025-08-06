@@ -97,3 +97,13 @@ export const actualizarNota = async (
 	});
 	return res;
 };
+
+export const toggleMateriaStatus = async (
+	fetch: typeof window.fetch,
+	id: string
+) => {
+	const res = await fetch(`${API}toggle-status/${id}`, {
+		method: 'PUT'
+	});
+	return res;
+};

@@ -25,7 +25,6 @@ type ErroresEstudiante = {
 	promedio?: string;
 	direccion?: string;
 	password?: string;
-	activo?: string;
 };
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
@@ -127,7 +126,6 @@ export const actions: Actions = {
 		const usuario: Partial<Usuario & { rol_id: number }> = {
 			cedula: payload.cedula,
 			correo: payload.correo,
-			activo: true,
 			nombre: payload.nombre,
 			rol_id: 5
 		};
@@ -234,8 +232,6 @@ function validarPayload(payload: Record<string, string | number | boolean>, isEd
 		'promedio',
 		'direccion'
 	];
-
-	if (isEditing) camposBase.push('activo');
 
 	for (const campo of camposBase) {
 		const valor = payload[campo];

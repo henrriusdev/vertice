@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 
 from src.service.materias import (
     get_materias, get_materia, get_materias_validas,
-    add_materia, modificar_materia_estudiante, update_materia, delete_materia
+    add_materia, modificar_materia_estudiante, update_materia, delete_materia, Materia
 )
 from src.service.trazabilidad import add_trazabilidad
 from src.service.usuarios import get_usuario_por_correo
@@ -99,6 +99,30 @@ async def eliminar_materia(id):
         await delete_materia(id)
         await add_trazabilidad({"accion": f"Eliminar Materia {id}", "usuario": usuario, "modulo": "Materias", "nivel_alerta": 3})
         return jsonify({"ok": True, "status": 200})
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+@mat.route('/toggle-status/<id>', methods=['PUT'])
+@jwt_required()
+async def toggle_materia_status(id):
+    usuario = await get_usuario_por_correo(get_jwt().get('sub'))
+    try:
+        materia = await get_materia(id)
+        if not materia:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Materia no encontrada"}}), 404
+            
+        # Toggle the activo status
+        await Materia.filter(id=id).update(activo=not materia["materia"]["activo"])
+        
+        await add_trazabilidad({
+            "accion": f"Cambiar estado de materia {id}",
+            "usuario": usuario,
+            "modulo": "Materias",
+            "nivel_alerta": 2
+        })
+        
+        return jsonify({"ok": True, "status": 200, "data": {"activo": not materia["materia"]["activo"]}})
     except Exception as ex:
         traceback.print_exc()
         return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
