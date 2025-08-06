@@ -4,7 +4,8 @@
 
 	let {
 		materias: mats = [],
-		docente = false
+		docente = false,
+		onMateriaDoubleClick = undefined
 	}: {
 		materias: {
 			id: string;
@@ -16,6 +17,7 @@
 			conflicto?: boolean;
 		}[];
 		docente: boolean;
+		onMateriaDoubleClick?: (materia: any) => void;
 	} = $props();
 
 	const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -169,6 +171,10 @@
 					<div
 						class="absolute px-1 py-1"
 						style="top: {pos.top}; height: {pos.height}; left: {pos.left}; width: {pos.width};"
+						ondblclick={() => onMateriaDoubleClick?.(materia)}
+						role="button"
+						tabindex="0"
+						onkeydown={(e) => e.key === 'Enter' && onMateriaDoubleClick?.(materia)}
 					>
 						<Card
 							padding="sm"
