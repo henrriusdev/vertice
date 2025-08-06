@@ -399,7 +399,7 @@
 		<div class="flex justify-between items-center w-full">
 			<div>
 				<Button type="button" color="alternative" onclick={() => (showModal = false)}
-					>Cancellar
+					>Cancelar
 				</Button>
 				<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
 					>{editMode ? 'Actualizar' : 'Guardar'}</Button

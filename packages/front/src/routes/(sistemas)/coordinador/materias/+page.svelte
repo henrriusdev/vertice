@@ -14,6 +14,7 @@
 	} from 'flowbite-svelte-icons';
 	import type { Horario, Materia } from '../../../app';
 	import type { PageData } from './$types';
+	import { goto } from '$app/navigation';
 
 	interface Form {
 		id: string;
@@ -54,34 +55,44 @@
 	let showModal = $state(false);
 	let editMode = $state(false);
 	let filtroSemestre = $state(1);
-	let selectedMateria: Materia | null = $state(null);
 
 	// Opciones de prelación calculadas dinámicamente
 	let opcionesPrelacion: { value: string; name: string }[] = $state([]);
 
-	// Filter materias by semester
+	// Filter materias by semester and expand each horario into a separate entry
 	const materiasFiltradas = $derived(
 		data.materias
-			.filter(mat => mat.semestre === filtroSemestre)
-			.map(mat => ({
-				id: mat.id,
-				nombre: mat.nombre,
-				dia: mat.horarios[0]?.dia || 'Lunes',
-				hora_inicio: mat.horarios[0]?.hora_inicio || '08:00',
-				hora_fin: mat.horarios[0]?.hora_fin || '10:00',
-				color: mat.activo === false ? 'gray' : undefined,
-				conflicto: false,
-				activo: mat.activo
-			}))
+			.filter((mat) => mat.semestre === filtroSemestre)
+			.flatMap((mat) => {
+				// If materia has no horarios, don't show it in the grid
+				if (!mat.horarios || mat.horarios.length === 0) {
+					return [];
+				}
+
+				// Create an entry for each horario
+				return mat.horarios.map((horario, index) => ({
+					id: mat.id, // Use original materia ID for color consistency
+					uniqueId: `${mat.id}-${index}`, // Unique ID for each horario entry
+					materiaId: mat.id, // Original materia ID for reference
+					nombre: mat.nombre,
+					dia: horario.dia as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado',
+					hora_inicio: horario.hora_inicio,
+					hora_fin: horario.hora_fin,
+					color: mat.activo === false ? 'gray' : undefined,
+					conflicto: false,
+					activo: mat.activo,
+					materia: mat // Keep reference to full materia object
+				}));
+			})
 	);
 
 	function openModal(materia: Materia | null = null) {
 		if (materia) {
-			form = { 
-				...materia, 
+			form = {
+				...materia,
 				id_carrera: materia.id_carrera.toString(),
 				id_docente: materia.id_docente.toString(),
-				prelacion: materia.prelacion ? materia.prelacion.split(',').map(p => p.trim()) : []
+				prelacion: materia.prelacion ? materia.prelacion.split(',').map((p) => p.trim()) : []
 			};
 			editMode = true;
 		} else {
@@ -114,23 +125,23 @@
 	}
 
 	function handleMateriaDoubleClick(materia: any) {
-		const fullMateria = data.materias.find(m => m.id === materia.id);
+		// Use materiaId to find the original materia, or use the materia reference if available
+		const fullMateria = data.materias.find((m) => m.id === materia.materiaId);
 		if (fullMateria) {
 			openModal(fullMateria);
 		}
 	}
 
 	function toggleMateriaStatus(materia: Materia) {
-		selectedMateria = materia;
 		// Create a form element and submit it
 		const formData = new FormData();
 		formData.set('id', materia.id);
 		formData.set('activo', materia.activo.toString());
-		
+
 		fetch('?/toggleStatus', {
 			method: 'POST',
 			body: formData
-		}).then(response => {
+		}).then((response) => {
 			if (response.ok) {
 				window.location.reload();
 			}
@@ -156,7 +167,7 @@
 
 <div class="container mx-auto p-4">
 	<div class="flex justify-between items-center mb-4">
-		<h1 class="text-2xl font-bold">Gestión de Materias por Coordinador</h1>
+		<h1 class="text-2xl font-bold">Gestión de Materias</h1>
 		<div class="flex gap-2 items-center">
 			<div class="flex items-center gap-2">
 				<Label for="semestre">Semestre:</Label>
@@ -178,23 +189,19 @@
 
 	<div class="mb-4">
 		<p class="text-sm text-gray-600">
-			Materias del semestre {filtroSemestre}: {materiasFiltradas.length} 
+			Materias del semestre {filtroSemestre}: {materiasFiltradas.length}
 			| Haga doble clic en una materia para editarla
 		</p>
 	</div>
 
 	<!-- Enhanced GrillaHorario with double-click functionality -->
 	<div class="relative">
-		<GrillaHorario 
-			materias={materiasFiltradas} 
-			docente={false}
-			onMateriaDoubleClick={handleMateriaDoubleClick}
-		/>
+		<GrillaHorario materias={materiasFiltradas} onMateriaDoubleClick={handleMateriaDoubleClick} />
 	</div>
 
 	<!-- Action buttons for quick access -->
 	<div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-		{#each data.materias.filter(m => m.semestre === filtroSemestre) as materia}
+		{#each data.materias.filter((m) => m.semestre === filtroSemestre) as materia}
 			<div class="bg-white rounded-lg shadow p-4 border {!materia.activo ? 'opacity-50' : ''}">
 				<div class="flex justify-between items-start">
 					<div class="flex-1">
@@ -206,11 +213,11 @@
 					</div>
 					<div class="flex gap-1">
 						<div class="relative">
-							<Button 
-								pill 
-								class="p-2!" 
-								size="xs" 
-								color="primary" 
+							<Button
+								pill
+								class="p-2!"
+								size="xs"
+								color="primary"
 								onclick={() => openModal(materia)}
 							>
 								<PenOutline class="w-4 h-4" />
@@ -218,10 +225,10 @@
 							<Tooltip placement="top">Editar</Tooltip>
 						</div>
 						<div class="relative">
-							<Button 
-								pill 
-								class="p-2!" 
-								size="xs" 
+							<Button
+								pill
+								class="p-2!"
+								size="xs"
 								color={materia.activo ? 'red' : 'green'}
 								onclick={() => toggleMateriaStatus(materia)}
 							>
@@ -247,21 +254,6 @@
 	{#snippet header()}
 		<div class="flex justify-between items-center w-full">
 			<span>{editMode ? 'Editar Materia' : 'Crear Materia'}</span>
-			{#if editMode}
-				<Button 
-					color={form.activo ? 'red' : 'green'}
-					size="sm"
-					onclick={() => {
-						const materia = data.materias.find(m => m.id === form.id);
-						if (materia) {
-							toggleMateriaStatus(materia);
-							showModal = false;
-						}
-					}}
-				>
-					{form.activo ? 'Inactivar' : 'Activar'}
-				</Button>
-			{/if}
 		</div>
 	{/snippet}
 	<form
@@ -317,7 +309,7 @@
 					bind:value={form.id_carrera}
 					class="select"
 					required
-					items={data.carreras.map((c) => ({ value: c.id, name: c.nombre }))}
+					items={data.carreras.map((c) => ({ value: c.id.toString(), name: c.nombre }))}
 					placeholder="Seleccione"
 				></Select>
 				<Input type="hidden" name="id_carrera" bind:value={form.id_carrera} />
@@ -330,7 +322,7 @@
 					placeholder="Seleccione"
 					bind:value={form.id_docente}
 					class="select"
-					items={data.docentes.map((d) => ({ value: d.id, name: d.nombre }))}
+					items={data.docentes.map((d) => ({ value: d.id.toString(), name: d.nombre }))}
 				></Select>
 				<input type="hidden" name="id_docente" bind:value={form.id_docente} />
 			</div>
@@ -383,6 +375,21 @@
 				<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
 					>{editMode ? 'Actualizar' : 'Guardar'}</Button
 				>
+				{#if editMode}
+					<Button
+						color={form.activo ? 'red' : 'green'}
+						onclick={() => {
+							const materia = data.materias.find((m) => m.id === form.id);
+							if (materia) {
+								toggleMateriaStatus(materia);
+								showModal = false;
+							}
+						}}
+					>
+					{form.activo ? 'Inactivar' : 'Activar'}
+				</Button>
+				<Button color="light" onclick={() => goto(`/materias/${form.id}`)}>Ver notas</Button>
+				{/if}
 			</div>
 			<ToastContainer />
 		</div>

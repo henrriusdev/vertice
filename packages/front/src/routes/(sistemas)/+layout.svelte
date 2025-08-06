@@ -287,16 +287,16 @@
 		activeUrl={rutaActual}
 		class="relative z-40 h-screen transition-all duration-300 {sidebarOpen
 			? 'w-72 min-w-72'
-			: 'w-16 min-w-16'} border-r border-gray-200 dark:border-gray-700 bg-blue-50"
-			activeClass="bg-blue-400"
-			nonActiveClass="hover:bg-blue-200 transition-colors duration-300"
+			: 'w-16 min-w-16'} border-r border-gray-200 dark:border-gray-700 bg-primary-50"
+			activeClass="bg-primary-500"
+			nonActiveClass="hover:bg-primary-200 transition-colors duration-300"
 	>
-		<SidebarWrapper class="h-full py-4 overflow-y-auto bg-blue-50">
-			<div class="flex items-center mb-5 pl-2.5 justify-start">
+		<SidebarWrapper class="h-full py-4 overflow-y-auto bg-primary-50">
+			<div class="flex items-center mb-5 justify-start">
 				{#if sidebarOpen}
-					<img src="/vertice-logo-full.svg" alt="VÉRTICE" class="h-8 w-auto" />
+					<img src="/vertice-logo-full.svg" alt="VÉRTICE" class="w-auto aspect-video" />
 				{:else}
-					<img src="/vertice-logo-v.svg" alt="V" class="h-8 w-8" />
+					<img src="/vertice-logo-v.svg" alt="V" class="w-auto" />
 				{/if}
 			</div>
 
@@ -335,7 +335,7 @@
 							class="flex items-center w-full gap-2 text-sm "
 							onclick={toggleUserDropdown}
 						>
-							<Avatar src={`https://unavatar.io/${data.correo}`} class="mr-3" />
+							<Avatar src={data.photoUrl || `https://unavatar.io/${data.correo}`} class="mr-3" />
 							{#if sidebarOpen}
 								<div class="flex-1 text-left">
 									<span class="font-medium truncate">{data.nombre}</span>

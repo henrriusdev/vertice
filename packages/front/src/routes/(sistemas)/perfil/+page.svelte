@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { PREGUNTAS_SEGURIDAD } from '$lib/servicios/pregunta-seguridad';
-	import { subirFotoPerfil, eliminarFotoPerfil, obtenerUrlFoto } from '$lib/servicios/autenticacion';
+
 	import { resolver } from '$lib/utilidades/resolver.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import { Avatar, Button, Card, Input, Label, Modal, Select, Fileupload } from 'flowbite-svelte';
+	import { Avatar, Button, Card, Input, Label, Modal, Select } from 'flowbite-svelte';
 	import { EnvelopeOutline, ShieldCheckOutline, CameraPhotoOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 
 	// Props
@@ -35,9 +35,7 @@
 	let canSubmitPassword = $derived(isPasswordValid);
 	let canSubmitQuestions = $derived(securityQuestions.every((q) => q.pregunta && q.respuesta));
 	let avatarSrc = $derived(
-		usuario?.foto && obtenerUrlFoto(usuario.foto) 
-			? obtenerUrlFoto(usuario.foto) 
-			: `https://unavatar.io/${usuario?.correo}`
+		data.photoUrl || `https://unavatar.io/${usuario?.correo}`
 	);
 
 	const handleSubmit: SubmitFunction = () => {
@@ -49,41 +47,45 @@
 		});
 	};
 
-	async function handlePhotoUpload() {
-		if (!selectedFile) return;
-		
+	// Form action handlers
+	const handlePhotoUpload: SubmitFunction = () => {
 		uploadingPhoto = true;
-		try {
-			const filename = await subirFotoPerfil(fetch, selectedFile);
-			// Update user data locally
-			if (usuario) {
-				usuario.foto = filename;
+		return async ({ result, update }) => {
+			if (result.type === 'success') {
+				photoModal = false;
+				selectedFile = null;
+				await update();
+			} else if (result.type === 'failure') {
+				alert(result.data?.message || 'Error al subir la foto');
 			}
-			photoModal = false;
-			selectedFile = null;
-		} catch (error) {
-			console.error('Error uploading photo:', error);
-			alert('Error al subir la foto');
-		} finally {
 			uploadingPhoto = false;
-		}
+		};
+	};
+
+	const handlePhotoDelete: SubmitFunction = () => {
+		uploadingPhoto = true;
+		return async ({ result, update }) => {
+			if (result.type === 'success') {
+				await update();
+			} else if (result.type === 'failure') {
+				alert(result.data?.message || 'Error al eliminar la foto');
+			}
+			uploadingPhoto = false;
+		};
+	};
+
+	function handleCameraClick() {
+		photoModal = true;
 	}
 
-	async function handlePhotoDelete() {
-		if (!usuario?.foto) return;
+	function handleDrop(event: DragEvent) {
+		event.preventDefault();
+		const target = event.currentTarget as HTMLElement;
+		target.classList.remove('border-primary-400', 'bg-primary-50');
 		
-		uploadingPhoto = true;
-		try {
-			await eliminarFotoPerfil(fetch);
-			// Update user data locally
-			if (usuario) {
-				usuario.foto = null;
-			}
-		} catch (error) {
-			console.error('Error deleting photo:', error);
-			alert('Error al eliminar la foto');
-		} finally {
-			uploadingPhoto = false;
+		const files = event.dataTransfer?.files;
+		if (files && files[0]) {
+			selectedFile = files[0];
 		}
 	}
 
@@ -100,7 +102,7 @@
 		<div class="max-w-4xl mx-auto space-y-8">
 			<h1 class="text-2xl font-bold text-center">Perfil</h1>
 			<!-- Información del Usuario -->
-			<Card class="p-8 shadow-lg max-w-full! bg-blue-50">
+			<Card class="p-8 shadow-lg max-w-full! bg-primary-50">
 				<div class="flex flex-col items-center md:flex-row md:items-start gap-12">
 					<!-- Avatar grande -->
 					<div class="flex flex-col items-center gap-6">
@@ -115,22 +117,29 @@
 									size="xs" 
 									pill 
 									color="primary"
-									onclick={() => (photoModal = true)}
+									onclick={handleCameraClick}
 									disabled={uploadingPhoto}
 								>
 									<CameraPhotoOutline class="w-4 h-4" />
 								</Button>
 								{#if usuario?.foto}
-									<Button 
-										size="xs" 
-										pill 
-										color="red"
-										onclick={handlePhotoDelete}
-										disabled={uploadingPhoto}
-									>
-										<TrashBinOutline class="w-4 h-4" />
-									</Button>
-								{/if}
+							<form method="POST" action="?/eliminarFoto" use:enhance={handlePhotoDelete}>
+								<Button 
+									type="submit"
+									size="xs" 
+									pill 
+									color="red"
+									disabled={uploadingPhoto}
+								>
+									<TrashBinOutline class="w-4 h-4" />
+								</Button>
+							</form>
+						{/if}
+							</div>
+							<div
+								class="absolute -top-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-sm font-medium rounded-full"
+							>
+								{usuario?.activo ? 'Activo' : 'Inactivo'}
 							</div>
 						</div>
 						<div class="text-center">
@@ -287,47 +296,72 @@
 			</Modal>
 
 			<!-- Modal de foto de perfil -->
-			<Modal bind:open={photoModal} size="md" autoclose={false}>
-				<div class="space-y-6">
-					<h3 class="text-xl font-medium">Actualizar Foto de Perfil</h3>
-					
-					<div class="space-y-4">
-						<div>
-							<Label for="photo-upload" class="mb-2">Seleccionar imagen</Label>
-							<Fileupload
-								id="photo-upload"
-								accept="image/*"
-								onchange={onFileSelected}
-								class="w-full"
-							/>
-							<p class="text-sm text-gray-500 mt-1">
-								Formatos permitidos: PNG, JPG, JPEG, GIF. Tamaño máximo: 5MB
-							</p>
-						</div>
+			<Modal bind:open={photoModal} size="sm" autoclose={false}>
+				<form method="POST" action="?/subirFoto" enctype="multipart/form-data" use:enhance={handlePhotoUpload}>
+					<div class="space-y-6">
+						<h3 class="text-lg font-semibold text-gray-900">Cambiar foto de perfil</h3>
 						
-						{#if selectedFile}
-							<div class="text-sm text-gray-700">
-								Archivo seleccionado: {selectedFile.name}
+						<div class="space-y-4">
+							<div>
+								<Label class="mb-2">Seleccionar imagen</Label>
+								<div 
+									class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+									role="button"
+									tabindex="0"
+									ondragover={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary-400', 'bg-primary-50'); }}
+									ondragleave={(e) => { e.currentTarget.classList.remove('border-primary-400', 'bg-primary-50'); }}
+									ondrop={handleDrop}
+									onclick={() => document.getElementById('photo-upload')?.click()}
+									onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById('photo-upload')?.click(); } }}
+								>
+									<div class="space-y-2">
+										<svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+											<path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+										<p class="text-sm text-gray-600">
+											<span class="font-medium text-primary-600 hover:text-primary-500">Haz clic para seleccionar</span>
+											o arrastra y suelta una imagen
+										</p>
+										<p class="text-xs text-gray-500">
+											PNG, JPG, JPEG, GIF hasta 5MB
+										</p>
+									</div>
+								</div>
+								<input 
+									id="photo-upload"
+									name="file"
+									type="file"
+									accept="image/*"
+									onchange={onFileSelected}
+									class="hidden"
+									required
+								/>
 							</div>
-						{/if}
-					</div>
+							
+							{#if selectedFile}
+								<div class="text-sm text-gray-700">
+									Archivo seleccionado: {selectedFile.name}
+								</div>
+							{/if}
+						</div>
 
-					<div class="flex justify-end gap-4">
-						<Button color="alternative" onclick={() => {
-							photoModal = false;
-							selectedFile = null;
-						}}>
-							Cancelar
-						</Button>
-						<Button 
-							color="primary" 
-							onclick={handlePhotoUpload}
-							disabled={!selectedFile || uploadingPhoto}
-						>
-							{uploadingPhoto ? 'Subiendo...' : 'Subir Foto'}
-						</Button>
+						<div class="flex justify-end gap-4">
+							<Button type="button" color="alternative" onclick={() => {
+								photoModal = false;
+								selectedFile = null;
+							}}>
+								Cancelar
+							</Button>
+							<Button 
+								type="submit"
+								color="primary" 
+								disabled={!selectedFile || uploadingPhoto}
+							>
+								{uploadingPhoto ? 'Subiendo...' : 'Subir Foto'}
+							</Button>
+						</div>
 					</div>
-				</div>
+				</form>
 			</Modal>
 		</div>
 	</div>

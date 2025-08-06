@@ -129,9 +129,9 @@
 	});
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-gray-900">
+<div class="min-h-screen flex items-center justify-center bg-primary-50 dark:bg-gray-900">
 	<div class="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl space-y-6">
-		<h1 class="text-2xl font-bold text-center text-blue-700 dark:text-white">
+		<h1 class="text-2xl font-bold text-center text-primary-700 dark:text-white">
 			Recuperar Contraseña
 		</h1>
 

@@ -1,11 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <style>
-    .logo-v { 
-      font-family: 'Arial', sans-serif; 
-      font-weight: bold; 
-      fill: #1e40af; 
-    }
-  </style>
-  <!-- V shape as geometric form -->
-  <path d="M20 20 L50 80 L80 20 L70 20 L50 60 L30 20 Z" fill="#1e40af"/>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+ "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="2048.000000pt" height="2048.000000pt" viewBox="0 0 1024.000000 1024.000000"
+ preserveAspectRatio="xMidYMid meet">
+
+<g transform="translate(0.000000,1024.000000) scale(0.100000,-0.100000)"
+fill="#004a77" stroke="none">
+<path d="M1883 7768 c72 -111 797 -1229 1160 -1788 209 -322 462 -711 562
+-865 823 -1268 1219 -1879 1288 -1987 45 -70 85 -127 90 -128 4 0 7 513 7
+1140 l0 1140 -24 38 c-21 34 -838 1290 -1395 2145 l-233 357 -744 0 -745 0 34
+-52z"/>
+<path d="M6650 7428 c-140 -216 -331 -512 -425 -658 -396 -611 -775 -1195
+-872 -1346 l-103 -160 2 -1137 3 -1137 186 288 c103 158 514 793 914 1412 400
+619 796 1231 880 1360 84 129 370 570 635 980 266 410 490 755 498 768 l14 22
+-739 0 -740 0 -253 -392z"/>
+</g>
 </svg>

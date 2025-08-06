@@ -34,14 +34,15 @@
   };
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-gray-900 relative">
+<div class="min-h-screen flex flex-col items-center justify-center bg-primary-50 dark:bg-gray-900 relative">
 
+    <img src="/vertice-logo-full.svg" alt="VÉRTICE" class="h-80 aspect-video -mb-20">
     <form
             method="post"
             use:enhance={handleSubmit}
             class="w-full max-w-md bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl space-y-6"
     >
-        <h1 class="text-2xl font-bold text-center text-blue-700 dark:text-white">Iniciar sesión</h1>
+        <h1 class="text-2xl font-bold text-center text-primary-700 dark:text-white">Iniciar sesión</h1>
 
         <div>
             <Label for="correo">Correo</Label>
@@ -84,7 +85,7 @@
         <Button type="submit" color="blue" class="w-full" disabled={loading}>Entrar</Button>
 
         <div class="text-center">
-            <a href="/recuperar" class="text-sm text-blue-600 hover:underline dark:text-blue-500">
+            <a href="/recuperar" class="text-sm text-primary-600 hover:underline dark:text-primary-500">
                 ¿Olvidaste tu contraseña?
             </a>
         </div>

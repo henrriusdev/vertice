@@ -84,10 +84,6 @@
 					<span>{data.estudiante.semestre || 'N/A'}</span>
 				</div>
 				<div class="flex justify-between">
-					<span class="font-medium">Promedio:</span>
-					<span>{data.estudiante.promedio}</span>
-				</div>
-				<div class="flex justify-between">
 					<span class="font-medium">Estado:</span>
 					<span>
 						{#if data.estudiante.activo}

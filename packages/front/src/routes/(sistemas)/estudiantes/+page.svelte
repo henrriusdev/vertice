@@ -1,33 +1,31 @@
 <script lang="ts">
-	import { cedulaMask, maxYearDate, nota, ConfirmDeleteModal, StatusToggleModal } from '$lib';
-	import { obtenerUrlFoto } from '$lib/servicios/autenticacion';
+	import { enhance } from '$app/forms';
+	import { cedulaMask, ConfirmDeleteModal, maxYearDate, nota, StatusToggleModal } from '$lib';
+	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
+	import { resolver } from '$lib/utilidades/resolver';
 	import { imask } from '@imask/svelte';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import {
+		Avatar,
 		Button,
 		Checkbox,
+		Datepicker,
 		Input,
 		Label,
 		Modal,
 		Select,
-		TableSearch,
-		Textarea,
-		Datepicker,
-		Tooltip,
 		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		TableBody,
-		TableBodyRow,
-		TableBodyCell,
-		Avatar
+		TableSearch,
+		Textarea,
+		Tooltip
 	} from 'flowbite-svelte';
-	import { EyeOutline, FileCopyOutline, PenOutline, PlusOutline, UsersOutline, CheckOutline } from 'flowbite-svelte-icons';
+	import { CheckOutline, EyeOutline, PenOutline, PlusOutline, UsersOutline } from 'flowbite-svelte-icons';
 	import type { Estudiante } from '../../../app';
-	import { resolver } from '$lib/utilidades/resolver';
-	import type { SubmitFunction } from '@sveltejs/kit';
-	import { enhance } from '$app/forms';
-	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
-	import { pl } from 'date-fns/locale';
 
 	// Datos de la página
 	let { data } = $props();
@@ -243,9 +241,7 @@
 						<TableBodyCell>
 							<div class="flex items-center gap-3">
 								<Avatar
-									src={estudiante.usuario?.foto && obtenerUrlFoto(estudiante.usuario.foto) 
-										? obtenerUrlFoto(estudiante.usuario.foto) 
-										: `https://unavatar.io/${estudiante.correo}`}
+									src={estudiante.usuario?.foto_base64 || `https://unavatar.io/${estudiante.correo}`}
 									size="sm"
 									class="ring-2 ring-gray-200"
 								/>

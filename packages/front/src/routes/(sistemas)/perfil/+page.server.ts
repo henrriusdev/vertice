@@ -1,11 +1,14 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { cambiarPassword } from '$lib/servicios/autenticacion';
+import { cambiarPassword, subirFotoPerfil, eliminarFotoPerfil } from '$lib/servicios/autenticacion';
 import { configurarPreguntaSeguridad } from '$lib/servicios/pregunta-seguridad';
 
 export const load = (async ({locals: { usuario } }) => {
+	const photoUrl = usuario?.foto ? `http://127.0.0.1:8000/api/usuario/photo/${usuario.foto}` : null;
+	
 	return {
-		usuario
+		usuario,
+		photoUrl
 	}
 }) satisfies PageServerLoad;
 
@@ -78,6 +81,49 @@ export const actions: Actions = {
 				type: 'failure',
 				message: e instanceof Error ? e.message : 'Error al configurar las preguntas de seguridad'
 			};
+		}
+	},
+
+	subirFoto: async ({ request, fetch }) => {
+		const data = await request.formData();
+		const file = data.get('file') as File;
+
+		if (!file || file.size === 0) {
+			return fail(400, {
+				type: 'error',
+				message: 'No se seleccionó ningún archivo'
+			});
+		}
+
+		try {
+			const filename = await subirFotoPerfil(fetch, file);
+			return {
+				type: 'success',
+				message: 'Foto subida exitosamente',
+				filename
+			};
+		} catch (e) {
+			console.error(e);
+			return fail(400, {
+				type: 'error',
+				message: e instanceof Error ? e.message : 'Error al subir la foto'
+			});
+		}
+	},
+
+	eliminarFoto: async ({ fetch }) => {
+		try {
+			await eliminarFotoPerfil(fetch);
+			return {
+				type: 'success',
+				message: 'Foto eliminada exitosamente'
+			};
+		} catch (e) {
+			console.error(e);
+			return fail(400, {
+				type: 'error',
+				message: e instanceof Error ? e.message : 'Error al eliminar la foto'
+			});
 		}
 	}
 };

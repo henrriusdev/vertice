@@ -9,6 +9,39 @@ from src.model.pago import Pago
 from tortoise.exceptions import DoesNotExist
 
 async def get_students(carrera_id=None):
+    import base64
+    import os
+    from os import path, getcwd
+    
+    # Photo upload folder path
+    UPLOAD_FOLDER = path.abspath(path.join(getcwd(), "../../uploads/profile_photos/"))
+    
+    def get_photo_base64(foto_filename):
+        """Convert photo file to base64 string"""
+        if not foto_filename:
+            return None
+        
+        filepath = path.join(UPLOAD_FOLDER, foto_filename)
+        if not path.exists(filepath):
+            return None
+        
+        try:
+            with open(filepath, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                # Get file extension to determine MIME type
+                file_ext = foto_filename.lower().split('.')[-1]
+                mime_type = {
+                    'jpg': 'image/jpeg',
+                    'jpeg': 'image/jpeg', 
+                    'png': 'image/png',
+                    'gif': 'image/gif'
+                }.get(file_ext, 'image/jpeg')
+                
+                return f"data:{mime_type};base64,{encoded_string}"
+        except Exception as e:
+            print(f"Error reading photo {filepath}: {e}")
+            return None
+    
     try:
         if carrera_id is not None:
             estudiantes = await Estudiante.filter(carrera_id=carrera_id).prefetch_related("usuario", "carrera").order_by("usuario__nombre")
@@ -29,7 +62,9 @@ async def get_students(carrera_id=None):
                 "id": e.id,
                 "activo": e.usuario.activo,
                 "usuario": {
-                    "id": e.usuario.id
+                    "id": e.usuario.id,
+                    "foto": e.usuario.foto,
+                    "foto_base64": get_photo_base64(e.usuario.foto)
                 }
             }
             for e in estudiantes

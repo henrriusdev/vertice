@@ -1,4 +1,5 @@
 import traceback
+import glob
 from datetime import timedelta, datetime
 from os import getcwd, path, makedirs
 import os
@@ -440,7 +441,24 @@ async def upload_photo():
             if usuario.foto:
                 old_filepath = path.join(UPLOAD_FOLDER, usuario.foto)
                 if path.exists(old_filepath):
-                    os.remove(old_filepath)
+                    try:
+                        os.remove(old_filepath)
+                        print(f"Deleted old photo: {old_filepath}")
+                    except OSError as e:
+                        print(f"Error deleting old photo {old_filepath}: {e}")
+                        # Continue with upload even if deletion fails
+            
+            # Also try to remove any existing photos with the same user ID pattern
+            # This handles cases where the file extension might have changed
+            pattern = path.join(UPLOAD_FOLDER, f"user_{usuario.id}.*")
+            existing_files = glob.glob(pattern)
+            for existing_file in existing_files:
+                if existing_file != filepath:  # Don't delete the file we're about to create
+                    try:
+                        os.remove(existing_file)
+                        print(f"Deleted existing photo: {existing_file}")
+                    except OSError as e:
+                        print(f"Error deleting existing photo {existing_file}: {e}")
             
             # Save new photo
             file.save(filepath)

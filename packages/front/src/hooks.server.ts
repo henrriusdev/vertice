@@ -1,5 +1,3 @@
-// src/hooks.server.ts
-import { refresh } from '$lib';
 import { type Handle } from '@sveltejs/kit';
 
 const rutasPublicas = ['/login',  '/api/usuario/refresh'];
