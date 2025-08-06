@@ -1,9 +1,13 @@
 import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
 
+// Track consecutive 401 errors to avoid redirecting on temporary issues
+let consecutiveAuthErrors = 0;
+const MAX_AUTH_ERRORS_BEFORE_LOGOUT = 3;
+
 /**
  * Enhanced fetch wrapper that handles authentication errors
- * Automatically redirects to logout on 401 responses
+ * Automatically redirects to logout only after multiple 401 responses
  */
 export async function apiCall(
     fetch: typeof window.fetch,
@@ -15,21 +19,34 @@ export async function apiCall(
         
         // Handle 401 Unauthorized responses
         if (response.status === 401) {
-            // Only redirect to logout in browser environment
-            if (browser) {
-                console.warn('Session expired (401), redirecting to logout...', {
+            consecutiveAuthErrors++;
+            
+            // Only redirect to logout after multiple consecutive failures
+            if (consecutiveAuthErrors >= MAX_AUTH_ERRORS_BEFORE_LOGOUT && browser) {
+                console.warn(`Session expired after ${consecutiveAuthErrors} consecutive 401 errors, redirecting to logout...`, {
                     url: input.toString(),
                     method: init?.method || 'GET'
                 });
-                // Redirect to logout
+                consecutiveAuthErrors = 0; // Reset counter
                 goto('/logout');
+            } else {
+                console.warn(`Authentication error ${consecutiveAuthErrors}/${MAX_AUTH_ERRORS_BEFORE_LOGOUT}`, {
+                    url: input.toString(),
+                    method: init?.method || 'GET'
+                });
             }
-            // Still return the response so callers can handle it if needed
+            
             return response;
+        } else {
+            // Reset error counter on successful requests
+            consecutiveAuthErrors = 0;
         }
         
         return response;
     } catch (error) {
+        // Reset error counter on network errors (not auth related)
+        consecutiveAuthErrors = 0;
+        
         // Log network errors for debugging
         console.error('Network error in API call:', {
             url: input.toString(),

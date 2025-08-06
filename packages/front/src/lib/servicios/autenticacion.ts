@@ -37,7 +37,7 @@ export async function refresh(fetch: typeof window.fetch, token: string): Promis
 	if (!response.ok) throw new Error('Token inválido');
 
 	const json = await response.json();
-	return json.data as Usuario;
+	return json.data.usuario as Usuario;
 }
 
 export async function logout(fetch: typeof window.fetch, token: string): Promise<boolean> {
