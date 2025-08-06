@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { cedulaMask, DataTable, maxYearDate, nota, ConfirmDeleteModal, StatusToggleModal } from '$lib';
+	import { cedulaMask, maxYearDate, nota, ConfirmDeleteModal, StatusToggleModal } from '$lib';
+	import { obtenerUrlFoto } from '$lib/servicios/autenticacion';
 	import { imask } from '@imask/svelte';
 	import {
 		Button,
@@ -11,9 +12,14 @@
 		TableSearch,
 		Textarea,
 		Datepicker,
-
-		Tooltip
-
+		Tooltip,
+		Table,
+		TableHead,
+		TableHeadCell,
+		TableBody,
+		TableBodyRow,
+		TableBodyCell,
+		Avatar
 	} from 'flowbite-svelte';
 	import { EyeOutline, FileCopyOutline, PenOutline, PlusOutline, UsersOutline, CheckOutline } from 'flowbite-svelte-icons';
 	import type { Estudiante } from '../../../app';
@@ -216,7 +222,62 @@
 			</div>
 		</div>
 	{/snippet}
-	<DataTable data={estudiantesFiltrados} {actions}></DataTable>
+
+	<!-- Custom table with photos -->
+	<div class="overflow-x-auto">
+		<Table striped hoverable shadow>
+			<TableHead>
+				<TableHeadCell>Estudiante</TableHeadCell>
+				<TableHeadCell>Cédula</TableHeadCell>
+				<TableHeadCell>Correo</TableHeadCell>
+				<TableHeadCell>Carrera</TableHeadCell>
+				<TableHeadCell>Semestre</TableHeadCell>
+				<TableHeadCell>Promedio</TableHeadCell>
+				<TableHeadCell>Dirección</TableHeadCell>
+				<TableHeadCell>Estado</TableHeadCell>
+				<TableHeadCell>Acciones</TableHeadCell>
+			</TableHead>
+			<TableBody class="divide-y">
+				{#each estudiantesFiltrados as estudiante}
+					<TableBodyRow class="align-middle">
+						<TableBodyCell>
+							<div class="flex items-center gap-3">
+								<Avatar
+									src={estudiante.usuario?.foto && obtenerUrlFoto(estudiante.usuario.foto) 
+										? obtenerUrlFoto(estudiante.usuario.foto) 
+										: `https://unavatar.io/${estudiante.correo}`}
+									size="sm"
+									class="ring-2 ring-gray-200"
+								/>
+								<span class="font-medium">{estudiante.nombre}</span>
+							</div>
+						</TableBodyCell>
+						<TableBodyCell>{estudiante.cedula}</TableBodyCell>
+						<TableBodyCell>{estudiante.correo}</TableBodyCell>
+						<TableBodyCell>{estudiante.carrera}</TableBodyCell>
+						<TableBodyCell>{estudiante.semestre}</TableBodyCell>
+						<TableBodyCell>{estudiante.promedio}</TableBodyCell>
+						<TableBodyCell class="max-w-xs truncate">{estudiante.direccion}</TableBodyCell>
+						<TableBodyCell>
+							<span class="px-2 py-1 rounded-full text-xs font-medium {estudiante.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+								{estudiante.activo ? 'Activo' : 'Inactivo'}
+							</span>
+						</TableBodyCell>
+						<TableBodyCell>
+							{@render actions(estudiante)}
+						</TableBodyCell>
+					</TableBodyRow>
+				{/each}
+				{#if estudiantesFiltrados.length === 0}
+					<TableBodyRow>
+						<TableBodyCell colspan="9" class="text-center py-4">
+							No se encontraron estudiantes
+						</TableBodyCell>
+					</TableBodyRow>
+				{/if}
+			</TableBody>
+		</Table>
+	</div>
 
 	<Modal
 		title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}

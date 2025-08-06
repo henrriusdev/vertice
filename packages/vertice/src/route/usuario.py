@@ -1,9 +1,12 @@
 import traceback
 from datetime import timedelta, datetime
+from os import getcwd, path, makedirs
+import os
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 from src.model.usuario import Usuario
 from src.service.trazabilidad import add_trazabilidad
@@ -12,6 +15,18 @@ from src.service.usuarios import bloquear_usuario, delete_usuario, get_usuarios,
 from src.utils.fecha import now_in_venezuela
 
 usr = Blueprint('usuario_blueprint', __name__)
+
+# Configuration for photo uploads
+UPLOAD_FOLDER = path.abspath(path.join(getcwd(), "../../uploads/profile_photos/"))
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def create_folder_if_not_exists(folder_path):
+    if not path.exists(folder_path):
+        makedirs(folder_path)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @usr.route('/toggle-status/<cedula>')
@@ -368,6 +383,121 @@ async def first_reset_password():
         })
 
         return jsonify({"ok": True, "status": 200, "data": "Contraseña actualizada exitosamente"})
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@usr.post('/upload-photo')
+@jwt_required()
+async def upload_photo():
+    try:
+        claims = get_jwt()
+        correo = claims.get('sub')
+        
+        usuario = await get_usuario_por_correo(correo)
+        if not usuario:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
+
+        if 'file' not in request.files:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "No se encontró archivo"}}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"ok": False, "status": 400, "data": {"message": "No se seleccionó archivo"}}), 400
+
+        if file and allowed_file(file.filename):
+            # Create upload folder if it doesn't exist
+            create_folder_if_not_exists(UPLOAD_FOLDER)
+            
+            # Generate secure filename using user ID
+            file_extension = file.filename.rsplit('.', 1)[1].lower()
+            filename = f"user_{usuario.id}.{file_extension}"
+            filepath = path.join(UPLOAD_FOLDER, filename)
+            
+            # Remove old photo if exists
+            if usuario.foto:
+                old_filepath = path.join(UPLOAD_FOLDER, usuario.foto)
+                if path.exists(old_filepath):
+                    os.remove(old_filepath)
+            
+            # Save new photo
+            file.save(filepath)
+            
+            # Update user record
+            usuario.foto = filename
+            await usuario.save()
+
+            await add_trazabilidad({
+                "accion": f"Subir foto de perfil: {filename}",
+                "usuario": usuario,
+                "modulo": "Usuarios",
+                "nivel_alerta": 2
+            })
+
+            return jsonify({
+                "ok": True, 
+                "status": 200, 
+                "data": {
+                    "message": "Foto subida exitosamente",
+                    "filename": filename
+                }
+            })
+        else:
+            return jsonify({"ok": False, "status": 400, "data": {"message": "Tipo de archivo no permitido"}}), 400
+
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@usr.get('/photo/<filename>')
+async def get_photo(filename):
+    try:
+        # Secure the filename
+        filename = secure_filename(filename)
+        filepath = path.join(UPLOAD_FOLDER, filename)
+        
+        if not path.exists(filepath):
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Foto no encontrada"}}), 404
+            
+        return send_file(filepath)
+        
+    except Exception as ex:
+        traceback.print_exc()
+        return jsonify({"ok": False, "status": 500, "data": {"message": str(ex)}}), 500
+
+
+@usr.delete('/delete-photo')
+@jwt_required()
+async def delete_photo():
+    try:
+        claims = get_jwt()
+        correo = claims.get('sub')
+        
+        usuario = await get_usuario_por_correo(correo)
+        if not usuario:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "Usuario no encontrado"}}), 404
+
+        if usuario.foto:
+            filepath = path.join(UPLOAD_FOLDER, usuario.foto)
+            if path.exists(filepath):
+                os.remove(filepath)
+            
+            usuario.foto = None
+            await usuario.save()
+
+            await add_trazabilidad({
+                "accion": "Eliminar foto de perfil",
+                "usuario": usuario,
+                "modulo": "Usuarios",
+                "nivel_alerta": 2
+            })
+
+            return jsonify({"ok": True, "status": 200, "data": {"message": "Foto eliminada exitosamente"}})
+        else:
+            return jsonify({"ok": False, "status": 404, "data": {"message": "No hay foto para eliminar"}}), 404
 
     except Exception as ex:
         traceback.print_exc()

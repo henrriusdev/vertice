@@ -7,6 +7,7 @@ class Usuario(Model):
     nombre = fields.CharField(max_length=255)
     correo = fields.CharField(max_length=255, unique=True)
     password = fields.CharField(max_length=255)
+    foto = fields.CharField(max_length=255, null=True)  # Ruta de la foto de perfil
     
     activo = fields.BooleanField(default=True)  # ✅ Permitir bloquear/reactivar
     fecha_creacion = fields.DatetimeField(auto_now_add=True)  # ✅ Fecha de creación
@@ -22,6 +23,7 @@ class Usuario(Model):
             "cedula": self.cedula,
             "nombre": self.nombre,
             "correo": self.correo,
+            "foto": self.foto,
             "activo": self.activo,
             "fecha_creacion": self.fecha_creacion.strftime("%d/%m/%Y") if self.fecha_creacion else None,
             "cambiar_clave": cambiar_clave,
