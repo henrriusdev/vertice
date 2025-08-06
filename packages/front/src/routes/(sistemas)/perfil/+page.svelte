@@ -5,7 +5,7 @@
 	import { resolver } from '$lib/utilidades/resolver.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Avatar, Button, Card, Input, Label, Modal, Select, Fileupload } from 'flowbite-svelte';
-	import { EnvelopeOutline, ShieldCheckOutline, CameraOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+	import { EnvelopeOutline, ShieldCheckOutline, CameraPhotoOutline, TrashBinOutline } from 'flowbite-svelte-icons';
 
 	// Props
 	let { data } = $props();
@@ -118,7 +118,7 @@
 									onclick={() => (photoModal = true)}
 									disabled={uploadingPhoto}
 								>
-									<CameraOutline class="w-4 h-4" />
+									<CameraPhotoOutline class="w-4 h-4" />
 								</Button>
 								{#if usuario?.foto}
 									<Button 
