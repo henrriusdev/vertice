@@ -3,6 +3,7 @@ from .rol import *
 from .peticion import *
 from .pago import *
 from .materia import *
+from .asignacion_materia import *
 from .coordinador import *
 from .estudiante import *
 from .docente import *

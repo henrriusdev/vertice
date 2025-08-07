@@ -10,9 +10,7 @@ class Materia(Model):
     ht = fields.IntField()
     semestre = fields.IntField()
     id_carrera = fields.ForeignKeyField("models.Carrera", related_name='materias')
-    horarios = fields.JSONField(null=True)  # Nuevo campo agrupado
     maximo = fields.IntField(null=True)
-    id_docente = fields.ForeignKeyField("models.Docente", related_name='materias', null=True)
     activo = fields.BooleanField(default=True)  # Para borrado lógico
 
     class Meta:
