@@ -36,7 +36,7 @@
 
 <div class="min-h-screen flex flex-col items-center justify-center bg-primary-50 dark:bg-gray-900 relative">
 
-    <img src="/vertice-logo-full.svg" alt="VÉRTICE" class="h-80 aspect-video -mb-20">
+    <img src="/vertice-logo-full.svg" alt="VÉRTICE" class="h-80 aspect-video -mb-20 -mt-20">
     <form
             method="post"
             use:enhance={handleSubmit}
