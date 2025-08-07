@@ -6,7 +6,7 @@ import {
 	obtenerMaterias,
 	toggleMateriaStatus
 } from '$lib';
-import type { MateriaReq } from '$lib/types';
+import type { MateriaReq, AsignacionReq } from '$lib/types';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -81,6 +81,8 @@ export const actions: Actions = {
 			return isNaN(num) ? defaultValue : num;
 		};
 
+		const asignaciones: AsignacionReq[] = JSON.parse(form.get('asignaciones')?.toString() || '[]');
+
 		const payload: MateriaReq = {
 			id: form.get('id')?.toString() || '',
 			nombre: form.get('nombre')?.toString() || '',
@@ -90,20 +92,10 @@ export const actions: Actions = {
 			ht: safeNumber(form.get('ht')),
 			semestre: safeNumber(form.get('semestre'), 1),
 			id_carrera: safeNumber(form.get('id_carrera')).toString(),
-			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
 			ciclo: form.get('ciclo')?.toString() || '',
 			maximo: safeNumber(form.get('maximo'), 30),
-			id_docente: safeNumber(form.get('id_docente')).toString()
+			asignaciones: asignaciones
 		};
-
-		// Validate schedule conflicts
-		const conflictos = await validarConflictosHorario(fetch, payload);
-		if (conflictos.length > 0) {
-			return {
-				type: 'failure',
-				message: `Conflicto de horario detectado: ${conflictos.join(', ')}`
-			};
-		}
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
@@ -136,6 +128,8 @@ export const actions: Actions = {
 			return isNaN(num) ? defaultValue : num;
 		};
 
+		const asignaciones: AsignacionReq[] = JSON.parse(form.get('asignaciones')?.toString() || '[]');
+
 		const payload: MateriaReq & { id: string } = {
 			id: form.get('id')?.toString() as string,
 			nombre: form.get('nombre')?.toString() as string,
@@ -145,20 +139,10 @@ export const actions: Actions = {
 			ht: safeNumber(form.get('ht')),
 			semestre: safeNumber(form.get('semestre'), 1),
 			id_carrera: safeNumber(form.get('id_carrera')).toString(),
-			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
 			ciclo: form.get('ciclo')?.toString() as string,
 			maximo: safeNumber(form.get('maximo'), 30),
-			id_docente: safeNumber(form.get('id_docente')).toString()
+			asignaciones: asignaciones
 		};
-
-		// Validate schedule conflicts (excluding current materia)
-		const conflictos = await validarConflictosHorario(fetch, payload, payload.id);
-		if (conflictos.length > 0) {
-			return {
-				type: 'failure',
-				message: `Conflicto de horario detectado: ${conflictos.join(', ')}`
-			};
-		}
 
 		const errores = validarPayload(payload);
 		if (Object.keys(errores).length > 0) {
@@ -183,53 +167,8 @@ export const actions: Actions = {
 	},
 };
 
-async function validarConflictosHorario(
-	fetch: typeof window.fetch, 
-	materia: MateriaReq, 
-	excludeId?: string
-): Promise<string[]> {
-	try {
-		const data = await obtenerMaterias(fetch);
-		const materias = data.materias.filter(m => 
-			m.semestre === materia.semestre && 
-			m.id_carrera === Number(materia.id_carrera) &&
-			m.id !== excludeId &&
-			m.activo !== false
-		);
-
-		const conflictos: string[] = [];
-
-		for (const horario of materia.horarios) {
-			for (const otraMateria of materias) {
-				for (const otroHorario of otraMateria.horarios) {
-					if (horario.dia === otroHorario.dia) {
-						const inicioA = horaAMinutos(horario.hora_inicio);
-						const finA = horaAMinutos(horario.hora_fin);
-						const inicioB = horaAMinutos(otroHorario.hora_inicio);
-						const finB = horaAMinutos(otroHorario.hora_fin);
-
-						if (inicioA < finB && finA > inicioB) {
-							conflictos.push(`${otraMateria.nombre} (${horario.dia} ${horario.hora_inicio}-${horario.hora_fin})`);
-						}
-					}
-				}
-			}
-		}
-
-		return conflictos;
-	} catch (error) {
-		console.error('Error validating schedule conflicts:', error);
-		return [];
-	}
-}
-
-function horaAMinutos(hora: string): number {
-	const [h, m] = hora.split(':').map(Number);
-	return h * 60 + m;
-}
-
 function validarPayload(
-	payload: Record<string, string | number | boolean>
+	payload: Record<string, string | number | boolean | AsignacionReq[]>
 ): Record<string, string> {
 	const errores: Record<string, string> = {};
 	const camposBase: (keyof typeof payload)[] = [
