@@ -59,6 +59,16 @@ export type Horario = {
 	hora_fin: string;
 };
 
+export type Asignacion = {
+	id: number;
+	nombre: string;
+	horarios: Horario[];
+	profesor: {
+		id: number;
+		nombre: string;
+	} | null;
+};
+
 export type Materia = {
 	id: string;
 	nombre: string;
@@ -68,11 +78,10 @@ export type Materia = {
 	ht: number;
 	semestre: number;
 	id_carrera: number;
-	horarios: Horario[];
 	ciclo: string;
 	maximo: number;
-	id_docente: number;
 	activo: boolean;
+	asignaciones: Asignacion[];
 };
 
 export type Metodo_pago = {

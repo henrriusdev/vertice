@@ -8,7 +8,7 @@ import {
 } from '$lib';
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import type { MateriaReq } from '$lib/types';
+import type { MateriaReq, AsignacionReq } from '$lib/types';
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
         const { rol } = await parent();
@@ -39,6 +39,8 @@ export const actions: Actions = {
 			return isNaN(num) ? defaultValue : num;
 		};
 
+		const asignaciones: AsignacionReq[] = JSON.parse(form.get('asignaciones')?.toString() || '[]');
+
 		const payload: MateriaReq = {
 			id: form.get('id')?.toString() || '',
 			nombre: form.get('nombre')?.toString() || '',
@@ -48,10 +50,9 @@ export const actions: Actions = {
 			ht: safeNumber(form.get('ht')),
 			semestre: safeNumber(form.get('semestre'), 1),
 			id_carrera: safeNumber(form.get('id_carrera')).toString(),
-			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
-                        ciclo: form.get('ciclo')?.toString() || '',
-                        maximo: safeNumber(form.get('maximo'), 30),
-                        id_docente: safeNumber(form.get('id_docente')).toString()
+			ciclo: form.get('ciclo')?.toString() || '',
+			maximo: safeNumber(form.get('maximo'), 30),
+			asignaciones: asignaciones
                 };
 
 		const errores = validarPayload(payload);
@@ -86,6 +87,8 @@ export const actions: Actions = {
 			return isNaN(num) ? defaultValue : num;
 		};
 
+		const asignaciones: AsignacionReq[] = JSON.parse(form.get('asignaciones')?.toString() || '[]');
+
 		const payload: MateriaReq & { id: string } = {
 			id: form.get('id')?.toString() as string,
 			nombre: form.get('nombre')?.toString() as string,
@@ -95,10 +98,9 @@ export const actions: Actions = {
 			ht: safeNumber(form.get('ht')),
 			semestre: safeNumber(form.get('semestre'), 1),
 			id_carrera: safeNumber(form.get('id_carrera')).toString(),
-			horarios: JSON.parse(form.get('horarios')?.toString() || '[]'),
-                        ciclo: form.get('ciclo')?.toString() as string,
-                        maximo: safeNumber(form.get('maximo'), 30),
-                        id_docente: safeNumber(form.get('id_docente')).toString()
+			ciclo: form.get('ciclo')?.toString() as string,
+			maximo: safeNumber(form.get('maximo'), 30),
+			asignaciones: asignaciones
                 };
 
 		const errores = validarPayload(payload);
@@ -143,7 +145,7 @@ export const actions: Actions = {
 };
 
 function validarPayload(
-	payload: Record<string, string | number | boolean>
+	payload: Record<string, string | number | boolean | AsignacionReq[]>
 ): Record<string, string> {
 	const errores: Record<string, string> = {};
 	const camposBase: (keyof typeof payload)[] = [

@@ -45,6 +45,13 @@ export type PagosEstudianteResponse = {
 	pagos: Pago[];
 };
 
+export type AsignacionReq = {
+	id?: number;
+	nombre: string;
+	profesor_id?: number;
+	horarios: { dia: string; hora_inicio: string; hora_fin: string }[];
+};
+
 export type MateriaReq = {
 	id: string;
 	nombre: string;
@@ -54,11 +61,10 @@ export type MateriaReq = {
 	ht: number;
 	semestre: number;
 	id_carrera: string;
-        ciclo: string;
-        maximo?: number;
-        id_docente?: string;
-        horarios: { dia: string; inicio: string; fin: string }[];
-}
+	ciclo: string;
+	maximo?: number;
+	asignaciones?: AsignacionReq[];
+};
 
 export type Peticion = {
   docente: {
