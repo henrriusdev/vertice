@@ -13,9 +13,10 @@
 		PlusOutline,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
-	import type { Asignacion, Horario, Materia } from '../../../app';
+	import type { Asignacion, Horario, Materia } from '../../../../app';
 	import type { PageData } from './$types';
 	import type { AsignacionReq } from '$lib/types';
+	import { GrillaHorario } from '$lib';
 
 	interface Form {
 		id: string;
@@ -61,12 +62,41 @@
 	// Opciones de prelación calculadas dinámicamente
 	let opcionesPrelacion: { value: string; name: string }[] = $state([]);
 
+	const materiasFiltradas = $derived(
+		data.materias
+			.filter((mat) => mat.semestre === filtroSemestre)
+			.flatMap((mat) => {
+				// Get all horarios from all asignaciones for this materia
+				const allHorarios = mat.asignaciones?.flatMap(asig => asig.horarios || []) || [];
+				
+				// If materia has no horarios, don't show it in the grid
+				if (allHorarios.length === 0) {
+					return [];
+				}
+
+				// Create an entry for each horario
+				return allHorarios.map((horario, index) => ({
+					id: mat.id, // Use original materia ID for color consistency
+					uniqueId: `${mat.id}-${index}`, // Unique ID for each horario entry
+					materiaId: mat.id, // Original materia ID for reference
+					nombre: mat.nombre,
+					dia: horario.dia as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado',
+					hora_inicio: horario.hora_inicio,
+					hora_fin: horario.hora_fin,
+					color: mat.activo === false ? 'gray' : undefined,
+					conflicto: false,
+					activo: mat.activo,
+					materia: mat // Keep reference to full materia object
+				}));
+			})
+	);
+
 	function openModal(materia: Materia | null = null) {
 		if (materia) {
 			form = {
 				...materia,
 				id_carrera: materia.id_carrera.toString(),
-				asignaciones: materia.asignaciones.map(asig => ({
+				asignaciones: materia.asignaciones.map((asig: Asignacion) => ({
 					id: asig.id,
 					nombre: asig.nombre,
 					profesor_id: asig.profesor?.id,
@@ -100,7 +130,7 @@
 		form = {
 			...materia,
 			id_carrera: materia.id_carrera.toString(),
-			asignaciones: materia.asignaciones.map(asig => ({
+			asignaciones: materia.asignaciones.map((asig: Asignacion) => ({
 				id: asig.id,
 				nombre: asig.nombre,
 				profesor_id: asig.profesor?.id,
@@ -149,6 +179,15 @@
 		return resolver(() => (showSeccionesModal = false));
 	};
 
+	// Handle double-click on materia in the grid to open edit modal
+	function handleMateriaDoubleClick(materiaData: any) {
+		// Find the original materia using the materiaId from the grid data
+		const materia = data.materias.find(m => m.id === materiaData.materiaId);
+		if (materia) {
+			openModal(materia);
+		}
+	}
+
 	$effect(() => {
 		if (form.semestre === 1) {
 			opcionesPrelacion = [];
@@ -186,8 +225,14 @@
 
 	<div class="mb-4">
 		<p class="text-sm text-gray-600">
-			Materias del semestre {filtroSemestre}: {data.materias.filter(m => m.semestre === filtroSemestre).length}
+			Materias del semestre {filtroSemestre}: {materiasFiltradas.length}
+			| Haga doble clic en una materia para editarla
 		</p>
+	</div>
+
+	<!-- Enhanced GrillaHorario with double-click functionality -->
+	<div class="relative">
+		<GrillaHorario docente={false} materias={materiasFiltradas} onMateriaDoubleClick={handleMateriaDoubleClick} />
 	</div>
 
 	<!-- Lista de materias con secciones -->
@@ -493,68 +538,4 @@
 			<Button type="submit" color="blue">Guardar Secciones</Button>
 		</div>
 	</form>
-</Modal>
-
-<ToastContainer />
-					items={opcionesPrelacion}
-					placeholder="Seleccione las prelaciones"
-				/>
-			</div>
-		</div>
-
-		<div class="mt-4">
-			<h2 class="font-bold mb-2">Horarios</h2>
-			{#each form.horarios as h, i}
-				<div class="flex gap-2 mb-2">
-					<Select bind:value={h.dia} class="select min-w-[15%]" placeholder="Seleccionar">
-						{#each dias as d}
-							<option>{d}</option>
-						{/each}
-					</Select>
-					<Input type="time" bind:value={h.hora_inicio} class="input" />
-					<Input type="time" bind:value={h.hora_fin} class="input" />
-					<Button type="button" color="red" size="sm" class="p-1" onclick={() => removeHorario(i)}
-						>✕
-					</Button>
-				</div>
-			{/each}
-			<Button type="button" color="primary" outline size="sm" onclick={addHorario}>
-				<PlusOutline class="h-5 w-5 mr-2" />
-				Agregar Horario
-			</Button>
-			<input type="hidden" name="horarios" value={JSON.stringify(form.horarios)} />
-		</div>
-	</form>
-	{#snippet footer()}
-		<div class="flex justify-between items-center w-full">
-			<div>
-				<Button type="button" color="alternative" onclick={() => (showModal = false)}
-					>Cancelar
-				</Button>
-				<Button type="submit" color="primary" onclick={() => formEl.requestSubmit()}
-					>{editMode ? 'Actualizar' : 'Guardar'}</Button
-				>
-				{#if editMode}
-					<Button
-						color={form.activo ? 'red' : 'green'}
-						onclick={() => {
-							const materia = data.materias.find((m) => m.id === form.id);
-							if (materia) {
-								toggleForm.requestSubmit();
-								showModal = false;
-							}
-						}}
-					>
-					{form.activo ? 'Inactivar' : 'Activar'}
-				</Button>
-				<form use:enhance={toggleMateriaStatus} action="?/toggleStatus" method="POST" class="hidden" bind:this={toggleForm}>
-					<input type="hidden" name="id" bind:value={form.id} />
-					<input type="hidden" name="activo" value={form.activo.toString()} />
-				</form>
-				<Button color="light" onclick={() => goto(`/materias/${form.id}`)}>Ver notas</Button>
-				{/if}
-			</div>
-			<ToastContainer />
-		</div>
-	{/snippet}
 </Modal>
