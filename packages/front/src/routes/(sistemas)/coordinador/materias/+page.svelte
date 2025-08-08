@@ -6,7 +6,6 @@
 	import ToastContainer from '$lib/componentes/ToastContainer.svelte';
 	import {
 		CalendarMonthOutline,
-		CogOutline,
 		EyeOutline,
 		EyeSlashOutline,
 		PenOutline,
@@ -53,10 +52,8 @@
 	let formEl: HTMLFormElement;
 	let { data }: { data: PageData } = $props();
 	let showModal = $state(false);
-	let showSeccionesModal = $state(false);
 	let editMode = $state(false);
 	let filtroSemestre = $state(1);
-	let materiaParaSecciones: Materia | null = $state(null);
 	let toggleOutForm: HTMLFormElement | null = $state(null);
 
 	// Opciones de prelación calculadas dinámicamente
@@ -125,25 +122,15 @@
 		showModal = true;
 	}
 
-	function openSeccionesModal(materia: Materia) {
-		materiaParaSecciones = materia;
-		form = {
-			...materia,
-			id_carrera: materia.id_carrera.toString(),
-			asignaciones: materia.asignaciones.map((asig: Asignacion) => ({
-				id: asig.id,
-				nombre: asig.nombre,
-				profesor_id: asig.profesor?.id,
-				horarios: asig.horarios
-			})),
-			prelacion: materia.prelacion ? materia.prelacion.split(',').map((p) => p.trim()) : []
-		};
-		showSeccionesModal = true;
-	}
-
 	function addAsignacion() {
+		const firstLetter = form.nombre ? form.nombre.charAt(0).toUpperCase() : 'S';
+		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		const sectionIndex = form.asignaciones.length;
+		const sectionLetter = alphabet[sectionIndex] || `${alphabet[sectionIndex % 26]}${Math.floor(sectionIndex / 26) + 1}`;
+		const autoName = `${firstLetter}${sectionLetter}`;
+		
 		form.asignaciones.push({
-			nombre: '',
+			nombre: autoName,
 			profesor_id: undefined,
 			horarios: []
 		});
@@ -173,10 +160,6 @@
 
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => (showModal = false));
-	};
-
-	const handleSeccionesSubmit: SubmitFunction = () => {
-		return resolver(() => (showSeccionesModal = false));
 	};
 
 	// Handle double-click on materia in the grid to open edit modal
@@ -259,18 +242,6 @@
 								<PenOutline class="w-4 h-4" />
 							</Button>
 							<Tooltip placement="top">Editar</Tooltip>
-						</div>
-						<div class="relative">
-							<Button
-								pill
-								class="p-2!"
-								size="xs"
-								color="blue"
-								onclick={() => openSeccionesModal(materia)}
-							>
-								<CogOutline class="w-4 h-4" />
-							</Button>
-							<Tooltip placement="top">Configurar Secciones</Tooltip>
 						</div>
 						<div class="relative">
 							<Button
@@ -405,44 +376,11 @@
 				/>
 			</div>
 		</div>
-		
-		<!-- Hidden input for asignaciones -->
-		<input type="hidden" name="asignaciones" value={JSON.stringify(form.asignaciones)} />
-		<input type="hidden" name="prelacion" value={form.prelacion.join(',')} />
 
-		<div class="flex justify-end gap-2 mt-4">
-			<Button color="red" onclick={() => (showModal = false)}>Cancelar</Button>
-			<Button type="submit">{editMode ? 'Actualizar' : 'Crear'}</Button>
-		</div>
-	</form>
-</Modal>
-
-<!-- Modal de configuración de secciones -->
-<Modal bind:open={showSeccionesModal} size="xl">
-	{#snippet header()}
-		<div class="flex justify-between items-center w-full">
-			<span>Configurar Secciones - {materiaParaSecciones?.nombre}</span>
-		</div>
-	{/snippet}
-	<form
-		method="POST"
-		use:enhance={handleSeccionesSubmit}
-		action="?/edit"
-	>
-		<input type="hidden" name="id" value={form.id} />
-		<input type="hidden" name="nombre" value={form.nombre} />
-		<input type="hidden" name="prelacion" value={form.prelacion.join(',')} />
-		<input type="hidden" name="unidad_credito" value={form.unidad_credito} />
-		<input type="hidden" name="hp" value={form.hp} />
-		<input type="hidden" name="ht" value={form.ht} />
-		<input type="hidden" name="semestre" value={form.semestre} />
-		<input type="hidden" name="id_carrera" value={form.id_carrera} />
-		<input type="hidden" name="ciclo" value={form.ciclo} />
-		<input type="hidden" name="maximo" value={form.maximo} />
-		
-		<div class="space-y-4">
-			<div class="flex justify-between items-center">
-				<h3 class="text-lg font-medium">Asignaciones</h3>
+		<!-- Sección de asignaciones -->
+		<div class="mt-6">
+			<div class="flex justify-between items-center mb-4">
+				<h3 class="text-lg font-medium">Asignaciones de Secciones</h3>
 				<Button onclick={addAsignacion} color="blue" size="sm">
 					<PlusOutline class="w-4 h-4 mr-2" />
 					Agregar Sección
@@ -450,7 +388,7 @@
 			</div>
 			
 			{#each form.asignaciones as asignacion, i}
-				<div class="border rounded-lg p-4 bg-gray-50">
+				<div class="border rounded-lg p-4 mb-4 bg-gray-50">
 					<div class="flex justify-between items-start mb-3">
 						<h4 class="font-medium">Sección {i + 1}</h4>
 						<Button onclick={() => removeAsignacion(i)} color="red" size="xs">
@@ -466,6 +404,7 @@
 								bind:value={asignacion.nombre}
 								placeholder="ej: MA, MB, MC"
 								class="input"
+								readonly
 							/>
 						</div>
 						<div>
@@ -531,11 +470,14 @@
 			{/each}
 		</div>
 		
+		<!-- Hidden input for asignaciones -->
 		<input type="hidden" name="asignaciones" value={JSON.stringify(form.asignaciones)} />
+		<input type="hidden" name="prelacion" value={form.prelacion.join(',')} />
 
-		<div class="flex justify-end gap-2 mt-6">
-			<Button color="red" onclick={() => (showSeccionesModal = false)}>Cancelar</Button>
-			<Button type="submit" color="blue">Guardar Secciones</Button>
+		<div class="flex justify-end gap-2 mt-4">
+			<Button color="red" onclick={() => (showModal = false)}>Cancelar</Button>
+			<Button type="submit">{editMode ? 'Actualizar' : 'Crear'}</Button>
 		</div>
 	</form>
 </Modal>
+
