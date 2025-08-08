@@ -7,6 +7,14 @@ import { addToast } from '$lib';
 
 export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 	const config = await obtenerConfiguracion(fetch);
+	if (!config) {
+		return {
+			materiasDisponibles: [] as MateriaDisponible[],
+			materiasInscritas: [],
+			inscripcionAbierta: false
+		};
+	}
+	
 	const { horario_inicio: inicio, horario_fin: fin }: { horario_inicio: Date; horario_fin: Date } =
 		config;
 	const materiasInscritas = await obtenerMateriasInscritas(fetch);
