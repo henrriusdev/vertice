@@ -218,13 +218,17 @@ async def inscribir_materia():
     correo = get_jwt_identity()
     claims = get_jwt()
     
-    materias = request.json["materias"]
+    # Now expecting asignacion IDs instead of materia IDs
+    asignaciones = request.json.get("asignaciones", request.json.get("materias", []))
+    
+    # Convert to integers since asignacion IDs are integers
+    asignaciones = [int(id_asig) for id_asig in asignaciones]
 
     estudiante = await get_usuario_por_correo(correo)
-    await add_materia(estudiante.cedula, materias)
+    await add_materia(estudiante.cedula, asignaciones)
 
     await add_trazabilidad({
-        "accion": f"Añadir materias {materias} al estudiante con cédula: {estudiante.cedula}",
+        "accion": f"Añadir secciones {asignaciones} al estudiante con cédula: {estudiante.cedula}",
         "usuario": await get_usuario_por_correo(claims.get('sub')),
         "modulo": "Estudiantes",
         "nivel_alerta": 2

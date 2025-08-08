@@ -186,7 +186,7 @@ async def get_materias_validas(cedula_estudiante: str):
         if ya_inscrito:
             raise Exception("Usted ya tiene inscrito su horario, no puede inscribir más materias o modificarlo")
 
-        materias_validas = []
+        secciones_validas = []
 
         if estudiante.usuario.rol_id == 4 or estudiante.semestre == 1:
             materias = await Materia.filter(
@@ -224,10 +224,7 @@ async def get_materias_validas(cedula_estudiante: str):
                 if not any(sum(m.notas) > 9.5 for m in prelaciones):
                     continue
 
-            count = await Matricula.filter(cod_materia=materia, ciclo=ciclo).count()
-
-            # Process asignaciones data
-            asignaciones_data = []
+            # Process each asignacion as a separate selectable item
             for asig in asignaciones:
                 horarios = asig.horarios or []
                 if isinstance(horarios, str):
@@ -236,35 +233,38 @@ async def get_materias_validas(cedula_estudiante: str):
                     except json.JSONDecodeError:
                         horarios = []
 
-                asignaciones_data.append({
-                    "id": asig.id,
-                    "nombre": asig.nombre,
+                # Count students enrolled in this specific section
+                count_seccion = await Matricula.filter(
+                    cod_materia=materia, 
+                    asignacion=asig,
+                    ciclo=ciclo
+                ).count()
+
+                secciones_validas.append({
+                    "id": asig.id,  # Now using asignacion ID
+                    "materia_id": materia.id,
+                    "nombre": f"{materia.nombre} - Sección {asig.nombre}",
+                    "materia_nombre": materia.nombre,
+                    "seccion_nombre": asig.nombre,
+                    "prelacion": materia.prelacion,
+                    "creditos": materia.unidad_credito,
+                    "hp": materia.hp,
+                    "ht": materia.ht,
+                    "semestre": materia.semestre,
+                    "maximo": materia.maximo,
+                    "cantidad_estudiantes": count_seccion,
                     "horarios": horarios,
                     "profesor": {
                         "id": asig.profesor.id,
                         "nombre": asig.profesor.usuario.nombre,
+                    } if asig.profesor and asig.profesor.usuario else None,
+                    "carrera": {
+                        "id": materia.id_carrera.id,
+                        "nombre": materia.id_carrera.nombre
                     }
                 })
 
-            materias_validas.append({
-                "id": materia.id,
-                "nombre": materia.nombre,
-                "prelacion": materia.prelacion,
-                "unidad_credito": materia.unidad_credito,
-                "hp": materia.hp,
-                "ht": materia.ht,
-                "semestre": materia.semestre,
-                "id_carrera": materia.id_carrera_id,
-                "maximo": materia.maximo,
-                "cantidad_estudiantes": count,
-                "carrera": {
-                    "id": materia.id_carrera.id,
-                    "nombre": materia.id_carrera.nombre
-                },
-                "asignaciones": asignaciones_data
-            })
-
-        return materias_validas
+        return secciones_validas
 
     except Exception as ex:
         raise Exception(ex)

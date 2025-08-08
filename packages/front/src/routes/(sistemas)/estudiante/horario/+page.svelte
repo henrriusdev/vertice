@@ -72,20 +72,20 @@
 		}
 	}
 
-	function agregarMateria(materia: any) {
-		const horarios = materia.horarios || [];
+	function agregarSeccion(seccion: any) {
+		const horarios = seccion.horarios || [];
 		horarios.forEach((horario: any) => {
 			materias.push({
-				id: materia.id,
-				nombre: materia.nombre,
+				id: seccion.id, // Now using asignacion ID
+				nombre: seccion.nombre, // Full name with section
 				dia: horario.dia,
 				hora_inicio: horario.hora_inicio,
 				hora_fin: horario.hora_fin,
 				color: getRandomColor(),
 				conflicto: false,
-				unidad_credito: materia.creditos,
-				prelacion: materia.prelacion,
-				carrera: materia.carrera.nombre,
+				unidad_credito: seccion.creditos,
+				prelacion: seccion.prelacion,
+				carrera: seccion.carrera.nombre,
 				editable: true
 			});
 		});
@@ -122,8 +122,8 @@
 		}
 	});
 
-	function quitarMateriaPorID(materiaId: string) {
-		materias = materias.filter((m) => m.id !== materiaId);
+	function quitarSeccionPorID(seccionId: number) {
+		materias = materias.filter((m) => m.id !== seccionId);
 		verificarConflictos();
 	}
 
@@ -152,11 +152,11 @@
 	<div class="flex flex-wrap justify-center gap-4 mt-6">
 		<Button color="blue" onclick={() => (openModal = true)} disabled={!data.inscripcionAbierta}>
 			<CalendarWeekOutline class="mr-2 h-5 w-5" />
-			Seleccionar Materias
+			Seleccionar Secciones
 		</Button>
 		<form use:enhance={handleSubmit} method="post">
 			{#each materias as materia}
-				<input type="hidden" name="materias" value={materia.id} />
+				<input type="hidden" name="asignaciones" value={materia.id} />
 			{/each}
 			<Button
 				type="submit"
@@ -177,39 +177,49 @@
 		</form>
 	</div>
 
-	<!-- Modal Seleccionar Materias -->
+	<!-- Modal Seleccionar Secciones -->
 	<Modal bind:open={openModal} size="xl">
 		{#snippet header()}
-			<div class="text-lg font-semibold">Seleccionar Materias</div>
+			<div class="text-lg font-semibold">Seleccionar Secciones</div>
 		{/snippet}
 
 		<div class="p-4 flex flex-wrap justify-start gap-4">
-			{#each materiasDisponibles as materia}
+			{#each materiasDisponibles as seccion}
 				<div class="relative">
-					<Button color="light" type="button" id="materia-{materia.id}">
+					<Button color="light" type="button" id="seccion-{seccion.id}">
 						<PlusOutline class="mr-2 h-5 w-5" />
-						{materia.nombre}
+						{seccion.nombre}
 					</Button>
 
 					<Popover
-						triggeredBy="#materia-{materia.id}"
+						triggeredBy="#seccion-{seccion.id}"
 						placement="bottom"
-						class="w-64 z-50 text-sm"
+						class="w-80 z-50 text-sm"
 						transition={slide}
 					>
 						<div class="p-2">
-							<p><span class="font-semibold">Créditos:</span> {materia.creditos}</p>
-							<p><span class="font-semibold">Prelación:</span> {materia.prelacion || 'Ninguna'}</p>
-							<p><span class="font-semibold">Carrera:</span> {materia.carrera.nombre}</p>
-							{#if materias.some((m) => m.id === materia.id)}
+							<p><span class="font-semibold">Materia:</span> {seccion.materia_nombre}</p>
+							<p><span class="font-semibold">Sección:</span> {seccion.seccion_nombre}</p>
+							<p><span class="font-semibold">Créditos:</span> {seccion.creditos}</p>
+							<p><span class="font-semibold">Prelación:</span> {seccion.prelacion || 'Ninguna'}</p>
+							<p><span class="font-semibold">Profesor:</span> {seccion.profesor?.nombre || 'No asignado'}</p>
+							<p><span class="font-semibold">Estudiantes:</span> {seccion.cantidad_estudiantes}/{seccion.maximo}</p>
+							<p><span class="font-semibold">Carrera:</span> {seccion.carrera.nombre}</p>
+							<div class="mt-2">
+								<p class="font-semibold">Horarios:</p>
+								{#each seccion.horarios as horario}
+									<p class="text-xs">{horario.dia}: {horario.hora_inicio} - {horario.hora_fin}</p>
+								{/each}
+							</div>
+							{#if materias.some((m) => m.id === seccion.id)}
 								<Button
 									size="xs"
 									class="mt-2"
 									type="button"
-									onclick={() => quitarMateriaPorID(materia.id)}>Quitar</Button
+									onclick={() => quitarSeccionPorID(seccion.id)}>Quitar</Button
 								>
 							{:else}
-								<Button size="xs" class="mt-2" type="button" onclick={() => agregarMateria(materia)}
+								<Button size="xs" class="mt-2" type="button" onclick={() => agregarSeccion(seccion)}
 									>Agregar</Button
 								>
 							{/if}
