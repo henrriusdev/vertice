@@ -41,26 +41,33 @@ export const load: PageServerLoad = async ({ fetch, locals: { usuario } }) => {
 export const actions: Actions = {
 	default: async ({ request, fetch }) => {
 		const form = await request.formData();
-		const materias: string[] = [];
-		for (const materia of form.getAll('materias')) {
-			if (!materias.includes(materia)) {
-				materias.push(materia.toString());
+		const asignaciones: number[] = [];
+		
+		// Handle both 'asignaciones' and 'materias' for backward compatibility
+		const formAsignaciones = form.getAll('asignaciones').length > 0 
+			? form.getAll('asignaciones') 
+			: form.getAll('materias');
+		
+		for (const asignacion of formAsignaciones) {
+			const id = parseInt(asignacion.toString());
+			if (!isNaN(id) && !asignaciones.includes(id)) {
+				asignaciones.push(id);
 			}
 		}
 
 		try {
 			const payload = {
-				materias: materias
+				asignaciones: asignaciones
 			};
 
 			await inscribirMaterias(fetch, payload);
 			return {
 				type: 'success',
-				message: 'Materias inscritas exitosamente',
+				message: 'Secciones inscritas exitosamente',
 				invalidate: true
 			};
 		} catch (e: any) {
-			console.error('Error al inscribir materias:', e);
+			console.error('Error al inscribir secciones:', e);
 			return {
 				type: 'failure',
 				message: e.message
