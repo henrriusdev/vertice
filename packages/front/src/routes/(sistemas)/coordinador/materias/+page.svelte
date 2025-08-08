@@ -16,6 +16,7 @@
 	import type { PageData } from './$types';
 	import type { AsignacionReq } from '$lib/types';
 	import { GrillaHorario } from '$lib';
+	import { goto } from '$app/navigation';
 
 	interface Form {
 		id: string;
@@ -76,7 +77,7 @@
 					id: mat.id, // Use original materia ID for color consistency
 					uniqueId: `${mat.id}-${index}`, // Unique ID for each horario entry
 					materiaId: mat.id, // Original materia ID for reference
-					nombre: mat.nombre,
+					nombre: mat.nombre + " - " + mat.asignaciones[index].nombre,
 					dia: horario.dia as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado',
 					hora_inicio: horario.hora_inicio,
 					hora_fin: horario.hora_fin,
@@ -171,7 +172,11 @@
 		}
 	}
 
+	// Update prelacion options whenever form.semestre, form.id_carrera, or showModal changes
 	$effect(() => {
+		// Only populate options when modal is open
+		if (!showModal) return;
+		
 		if (form.semestre === 1) {
 			opcionesPrelacion = [];
 		} else {
@@ -477,6 +482,9 @@
 		<div class="flex justify-end gap-2 mt-4">
 			<Button color="red" onclick={() => (showModal = false)}>Cancelar</Button>
 			<Button type="submit">{editMode ? 'Actualizar' : 'Crear'}</Button>
+			<Button type="button" onclick={()=>goto(`/materias/${form.id}`)}>
+				Ver notas
+			</Button>
 		</div>
 	</form>
 </Modal>

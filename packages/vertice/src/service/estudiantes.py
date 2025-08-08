@@ -3,6 +3,7 @@ from datetime import datetime
 from src.utils.fecha import format_fecha, parse_fecha, now_in_venezuela
 from src.model.usuario import Usuario
 from src.model.estudiante import Estudiante
+from src.model.asignacion_materia import AsignacionMateria
 from src.model.matricula import Matricula
 from src.model.configuracion import Configuracion
 from src.model.pago import Pago
@@ -212,11 +213,21 @@ async def get_notas_estudiante(cedula_estudiante: str):
 async def get_historico(cedula_estudiante: str):
     try:
         print(cedula_estudiante)
-        matriculas = await Matricula.filter(cedula_estudiante__usuario__cedula=cedula_estudiante).prefetch_related("cod_materia", "cod_materia__id_docente__usuario")
+        matriculas = await Matricula.filter(cedula_estudiante__usuario__cedula=cedula_estudiante).prefetch_related(
+            "cod_materia", 
+            "asignacion", 
+            "asignacion__profesor", 
+            "asignacion__profesor__usuario"
+        )
         print(len(matriculas))
 
         historico = []
         for m in matriculas:
+            # Get docente name from asignacion if available, otherwise use 'No asignado'
+            docente_nombre = "No asignado"
+            if m.asignacion and hasattr(m.asignacion, 'profesor') and m.asignacion.profesor and hasattr(m.asignacion.profesor, 'usuario'):
+                docente_nombre = m.asignacion.profesor.usuario.nombre
+            
             historico.append({
                 "nombre": m.cod_materia.nombre,
                 "id": m.cod_materia.id,
@@ -226,12 +237,13 @@ async def get_historico(cedula_estudiante: str):
                 "notas": m.notas or [],
                 "prelacion": m.cod_materia.prelacion,
                 "promedio": round(sum(m.notas) / len(m.notas), 2) if m.notas else 0,
-                "docente": m.cod_materia.id_docente.usuario.nombre
+                "docente": docente_nombre
             })
 
         return historico
 
     except Exception as ex:
+        print(f"Error in get_historico: {ex}")
         raise Exception(ex)
 
 

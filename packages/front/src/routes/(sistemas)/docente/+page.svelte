@@ -8,8 +8,9 @@
   const materias = $derived(
     (data.materiasAsignadas || []).map((materia: MateriaDocente) => ({
       ...materia,
-      id: `${materia.id}-${Math.random().toString(36).substring(7)}`,
+      id: `${materia.id}`,
       originalId: materia.id,
+      nombre: materia.nombre + " - " + materia.seccion,
       color: materia.color || getRandomColor()
     }))
   );

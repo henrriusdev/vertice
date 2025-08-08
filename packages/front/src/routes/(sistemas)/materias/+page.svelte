@@ -180,7 +180,11 @@
 		return resolver(() => (showModal = false));
 	};
 
+	// Update prelacion options whenever form.semestre, form.id_carrera, or showModal changes
 	$effect(() => {
+		// Only populate options when modal is open
+		if (!showModal) return;
+		
 		if (form.semestre === 1) {
 			opcionesPrelacion = [];
 		} else {

@@ -21,6 +21,7 @@
 	} from 'flowbite-svelte';
 	import {
 		BookOpenOutline,
+		BookOutline,
 		BuildingOutline,
 		CalendarMonthOutline,
 		ChalkboardUserOutline,
@@ -358,6 +359,12 @@
 								<div class="flex items-center">
 									<UserCircleOutline class="w-5 h-5 mr-2" />
 									Mi Perfil
+								</div>
+							</DropdownItem>
+							<DropdownItem href="/manual">
+								<div class="flex items-center">
+									<BookOutline class="w-5 h-5 mr-2" />
+									Manual de Usuario
 								</div>
 							</DropdownItem>
 							<DropdownDivider />

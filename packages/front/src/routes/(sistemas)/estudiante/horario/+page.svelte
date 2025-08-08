@@ -73,10 +73,29 @@
 	}
 
 	function agregarSeccion(seccion: any) {
+		// Check if a section of the same materia is already selected
+		const materiaName = seccion.materia_nombre;
+		const existingMateriaSections = materiasDisponibles.filter(s => 
+			s.materia_nombre === materiaName && 
+			materias.some(m => m.id === s.id)
+		);
+		
+		// If a section of this materia is already selected, remove it first
+		if (existingMateriaSections.length > 0) {
+			existingMateriaSections.forEach(existingSection => {
+				quitarSeccionPorID(existingSection.id);
+				addToast({
+					type: 'info',
+					message: `Se ha reemplazado la sección ${existingSection.seccion_nombre} de ${materiaName}`
+				});
+			});
+		}
+		
+		// Now add the new section
 		const horarios = seccion.horarios || [];
 		horarios.forEach((horario: any) => {
 			materias.push({
-				id: seccion.id, // Now using asignacion ID
+				id: seccion.id, // Using asignacion ID
 				nombre: seccion.nombre, // Full name with section
 				dia: horario.dia,
 				hora_inicio: horario.hora_inicio,
