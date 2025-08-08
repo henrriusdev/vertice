@@ -3,6 +3,7 @@ from src.model.materia import Materia
 from src.model.docente import Docente
 from src.model.peticion import Peticion
 from src.model.usuario import Usuario
+from src.model.asignacion_materia import AsignacionMateria
 from tortoise.exceptions import DoesNotExist
 
 async def get_docentes():
@@ -121,11 +122,17 @@ async def obtener_materias_por_email_docente(email: str):
     try:
         usuario = await Usuario.get(correo=email).prefetch_related("docente")
         docente = await usuario.docente
-        materias = await Materia.filter(id_docente=docente.id).prefetch_related("id_carrera")
-
+        
+        # Get all asignaciones for this docente
+        asignaciones = await AsignacionMateria.filter(profesor=docente.id).prefetch_related("materia", "materia__id_carrera")
+        
         resultado = []
-        for materia in materias:
-            horarios = materia.horarios or []
+        for asignacion in asignaciones:
+            materia = await asignacion.materia
+            carrera = await materia.id_carrera
+            
+            # Get horarios from the asignacion
+            horarios = asignacion.horarios or []
             for horario in horarios:
                 resultado.append({
                     "id": materia.id,
@@ -134,7 +141,9 @@ async def obtener_materias_por_email_docente(email: str):
                     "hora_inicio": horario.get("hora_inicio"),
                     "hora_fin": horario.get("hora_fin"),
                     "color": None,
-                    "conflicto": False
+                    "conflicto": False,
+                    "seccion": asignacion.nombre,
+                    "carrera": carrera.nombre if carrera else None
                 })
             
         return resultado

@@ -49,7 +49,10 @@ export const eliminarDocente = async (fetch: typeof window.fetch, cedula: string
 };
 
 export const obtenerMateriasAsignadas = async (fetch: typeof window.fetch) => {
-	const res = await fetch(`${API}materias`);
+	const res = await apiCall(fetch, `${API}materias`, {
+		method: 'GET',
+		credentials: 'include'
+	});
 	const response = await res.json();
 	return response.data as MateriaDocente[];
 };

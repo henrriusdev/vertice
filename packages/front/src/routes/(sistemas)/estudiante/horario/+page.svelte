@@ -127,6 +127,16 @@
 		verificarConflictos();
 	}
 
+	// Handle double-click on materia in the grid to open details or perform an action
+	function handleMateriaDoubleClick(materiaData: any) {
+		// Find the materia in the available materias
+		const materia = materiasDisponibles.find(m => m.id === materiaData.id);
+		if (materia) {
+			// Open modal to show details or perform an action
+			openModal = true;
+		}
+	}
+
 	const handleSubmit: SubmitFunction = () => {
 		return resolver(() => (isLoading = false));
 	};
@@ -136,7 +146,7 @@
 <div class="container mx-auto p-4 bg-white">
 	<h1 class="text-2xl font-bold text-center mb-6">Horario de clases</h1>
 
-	<GrillaHorario {materias} docente={false} />
+	<GrillaHorario {materias} docente={false} onMateriaDoubleClick={handleMateriaDoubleClick} />
 
 	<!-- Botones -->
 	<div class="flex flex-wrap justify-center gap-4 mt-6">
