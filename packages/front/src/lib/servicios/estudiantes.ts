@@ -93,7 +93,7 @@ export const obtenerNotasEstudiantePorCedula = async (fetch: typeof window.fetch
 
 export const inscribirMaterias = async (
 	fetch: typeof window.fetch,
-	payload: { materias: string[] }
+	payload: { asignaciones: number[] }
 ) => {
 	const res = await fetch(`${API}add-materia`, {
 		method: 'POST',

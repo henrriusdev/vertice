@@ -159,14 +159,24 @@ export type MateriaHistorico = {
 };
 
 export type MateriaDisponible = {
-	id: string;
-	nombre: string;
-	unidad_credito: number;
+	id: number; // Now asignacion ID (number)
+	materia_id: string;
+	nombre: string; // Full name with section (e.g., "Mathematics - Section A")
+	materia_nombre: string;
+	seccion_nombre: string;
+	creditos: number;
 	prelacion: string | null;
+	horarios: Horario[];
+	profesor: {
+		id: number;
+		nombre: string;
+	} | null;
 	carrera: {
 		id: string;
 		nombre: string;
 	};
+	cantidad_estudiantes: number;
+	maximo: number;
 };
 
 export type MateriaDocente = {

@@ -159,17 +159,22 @@ async def toggle_student_status(cedula: str):
         raise Exception(ex)
 
 
-async def add_materia(cedula: str, id_materias: list[str]):
+async def add_materia(cedula: str, id_asignaciones: list[int]):
     try:
         estudiante = await Estudiante.get(usuario__cedula=cedula)
         config = (await Configuracion.get(id=1))
         notas = [0 for _ in range(config.num_porcentaje)]
-        for id_materia in id_materias:
+        
+        for id_asignacion in id_asignaciones:
+            # Get the asignacion and its related materia
+            asignacion = await AsignacionMateria.get(id=id_asignacion).prefetch_related("materia")
+            
             await Matricula.create(
-                cod_materia_id=id_materia,
+                cod_materia=asignacion.materia,
+                asignacion=asignacion,
                 cedula_estudiante=estudiante,
                 notas=notas,
-                uc=0,
+                uc=asignacion.materia.unidad_credito,
                 ciclo=config.ciclo
             )
         return 1
@@ -256,24 +261,53 @@ async def get_inscritas(cedula: str):
         matriculas = await Matricula.filter(
             cedula_estudiante__usuario__cedula=cedula,
             ciclo=ciclo
-        ).prefetch_related("cod_materia__id_docente__usuario")
+        ).prefetch_related("cod_materia", "asignacion__profesor__usuario")
 
         resultado = []
 
         for m in matriculas:
             materia = m.cod_materia
-            docente = materia.id_docente.usuario if materia.id_docente else None
-            horarios = materia.horarios or []
-
-            resultado.append({
-                "id": materia.id,
-                "nombre": materia.nombre,
-                "hp": materia.hp,
-                "ht": materia.ht,
-                "horarios": horarios,
-                "unidad_credito": materia.unidad_credito,
-                "docente": docente.nombre if docente else None
-            })
+            asignacion = m.asignacion
+            
+            if asignacion:
+                # New system: use asignacion data
+                horarios = asignacion.horarios or []
+                if isinstance(horarios, str):
+                    try:
+                        import json
+                        horarios = json.loads(horarios)
+                    except json.JSONDecodeError:
+                        horarios = []
+                
+                docente = asignacion.profesor.usuario if asignacion.profesor and asignacion.profesor.usuario else None
+                
+                resultado.append({
+                    "id": materia.id,
+                    "nombre": f"{materia.nombre} - Sección {asignacion.nombre}",
+                    "materia_nombre": materia.nombre,
+                    "seccion_nombre": asignacion.nombre,
+                    "hp": materia.hp,
+                    "ht": materia.ht,
+                    "horarios": horarios,
+                    "unidad_credito": materia.unidad_credito,
+                    "docente": docente.nombre if docente else None
+                })
+            else:
+                # Fallback for old system (if asignacion is null)
+                docente = materia.id_docente.usuario if hasattr(materia, 'id_docente') and materia.id_docente else None
+                horarios = materia.horarios if hasattr(materia, 'horarios') else []
+                
+                resultado.append({
+                    "id": materia.id,
+                    "nombre": materia.nombre,
+                    "materia_nombre": materia.nombre,
+                    "seccion_nombre": "",
+                    "hp": materia.hp,
+                    "ht": materia.ht,
+                    "horarios": horarios,
+                    "unidad_credito": materia.unidad_credito,
+                    "docente": docente.nombre if docente else None
+                })
 
         return resultado
 
